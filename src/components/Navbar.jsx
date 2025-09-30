@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { Sheet } from '@/components/ui/sheet';
-import { Button } from '@/components/ui/button';
-import { Menu } from 'lucide-react';
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Sheet } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { Menu } from "lucide-react";
 
 const nav = [
-  { to: '/strategies', label: 'Strategies' },
-  { to: '/portfolio', label: 'Portfolio' },
-  { to: '/invest', label: 'Invest' },
-  { to: '/risk', label: 'Risk' },
-  { to: '/reports', label: 'Reports' },
+  { to: "/strategies", label: "strategies" },
+  { to: "/portfolio", label: "portfolio" },
+  { to: "/invest", label: "invest" },
+  { to: "/risk", label: "Risk" },
+  { to: "/reports", label: "reports" },
 ];
 
 export default function Navbar() {
@@ -33,8 +33,8 @@ export default function Navbar() {
               href={n.to}
               className={
                 pathname === n.to
-                  ? 'text-blue-600 font-medium'
-                  : 'text-gray-700 hover:text-blue-600'
+                  ? "text-blue-600 font-medium"
+                  : "text-gray-700 hover:text-blue-600"
               }
             >
               {n.label}
