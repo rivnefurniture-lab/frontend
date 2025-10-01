@@ -1,3 +1,5 @@
+"use client";
+
 import { useMemo, useState } from "react";
 import { strategies } from "./mock";
 import { Input } from "@/components/ui/input";

@@ -1,3 +1,5 @@
+"use client";
+
 import { portfolio } from "./mock";
 import { Card, CardContent } from "@/components/ui/card";
 import {

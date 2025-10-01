@@ -2,26 +2,14 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import Metric from "@/components/Metric";
 import { strategies } from "@/app/strategies/mock";
-import { motion } from "framer-motion";
+import Hero from "@/app/hero";
 
 export default function Page() {
   return (
     <div>
       <section className="container pt-16 pb-12 grid lg:grid-cols-2 gap-10 items-center">
         <div>
-          <motion.h1
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="text-4xl md:text-5xl font-bold leading-tight"
-          >
-            Invest in proven{" "}
-            <span className="text-blue-600">trading algorithms</span>
-          </motion.h1>
-          <p className="mt-4 text-gray-600 max-w-xl">
-            Discover, compare, and allocate capital across vetted strategies
-            with transparent risk and performance metrics.
-          </p>
+          <Hero />
           <div className="mt-6 flex gap-3">
             <Link href="/strategies">
               <Button size="lg">Explore strategies</Button>

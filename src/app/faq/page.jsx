@@ -12,6 +12,7 @@ const faqs = [
     a: "We review methodology, backtests, and live performance where available.",
   },
 ];
+
 export default function Page() {
   return (
     <div className="container py-10 max-w-3xl">
