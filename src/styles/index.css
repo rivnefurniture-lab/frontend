@@ -1,5 +1,38 @@
 @import "tailwindcss";
 
+@layer base {
+  :root {
+    --color-brand: #2563eb;
+    --color-brand-foreground: #ffffff;
+  }
+}
+
+@layer utilities {
+  /* Colors */
+  .bg-brand {
+    background-color: var(--color-brand);
+  }
+  .text-brand {
+    color: var(--color-brand);
+  }
+  .text-brand-foreground {
+    color: var(--color-brand-foreground);
+  }
+
+  /* Shadows */
+  .shadow-soft {
+    box-shadow: 0 10px 25px -10px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Border radius */
+  .rounded-xl {
+    border-radius: 1rem;
+  }
+  .rounded-2xl {
+    border-radius: 1.25rem;
+  }
+}
+
 /* App base styles */
 :root {
   --radius: 1rem;
@@ -7,4 +40,8 @@
 
 .container {
   @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+}
+
+.tap {
+  @apply min-h-[44px] min-w-[44px];
 }

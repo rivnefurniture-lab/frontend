@@ -1,6 +1,4 @@
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import Metric from "@/components/Metric";
 import { strategies } from "@/app/strategies/mock";
 import Hero from "@/app/hero";
 
@@ -8,24 +6,7 @@ export default function Page() {
   return (
     <div>
       <section className="container pt-16 pb-12 grid lg:grid-cols-2 gap-10 items-center">
-        <div>
-          <Hero />
-          <div className="mt-6 flex gap-3">
-            <Link href="/strategies">
-              <Button size="lg">Explore strategies</Button>
-            </Link>
-            <Link href="/auth?mode=signup">
-              <Button size="lg" variant="secondary">
-                Create account
-              </Button>
-            </Link>
-          </div>
-          <div className="mt-8 grid grid-cols-3 gap-4">
-            <Metric label="Active strategies" value="32" />
-            <Metric label="Avg. Sharpe" value="1.45" />
-            <Metric label="Investors" value="2,184" />
-          </div>
-        </div>
+        <Hero />
         <div className="bg-white p-6 rounded-2xl shadow-soft border border-gray-100">
           <img
             src="https://dummyimage.com/800x480/edf2f7/1a202c&text=Performance+Overview"

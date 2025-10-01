@@ -23,8 +23,8 @@ export default function Navbar() {
   return (
     <header className="bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-b border-gray-100 sticky top-0 z-40">
       <div className="container h-16 flex items-center justify-between">
-        <Link href="/" className="text-xl font-bold">
-          algotcha
+        <Link href="/" className="text-xl font-bold capitalize">
+          Algotcha
         </Link>
 
         <nav className="hidden md:flex items-center gap-5">
