@@ -2,6 +2,9 @@
 
 import React, { useState } from "react";
 import { useAuth } from "@/context/AuthProvider";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 export default function AuthPage() {
   const { user, loading, login, register, logout } = useAuth();
@@ -14,13 +17,13 @@ export default function AuthPage() {
   const [error, setError] = useState<string | null>(null);
   const [successOpen, setSuccessOpen] = useState(false);
 
+  const isSignup = mode === "register";
+
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     try {
-      if (mode === "login") {
-        await login(email, password);
-      } else {
+      if (isSignup) {
         await register(
           email,
           password,
@@ -29,6 +32,8 @@ export default function AuthPage() {
           country || undefined,
         );
         setSuccessOpen(true);
+      } else {
+        await login(email, password);
       }
       setEmail("");
       setPassword("");
@@ -44,81 +49,107 @@ export default function AuthPage() {
 
   if (user) {
     return (
-      <div className="max-w-md mx-auto p-6 space-y-4">
-        <p className="text-lg">
-          Logged in as <strong>{user.email}</strong>
-        </p>
-        <button
-          onClick={logout}
-          className="px-4 py-2 rounded bg-black text-white"
-        >
-          Logout
-        </button>
+      <div className="container py-10 max-w-md">
+        <Card>
+          <CardContent className="p-6 space-y-4">
+            <p className="text-lg">
+              Logged in as <strong>{user.email}</strong>
+            </p>
+            <Button onClick={logout} className="w-full">
+              Logout
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="max-w-md mx-auto p-6">
-      <div className="flex gap-4 mb-4">
-        <button
-          onClick={() => setMode("login")}
-          className={`px-3 py-1 rounded ${mode === "login" ? "bg-black text-white" : "border"}`}
-        >
-          Login
-        </button>
-        <button
-          onClick={() => setMode("register")}
-          className={`px-3 py-1 rounded ${mode === "register" ? "bg-black text-white" : "border"}`}
-        >
-          Register
-        </button>
-      </div>
+    <div className="container py-10 max-w-md">
+      <Card>
+        <CardContent className="p-6">
+          <h1 className="text-2xl font-semibold mb-1">
+            {isSignup ? "Create account" : "Sign in"}
+          </h1>
+          <p className="text-gray-600 mb-6">
+            {isSignup
+              ? "Start investing in algorithms within minutes."
+              : "Welcome back."}
+          </p>
 
-      <form onSubmit={onSubmit} className="space-y-3">
-        {mode === "register" && (
-          <>
-            <input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Name (optional)"
-              className="border w-full px-3 py-2 rounded"
+          <form onSubmit={onSubmit} className="space-y-4">
+            {isSignup && (
+              <>
+                <Input
+                  placeholder="Full name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+                <Input
+                  placeholder="Phone (optional)"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                />
+                <Input
+                  placeholder="Country (optional)"
+                  value={country}
+                  onChange={(e) => setCountry(e.target.value)}
+                />
+              </>
+            )}
+            <Input
+              placeholder="Email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
             />
-            <input
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="Phone (optional)"
-              className="border w-full px-3 py-2 rounded"
+            <Input
+              placeholder="Password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
             />
-            <input
-              value={country}
-              onChange={(e) => setCountry(e.target.value)}
-              placeholder="Country (optional)"
-              className="border w-full px-3 py-2 rounded"
-            />
-          </>
-        )}
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="Email"
-          className="border w-full px-3 py-2 rounded"
-          required
-        />
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Password"
-          className="border w-full px-3 py-2 rounded"
-          required
-        />
-        {error && <p className="text-red-600">{error}</p>}
-        <button className="bg-black text-white px-4 py-2 rounded">
-          {mode === "login" ? "Login" : "Create account"}
-        </button>
-      </form>
+
+            {error && <p className="text-red-600 text-sm">{error}</p>}
+
+            <Button className="w-full">
+              {isSignup ? "Create account" : "Sign in"}
+            </Button>
+          </form>
+
+          <p className="text-xs text-gray-500 mt-4">
+            By continuing you agree to our Terms and Privacy Policy.
+          </p>
+
+          <div className="mt-4 text-sm text-gray-600">
+            {isSignup ? (
+              <p>
+                Already have an account?{" "}
+                <button
+                  type="button"
+                  className="text-blue-600 underline"
+                  onClick={() => setMode("login")}
+                >
+                  Sign in
+                </button>
+              </p>
+            ) : (
+              <p>
+                Don’t have an account?{" "}
+                <button
+                  type="button"
+                  className="text-blue-600 underline"
+                  onClick={() => setMode("register")}
+                >
+                  Sign up
+                </button>
+              </p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
       {successOpen && (
         <div
@@ -134,12 +165,9 @@ export default function AuthPage() {
               Welcome to Algotcha! You can now connect your exchange and start
               tracking balances.
             </p>
-            <button
-              className="bg-black text-white px-4 py-2 rounded"
-              onClick={() => setSuccessOpen(false)}
-            >
+            <Button className="w-full" onClick={() => setSuccessOpen(false)}>
               Close
-            </button>
+            </Button>
           </div>
         </div>
       )}
