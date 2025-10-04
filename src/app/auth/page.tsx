@@ -6,9 +6,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 
 export default function AuthPage() {
-  const { user, loading, login, register, logout } = useAuth();
+  const { user, loading, login, register } = useAuth();
   const router = useRouter();
   const [mode, setMode] = useState<"login" | "register" | "forgot">("login");
   const [email, setEmail] = useState("");
@@ -28,21 +29,24 @@ export default function AuthPage() {
     try {
       if (mode === "login") {
         await login(email, password);
+        router.replace("/portfolio");
       } else if (mode === "register") {
-        await register(
+        const { error } = await supabase.auth.signUp({
           email,
           password,
-          name || undefined,
-          phone || undefined,
-          country || undefined,
-        );
-        router.replace("/portfolio");
-      } else if (mode === "forgot") {
-        await fetch("/api/auth/forgot-password", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email }),
+          options: {
+            data: { name, phone, country },
+            emailRedirectTo: `${window.location.origin}/verify-email?email=${encodeURIComponent(email)}`,
+          },
         });
+
+        if (error) throw error;
+        router.replace(`/verify-email?email=${encodeURIComponent(email)}`);
+      } else if (mode === "forgot") {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/password-reset`,
+        });
+        if (error) throw error;
         setMessage("If this email exists, a reset link has been sent.");
       }
 
@@ -125,7 +129,7 @@ export default function AuthPage() {
             {error && <p className="text-red-600 text-sm">{error}</p>}
             {message && <p className="text-green-600 text-sm">{message}</p>}
 
-            <Button className="w-full">
+            <Button type="submit" className="w-full">
               {mode === "forgot"
                 ? "Send reset link"
                 : isSignup

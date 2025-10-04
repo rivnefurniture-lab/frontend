@@ -4,13 +4,11 @@ import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 
 export default function PasswordResetPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const token = searchParams.get("token");
-
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState(null);
@@ -22,11 +20,6 @@ export default function PasswordResetPage() {
     setError(null);
     setMessage(null);
 
-    if (!token) {
-      setError("Invalid or missing reset token.");
-      return;
-    }
-
     if (password !== confirm) {
       setError("Passwords do not match.");
       return;
@@ -34,16 +27,13 @@ export default function PasswordResetPage() {
 
     try {
       setLoading(true);
-      const res = await fetch("/api/auth/reset-password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token, password }),
+
+      // Supabase already knows the user from the reset link session
+      const { error } = await supabase.auth.updateUser({
+        password,
       });
 
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.message || "Failed to reset password");
-      }
+      if (error) throw error;
 
       setMessage("Password reset successful! Redirecting...");
       setTimeout(() => {

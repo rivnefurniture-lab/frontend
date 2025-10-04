@@ -1,5 +1,7 @@
+"use client";
+
 import { useState } from "react";
-import { strategies } from "@/data.mock";
+import { strategies } from "../strategies/mock";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";

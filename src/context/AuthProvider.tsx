@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
+import { AuthChangeEvent, Session } from "@supabase/supabase-js";
 
 type User = {
-  id: number;
+  id: string;
   email: string;
   name?: string | null;
   phone?: string | null;
   country?: string | null;
-  createdAt: string;
-  binanceConnectedAt?: string | null;
 };
 
 type AuthContextType = {
@@ -21,7 +21,7 @@ type AuthContextType = {
     password: string,
     name?: string,
     phone?: string,
-    country?: string
+    country?: string,
   ) => Promise<void>;
   logout: () => Promise<void>;
 };
@@ -38,32 +38,42 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const me = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch('/api/auth/me', { credentials: 'include' });
-      if (res.ok) setUser(await res.json());
-      else setUser(null);
-    } catch {
-      setUser(null);
-    } finally {
-      setLoading(false);
-    }
+  const mapUser = (session: Session | null): User | null => {
+    if (!session?.user) return null;
+    return {
+      id: session.user.id,
+      email: session.user.email!,
+      name: session.user.user_metadata?.name || null,
+      phone: session.user.user_metadata?.phone || null,
+      country: session.user.user_metadata?.country || null,
+    };
   };
 
   useEffect(() => {
-    me();
+    // initial session fetch
+    supabase.auth.getSession().then(({ data }) => {
+      setUser(mapUser(data.session));
+      setLoading(false);
+    });
+
+    // subscribe to auth state changes
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (_event: AuthChangeEvent, session: Session | null) => {
+        setUser(mapUser(session));
+      },
+    );
+
+    return () => {
+      listener.subscription.unsubscribe();
+    };
   }, []);
 
   const login = async (email: string, password: string) => {
-    const res = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ email, password }),
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
     });
-    if (!res.ok) throw new Error('Login failed');
-    await me();
+    if (error) throw error;
   };
 
   const register = async (
@@ -71,20 +81,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     password: string,
     name?: string,
     phone?: string,
-    country?: string
+    country?: string,
   ) => {
-    const res = await fetch('/api/auth/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ email, password, name, phone, country }),
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          name,
+          phone,
+          country,
+        },
+      },
     });
-    if (!res.ok) throw new Error('Registration failed');
-    await me();
+    if (error) throw error;
   };
 
   const logout = async () => {
-    await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+    await supabase.auth.signOut();
     setUser(null);
   };
 

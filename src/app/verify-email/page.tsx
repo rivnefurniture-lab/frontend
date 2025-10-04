@@ -4,33 +4,40 @@ import { useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
+import { supabase } from "@/lib/supabase";
 
 export default function VerifyEmailPage() {
   const searchParams = useSearchParams();
-  const token = searchParams.get("token");
+  const email = searchParams.get("email") || "";
   const [status, setStatus] = useState<
-    "loading" | "success" | "error" | "pending"
-  >(token ? "loading" : "pending");
+    "pending" | "loading" | "success" | "error"
+  >(email ? "pending" : "loading");
   const [message, setMessage] = useState("");
-  const [email, setEmail] = useState("");
 
   useEffect(() => {
-    if (!token) return;
-    const verify = async () => {
-      try {
-        const res = await fetch(`/api/auth/verify-email?token=${token}`);
-        if (!res.ok) throw new Error("Failed");
-        const data = await res.json();
+    const checkConfirmation = async () => {
+      const hash = window.location.hash; // Supabase sends access_token in hash
+      if (!hash) return;
+
+      setStatus("loading");
+      const { data, error } = await supabase.auth.getUser();
+      if (error) {
+        setStatus("error");
+        setMessage("Failed to verify email.");
+        return;
+      }
+
+      if (data.user && data.user.email_confirmed_at) {
         setStatus("success");
-        setMessage(data.message || "Email verified successfully.");
-        setEmail(data.email);
-      } catch {
+        setMessage("Your email has been verified!");
+      } else {
         setStatus("error");
         setMessage("Invalid or expired verification link.");
       }
     };
-    verify();
-  }, [token]);
+
+    checkConfirmation();
+  }, []);
 
   const getColor = () => {
     if (status === "error") return "text-red-600";
