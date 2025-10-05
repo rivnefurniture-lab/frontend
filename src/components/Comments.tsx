@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { apiFetch } from "@/lib/api";
 
 type Comment = {
   id: number;
@@ -25,7 +26,7 @@ export default function Comments() {
     const run = async () => {
       try {
         setLoading(true);
-        const res = await fetch("/api/comments");
+        const res = await apiFetch("/api/comments");
         if (!res.ok) throw new Error("HTTP " + res.status);
         const data = await res.json();
         setComments(data);
@@ -47,9 +48,10 @@ export default function Comments() {
       {err && <p className="text-red-600">Error: {err}</p>}
 
       <ul className="space-y-4">
-        {comments.map(c => (
+        {comments.map((c) => (
           <li key={c.id} className="p-4 border rounded-lg flex gap-4">
             {c.photo ? (
+              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={`/reviews/photos/${c.photo}`}
                 alt={c.author || "user"}
@@ -61,7 +63,9 @@ export default function Comments() {
             ) : null}
             <div className="flex-1">
               <div className="flex items-center gap-2 text-sm text-gray-600">
-                <span className="font-medium text-gray-800">{c.author || "Anonymous"}</span>
+                <span className="font-medium text-gray-800">
+                  {c.author || "Anonymous"}
+                </span>
                 <span>•</span>
                 <time>{fmt(c.createdAt)}</time>
               </div>
@@ -72,8 +76,9 @@ export default function Comments() {
       </ul>
 
       <p className="text-sm text-gray-500 mt-6">
-        To add avatars, place image files into <code>public/reviews/photos/</code> and set the "photo" field in the
-        database later.
+        To add avatars, place image files into{" "}
+        <code>public/reviews/photos/</code> and set the &#34;photo&#34; field in
+        the database later.
       </p>
     </section>
   );

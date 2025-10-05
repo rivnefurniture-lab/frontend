@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { api } from "@/lib/utils";
+import { apiFetch } from "@/lib/api";
 
 export default function Live() {
   const [logs, setLogs] = useState([]);
@@ -19,7 +19,7 @@ export default function Live() {
 
   const refreshJobs = async () => {
     try {
-      const res = await api("/strategies/jobs");
+      const res = await apiFetch("/strategies/jobs");
       setJobs(res.jobs);
     } catch {
       setJobs([]);
@@ -27,7 +27,7 @@ export default function Live() {
   };
 
   const stop = async (id) => {
-    await api("/strategies/stop", { body: { jobId: id } });
+    await apiFetch("/strategies/stop", { body: { jobId: id } });
     await refreshJobs();
   };
 

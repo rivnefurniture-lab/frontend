@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { api } from "@/lib/utils";
+import { apiFetch } from "@/lib/api";
 
 function ExchangeForm({ id, fields }) {
   const [form, setForm] = useState({ testnet: true });
@@ -14,7 +14,7 @@ function ExchangeForm({ id, fields }) {
   const submit = async (e) => {
     e.preventDefault();
     try {
-      await api("/connect", { body: { exchange: id, ...form } });
+      await apiFetch("/connect", { body: { exchange: id, ...form } });
       setStatus({ ok: true, msg: "Connected ✓" });
     } catch (e) {
       setStatus({ ok: false, msg: e.message });
@@ -23,7 +23,7 @@ function ExchangeForm({ id, fields }) {
 
   const test = async () => {
     try {
-      const res = await api(`/balance?exchange=${id}`);
+      const res = await apiFetch(`/balance?exchange=${id}`);
       setStatus({
         ok: true,
         msg: `Balance: ${Object.keys(res.total).slice(0, 5).join(", ")}`,

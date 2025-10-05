@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { api } from "@/lib/utils";
+import { apiFetch } from "@/lib/api";
 
 export default function Pay() {
   const router = useRouter();
@@ -20,7 +20,7 @@ export default function Pay() {
     try {
       setLoading(true);
       setError(null);
-      const { url } = await api("/pay/stripe/create-session", {
+      const { url } = await apiFetch("/pay/stripe/create-session", {
         body: { planId: plan, redirect },
       });
       window.location.href = url;
@@ -35,7 +35,7 @@ export default function Pay() {
     try {
       setLoading(true);
       setError(null);
-      const { data, signature, url } = await api("/pay/liqpay/create", {
+      const { data, signature, url } = await apiFetch("/pay/liqpay/create", {
         body: { planId: plan, redirect },
       });
 
@@ -66,7 +66,7 @@ export default function Pay() {
     try {
       setLoading(true);
       setError(null);
-      const { url, address, amount, currency } = await api(
+      const { url, address, amount, currency } = await apiFetch(
         "/pay/crypto/create",
         {
           body: { planId: plan, redirect },
