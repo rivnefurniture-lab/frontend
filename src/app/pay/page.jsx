@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { apiFetch } from "@/lib/api";
 
-export default function Pay() {
+function PayInner() {
   const router = useRouter();
   const params = useSearchParams();
 
@@ -14,14 +14,15 @@ export default function Pay() {
   const redirect = params.get("redirect") || "/";
 
   const [loading, setLoading] = useState(false);
-  const [error, setError] = (useState < string) | (null > null);
+  const [error, setError] = useState(null);
 
   const payStripe = async () => {
     try {
       setLoading(true);
       setError(null);
       const { url } = await apiFetch("/pay/stripe/create-session", {
-        body: { planId: plan, redirect },
+        method: "POST",
+        body: JSON.stringify({ planId: plan, redirect }),
       });
       window.location.href = url;
     } catch (e) {
@@ -36,7 +37,8 @@ export default function Pay() {
       setLoading(true);
       setError(null);
       const { data, signature, url } = await apiFetch("/pay/liqpay/create", {
-        body: { planId: plan, redirect },
+        method: "POST",
+        body: JSON.stringify({ planId: plan, redirect }),
       });
 
       const form = document.createElement("form");
@@ -69,7 +71,8 @@ export default function Pay() {
       const { url, address, amount, currency } = await apiFetch(
         "/pay/crypto/create",
         {
-          body: { planId: plan, redirect },
+          method: "POST",
+          body: JSON.stringify({ planId: plan, redirect }),
         },
       );
 
@@ -117,5 +120,13 @@ export default function Pay() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function Pay() {
+  return (
+    <Suspense fallback={<div>Loading checkout...</div>}>
+      <PayInner />
+    </Suspense>
   );
 }

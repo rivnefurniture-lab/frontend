@@ -1,11 +1,13 @@
 "use client";
 
+import { Suspense } from "react";
 import { plans } from "./mock";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useRouter, useSearchParams } from "next/navigation";
 
-export default function Pricing() {
+// inner component that actually uses useSearchParams
+function PricingInner() {
   const router = useRouter();
   const params = useSearchParams();
   const redirect = params.get("redirect") || "/";
@@ -44,5 +46,13 @@ export default function Pricing() {
         ))}
       </div>
     </div>
+  );
+}
+
+export default function Pricing() {
+  return (
+    <Suspense fallback={<div>Loading pricing...</div>}>
+      <PricingInner />
+    </Suspense>
   );
 }

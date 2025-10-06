@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Sheet } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Menu } from "lucide-react";
+import { Menu, User } from "lucide-react";
+import { useAuth } from "@/context/AuthProvider";
 
 const nav = [
   { to: "/strategies", label: "Strategies" },
@@ -19,6 +20,13 @@ const nav = [
 
 export default function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user, logout } = useAuth();
+
+  const handleLogout = async () => {
+    await logout();
+    router.push("/auth");
+  };
 
   return (
     <header className="bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-b border-gray-100 sticky top-0 z-40">
@@ -27,6 +35,7 @@ export default function Navbar() {
           Algotcha
         </Link>
 
+        {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-5">
           {nav.map((n) => {
             const isActive = pathname === n.to;
@@ -46,17 +55,39 @@ export default function Navbar() {
           })}
         </nav>
 
+        {/* Right side: profile or auth buttons */}
         <div className="hidden md:flex items-center gap-3">
-          <Link href="/auth">
-            <Button variant="secondary" size="sm">
-              Sign in
-            </Button>
-          </Link>
-          <Link href="/auth?mode=signup">
-            <Button size="sm">Get started</Button>
-          </Link>
+          {!user ? (
+            <>
+              <Link href="/auth">
+                <Button variant="secondary" size="sm">
+                  Sign in
+                </Button>
+              </Link>
+              <Link href="/auth?mode=signup">
+                <Button size="sm">Get started</Button>
+              </Link>
+            </>
+          ) : (
+            <div className="flex items-center gap-3">
+              <Link href="/profile">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
+                  <User size={16} />
+                  {user.name || user.email}
+                </Button>
+              </Link>
+              <Button size="sm" onClick={handleLogout}>
+                Logout
+              </Button>
+            </div>
+          )}
         </div>
 
+        {/* Mobile menu */}
         <div className="md:hidden">
           <Sheet
             trigger={
@@ -79,12 +110,38 @@ export default function Navbar() {
                   {n.label}
                 </Link>
               ))}
-              <Link href="/auth" className="text-gray-800">
-                Sign in
-              </Link>
-              <Link href="/auth?mode=signup" className="text-gray-800">
-                Get started
-              </Link>
+              {!user ? (
+                <>
+                  <Link href="/auth" className="text-gray-800">
+                    Sign in
+                  </Link>
+                  <Link href="/auth?mode=signup" className="text-gray-800">
+                    Get started
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <div className="p-2 border rounded bg-gray-50">
+                    <p className="font-medium">{user.name || "No name"}</p>
+                    <p className="text-sm text-gray-600">{user.email}</p>
+                    {user.country && (
+                      <p className="text-sm text-gray-600">{user.country}</p>
+                    )}
+                    {user.phone && (
+                      <p className="text-sm text-gray-600">{user.phone}</p>
+                    )}
+                  </div>
+                  <Link href="/profile" className="text-gray-800">
+                    Profile
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="text-left text-gray-800"
+                  >
+                    Logout
+                  </button>
+                </>
+              )}
             </div>
           </Sheet>
         </div>
