@@ -9,11 +9,13 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
 export default function AuthPage() {
-  const { user, loading, login, register } = useAuth();
+  const { user, loading, login } = useAuth();
   const router = useRouter();
   const [mode, setMode] = useState<"login" | "register" | "forgot">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [remember, setRemember] = useState(true);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [country, setCountry] = useState("");
@@ -26,21 +28,55 @@ export default function AuthPage() {
     e.preventDefault();
     setError(null);
     setMessage(null);
+
     try {
       if (mode === "login") {
-        await login(email, password);
+        // 🔹 Persist session based on "Remember me"
+        await supabase.auth.signInWithPassword({
+          email,
+          password,
+          options: {
+            // When remember = false, session persists only in-memory
+            // (will clear on tab close)
+            shouldCreateUser: false,
+          },
+        });
+
+        if (!remember) {
+          await supabase.auth.setSession(
+            (await supabase.auth.getSession()).data.session ?? null
+          );
+          // Supabase automatically stores session in localStorage —
+          // for non-remember sessions, we can clear it on window unload:
+          window.addEventListener("beforeunload", () =>
+            supabase.auth.signOut()
+          );
+        }
+
         router.replace("/portfolio");
       } else if (mode === "register") {
+        if (!email || !password) {
+          setError("Please fill out all required fields.");
+          return;
+        }
+        if (password !== confirmPassword) {
+          setError("Passwords do not match.");
+          return;
+        }
+
         const { error } = await supabase.auth.signUp({
           email,
           password,
           options: {
             data: { name, phone, country },
-            emailRedirectTo: `${window.location.origin}/verify-email?email=${encodeURIComponent(email)}`,
+            emailRedirectTo: `${window.location.origin}/verify-email?email=${encodeURIComponent(
+              email
+            )}`,
           },
         });
 
         if (error) throw error;
+
         router.replace(`/verify-email?email=${encodeURIComponent(email)}`);
       } else if (mode === "forgot") {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
@@ -52,18 +88,17 @@ export default function AuthPage() {
 
       setEmail("");
       setPassword("");
+      setConfirmPassword("");
       setName("");
       setPhone("");
       setCountry("");
-    } catch (e: any) {
-      setError(e.message || "Error");
+    } catch (err: any) {
+      setError(err.message || "Something went wrong. Please try again.");
     }
   };
 
   useEffect(() => {
-    if (user) {
-      router.replace("/portfolio");
-    }
+    if (user) router.replace("/portfolio");
   }, [user, router]);
 
   if (loading) return <p className="p-6">Loading...</p>;
@@ -87,23 +122,26 @@ export default function AuthPage() {
                 : "Welcome back."}
           </p>
 
-          <form onSubmit={onSubmit} className="space-y-4">
+          <form onSubmit={onSubmit} className="space-y-4" autoComplete="on">
             {isSignup && (
               <>
                 <Input
                   placeholder="Full name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
+                  autoComplete="name"
                 />
                 <Input
                   placeholder="Phone (optional)"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
+                  autoComplete="tel"
                 />
                 <Input
                   placeholder="Country (optional)"
                   value={country}
                   onChange={(e) => setCountry(e.target.value)}
+                  autoComplete="country"
                 />
               </>
             )}
@@ -114,16 +152,44 @@ export default function AuthPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              autoComplete={isSignup ? "email" : "username"}
             />
 
             {mode !== "forgot" && (
-              <Input
-                placeholder="Password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
+              <>
+                <Input
+                  placeholder="Password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  autoComplete={isSignup ? "new-password" : "current-password"}
+                />
+                {isSignup && (
+                  <Input
+                    placeholder="Confirm password"
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                    autoComplete="new-password"
+                  />
+                )}
+              </>
+            )}
+
+            {mode === "login" && (
+              <div className="flex items-center justify-between text-sm">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={remember}
+                    onChange={(e) => setRemember(e.target.checked)}
+                    className="cursor-pointer"
+                  />
+                  Remember me
+                </label>
+              </div>
             )}
 
             {error && <p className="text-red-600 text-sm">{error}</p>}
@@ -167,7 +233,7 @@ export default function AuthPage() {
                   Don’t have an account?{" "}
                   <button
                     type="button"
-                    className="text-blue-600 underline"
+                    className="text-blue-600 underline cursor-pointer"
                     onClick={() => setMode("register")}
                   >
                     Sign up
@@ -177,7 +243,7 @@ export default function AuthPage() {
                   Forgot password?{" "}
                   <button
                     type="button"
-                    className="text-blue-600 underline"
+                    className="text-blue-600 underline cursor-pointer"
                     onClick={() => setMode("forgot")}
                   >
                     Reset here
