@@ -93,161 +93,163 @@ export default function AuthPage() {
   if (loading) return <p className="p-6">Loading...</p>;
 
   return (
-    <div className="flex items-center justify-center">
-      <div className="w-full max-w-md px-4">
-        <Card>
-          <CardContent className="p-8 flex flex-col items-center">
-            <h1 className="text-2xl font-semibold mb-1 text-center">
+    <div className="w-full max-w-lg">
+      <Card>
+        <CardContent className="p-8 flex flex-col items-center">
+          <h1 className="text-2xl font-semibold mb-1 text-center">
+            {mode === "forgot"
+              ? "Reset password"
+              : isSignup
+                ? "Create account"
+                : "Sign in"}
+          </h1>
+
+          <p className="text-gray-600 mb-6 text-center">
+            {mode === "forgot"
+              ? "Enter your email to receive a reset link."
+              : isSignup
+                ? "Start investing in algorithms within minutes."
+                : "Welcome back."}
+          </p>
+
+          <form
+            onSubmit={onSubmit}
+            className="flex flex-col items-center gap-4 w-full"
+            autoComplete="on"
+          >
+            {isSignup && (
+              <>
+                <Input
+                  placeholder="Full name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  autoComplete="name"
+                  inputWidth="full"
+                  name="full name"
+                />
+                <Input
+                  placeholder="Phone (optional)"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  autoComplete="tel"
+                  inputWidth="full"
+                  name="phone"
+                />
+                <Input
+                  placeholder="Country (optional)"
+                  value={country}
+                  onChange={(e) => setCountry(e.target.value)}
+                  autoComplete="country"
+                  inputWidth="full"
+                  name="country"
+                />
+              </>
+            )}
+
+            <Input
+              placeholder="Email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              autoComplete={isSignup ? "email" : "username"}
+              inputWidth="full"
+              name="email"
+            />
+
+            {mode !== "forgot" && (
+              <>
+                <Input
+                  placeholder="Password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  autoComplete={isSignup ? "new-password" : "current-password"}
+                  inputWidth="full"
+                  name="password"
+                />
+                {isSignup && (
+                  <Input
+                    placeholder="Confirm password"
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                    autoComplete="new-password"
+                    inputWidth="full"
+                    name="new-password"
+                  />
+                )}
+              </>
+            )}
+
+            {error && (
+              <p className="text-red-600 text-sm text-center">{error}</p>
+            )}
+            {message && (
+              <p className="text-green-600 text-sm text-center">{message}</p>
+            )}
+
+            <Button type="submit" className="w-fit">
               {mode === "forgot"
-                ? "Reset password"
+                ? "Send reset link"
                 : isSignup
                   ? "Create account"
                   : "Sign in"}
-            </h1>
+            </Button>
+          </form>
 
-            <p className="text-gray-600 mb-6 text-center">
-              {mode === "forgot"
-                ? "Enter your email to receive a reset link."
-                : isSignup
-                  ? "Start investing in algorithms within minutes."
-                  : "Welcome back."}
-            </p>
-
-            <form
-              onSubmit={onSubmit}
-              className="flex flex-col items-center gap-4 w-full"
-              autoComplete="on"
-            >
-              {isSignup && (
-                <>
-                  <Input
-                    placeholder="Full name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    autoComplete="name"
-                    inputWidth="full"
-                  />
-                  <Input
-                    placeholder="Phone (optional)"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    autoComplete="tel"
-                    inputWidth="full"
-                  />
-                  <Input
-                    placeholder="Country (optional)"
-                    value={country}
-                    onChange={(e) => setCountry(e.target.value)}
-                    autoComplete="country"
-                    inputWidth="full"
-                  />
-                </>
-              )}
-
-              <Input
-                placeholder="Email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                autoComplete={isSignup ? "email" : "username"}
-                inputWidth="full"
-              />
-
-              {mode !== "forgot" && (
-                <>
-                  <Input
-                    placeholder="Password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    autoComplete={
-                      isSignup ? "new-password" : "current-password"
-                    }
-                    inputWidth="full"
-                  />
-                  {isSignup && (
-                    <Input
-                      placeholder="Confirm password"
-                      type="password"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      required
-                      autoComplete="new-password"
-                      inputWidth="full"
-                    />
-                  )}
-                </>
-              )}
-
-              {error && (
-                <p className="text-red-600 text-sm text-center">{error}</p>
-              )}
-              {message && (
-                <p className="text-green-600 text-sm text-center">{message}</p>
-              )}
-
-              <Button type="submit" className="w-fit">
-                {mode === "forgot"
-                  ? "Send reset link"
-                  : isSignup
-                    ? "Create account"
-                    : "Sign in"}
-              </Button>
-            </form>
-
-            <div className="mt-6 text-sm text-gray-600 text-left">
-              {mode === "forgot" ? (
+          <div className="mt-6 text-sm text-gray-600 text-left">
+            {mode === "forgot" ? (
+              <p>
+                Remember your password?{" "}
+                <button
+                  type="button"
+                  className="text-blue-600 underline cursor-pointer"
+                  onClick={() => setMode("login")}
+                >
+                  Back to login
+                </button>
+              </p>
+            ) : isSignup ? (
+              <p>
+                Already have an account?{" "}
+                <button
+                  type="button"
+                  className="text-blue-600 underline cursor-pointer"
+                  onClick={() => setMode("login")}
+                >
+                  Sign in
+                </button>
+              </p>
+            ) : (
+              <>
                 <p>
-                  Remember your password?{" "}
+                  Don’t have an account?{" "}
                   <button
                     type="button"
                     className="text-blue-600 underline cursor-pointer"
-                    onClick={() => setMode("login")}
+                    onClick={() => setMode("register")}
                   >
-                    Back to login
+                    Sign up
                   </button>
                 </p>
-              ) : isSignup ? (
-                <p>
-                  Already have an account?{" "}
+                <p className="mt-2">
+                  Forgot password?{" "}
                   <button
                     type="button"
                     className="text-blue-600 underline cursor-pointer"
-                    onClick={() => setMode("login")}
+                    onClick={() => setMode("forgot")}
                   >
-                    Sign in
+                    Reset here
                   </button>
                 </p>
-              ) : (
-                <>
-                  <p>
-                    Don’t have an account?{" "}
-                    <button
-                      type="button"
-                      className="text-blue-600 underline cursor-pointer"
-                      onClick={() => setMode("register")}
-                    >
-                      Sign up
-                    </button>
-                  </p>
-                  <p className="mt-2">
-                    Forgot password?{" "}
-                    <button
-                      type="button"
-                      className="text-blue-600 underline cursor-pointer"
-                      onClick={() => setMode("forgot")}
-                    >
-                      Reset here
-                    </button>
-                  </p>
-                </>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+              </>
+            )}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -2,7 +2,7 @@ import { forwardRef } from "react";
 import { cn } from "@/lib/utils";
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  inputWidth?: "sm" | "md" | "lg" | "responsive";
+  inputWidth?: "sm" | "md" | "lg" | "full" | "responsive";
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
