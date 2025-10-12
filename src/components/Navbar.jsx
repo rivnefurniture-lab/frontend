@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Sheet } from "@/components/ui/sheet";
+import { MobileMenu } from "@/components/ui/MobileMenu";
 import { Button } from "@/components/ui/button";
 import { Menu, User } from "lucide-react";
 import { useAuth } from "@/context/AuthProvider";
@@ -55,7 +55,7 @@ export default function Navbar() {
           })}
         </nav>
 
-        {/* Right side: profile or auth buttons */}
+        {/* Right side: account or auth buttons */}
         <div className="hidden md:flex items-center gap-3">
           {!user ? (
             <>
@@ -70,7 +70,7 @@ export default function Navbar() {
             </>
           ) : (
             <div className="flex items-center gap-3">
-              <Link href="/profile">
+              <Link href="/account">
                 <Button
                   variant="ghost"
                   size="sm"
@@ -89,11 +89,11 @@ export default function Navbar() {
 
         {/* Mobile menu */}
         <div className="md:hidden">
-          <Sheet
+          <MobileMenu
             trigger={
-              <Button variant="secondary" size="sm">
+              <button className="p-2">
                 <Menu size={18} />
-              </Button>
+              </button>
             }
           >
             <div className="flex flex-col gap-4">
@@ -102,40 +102,28 @@ export default function Navbar() {
                   key={n.to}
                   href={n.to}
                   className={
-                    pathname === n.to
-                      ? "text-blue-600 font-medium"
-                      : "text-gray-800"
+                    pathname === n.to ? "text-blue-600" : "text-gray-800"
                   }
                 >
                   {n.label}
                 </Link>
               ))}
+
               {!user ? (
                 <>
-                  <Link href="/auth" className="text-gray-800">
-                    Sign in
-                  </Link>
-                  <Link href="/auth?mode=register" className="text-gray-800">
-                    Get started
-                  </Link>
+                  <Link href="/auth">Sign in</Link>
+                  <Link href="/auth?mode=register">Get started</Link>
                 </>
               ) : (
                 <>
                   <div className="p-2 border rounded bg-gray-50">
                     <p className="font-medium">{user.name || "No name"}</p>
                     <p className="text-sm text-gray-600">{user.email}</p>
-                    {user.country && (
-                      <p className="text-sm text-gray-600">{user.country}</p>
-                    )}
-                    {user.phone && (
-                      <p className="text-sm text-gray-600">{user.phone}</p>
-                    )}
                   </div>
-                  <Link href="/profile" className="text-gray-800">
-                    Profile
-                  </Link>
+                  <Link href="/account">Account</Link>
                   <button
                     onClick={handleLogout}
+                    data-sheet-close
                     className="text-left text-gray-800"
                   >
                     Logout
@@ -143,7 +131,7 @@ export default function Navbar() {
                 </>
               )}
             </div>
-          </Sheet>
+          </MobileMenu>
         </div>
       </div>
     </header>
