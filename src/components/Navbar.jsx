@@ -64,7 +64,7 @@ export default function Navbar() {
                   Sign in
                 </Button>
               </Link>
-              <Link href="/auth?mode=signup">
+              <Link href="/auth?mode=register">
                 <Button size="sm">Get started</Button>
               </Link>
             </>
@@ -115,7 +115,7 @@ export default function Navbar() {
                   <Link href="/auth" className="text-gray-800">
                     Sign in
                   </Link>
-                  <Link href="/auth?mode=signup" className="text-gray-800">
+                  <Link href="/auth?mode=register" className="text-gray-800">
                     Get started
                   </Link>
                 </>

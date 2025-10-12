@@ -5,12 +5,13 @@ import { useAuth } from "@/context/AuthProvider";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
 export default function AuthPage() {
   const { user, loading, login } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const [mode, setMode] = useState<"login" | "register" | "forgot">("login");
   const [email, setEmail] = useState("");
@@ -23,6 +24,34 @@ export default function AuthPage() {
   const [message, setMessage] = useState<string | null>(null);
 
   const isSignup = mode === "register";
+
+  useEffect(() => {
+    const urlMode = searchParams.get("mode") as
+      | "login"
+      | "register"
+      | "forgot"
+      | null;
+
+    if (!urlMode && mode !== "login") {
+      setMode("login");
+      return;
+    }
+
+    if (urlMode && urlMode !== mode) {
+      setMode(urlMode);
+    }
+  }, [searchParams, mode]);
+
+  const updateMode = (newMode: "login" | "register" | "forgot") => {
+    const params = new URLSearchParams(searchParams);
+    if (newMode === "login") {
+      params.delete("mode");
+    } else {
+      params.set("mode", newMode);
+    }
+
+    router.replace(`/auth?${params.toString()}`, { scroll: false });
+  };
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,7 +93,6 @@ export default function AuthPage() {
         });
 
         if (error) throw error;
-
         router.replace(`/verify-email?email=${encodeURIComponent(email)}`);
       } else if (mode === "forgot") {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
@@ -74,7 +102,6 @@ export default function AuthPage() {
         setMessage("If this email exists, a reset link has been sent.");
       }
 
-      // Reset fields
       setEmail("");
       setPassword("");
       setConfirmPassword("");
@@ -123,25 +150,16 @@ export default function AuthPage() {
                   placeholder="Full name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  autoComplete="name"
-                  inputWidth="full"
-                  name="full name"
                 />
                 <Input
                   placeholder="Phone (optional)"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  autoComplete="tel"
-                  inputWidth="full"
-                  name="phone"
                 />
                 <Input
                   placeholder="Country (optional)"
                   value={country}
                   onChange={(e) => setCountry(e.target.value)}
-                  autoComplete="country"
-                  inputWidth="full"
-                  name="country"
                 />
               </>
             )}
@@ -152,9 +170,6 @@ export default function AuthPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              autoComplete={isSignup ? "email" : "username"}
-              inputWidth="full"
-              name="email"
             />
 
             {mode !== "forgot" && (
@@ -165,9 +180,6 @@ export default function AuthPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  autoComplete={isSignup ? "new-password" : "current-password"}
-                  inputWidth="full"
-                  name="password"
                 />
                 {isSignup && (
                   <Input
@@ -176,9 +188,6 @@ export default function AuthPage() {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required
-                    autoComplete="new-password"
-                    inputWidth="full"
-                    name="new-password"
                   />
                 )}
               </>
@@ -207,7 +216,7 @@ export default function AuthPage() {
                 <button
                   type="button"
                   className="text-blue-600 underline cursor-pointer"
-                  onClick={() => setMode("login")}
+                  onClick={() => updateMode("login")}
                 >
                   Back to login
                 </button>
@@ -218,7 +227,7 @@ export default function AuthPage() {
                 <button
                   type="button"
                   className="text-blue-600 underline cursor-pointer"
-                  onClick={() => setMode("login")}
+                  onClick={() => updateMode("login")}
                 >
                   Sign in
                 </button>
@@ -230,7 +239,7 @@ export default function AuthPage() {
                   <button
                     type="button"
                     className="text-blue-600 underline cursor-pointer"
-                    onClick={() => setMode("register")}
+                    onClick={() => updateMode("register")}
                   >
                     Sign up
                   </button>
@@ -240,7 +249,7 @@ export default function AuthPage() {
                   <button
                     type="button"
                     className="text-blue-600 underline cursor-pointer"
-                    onClick={() => setMode("forgot")}
+                    onClick={() => updateMode("forgot")}
                   >
                     Reset here
                   </button>
