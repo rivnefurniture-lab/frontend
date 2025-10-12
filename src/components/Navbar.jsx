@@ -121,13 +121,13 @@ export default function Navbar() {
                     <p className="text-sm text-gray-600">{user.email}</p>
                   </div>
                   <Link href="/account">Account</Link>
-                  <button
+                  <a
                     onClick={handleLogout}
-                    data-sheet-close
+                    data-sheet-close=""
                     className="text-left text-gray-800"
                   >
                     Logout
-                  </button>
+                  </a>
                 </>
               )}
             </div>

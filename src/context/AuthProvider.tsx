@@ -10,6 +10,9 @@ type User = {
   name?: string | null;
   phone?: string | null;
   country?: string | null;
+  facebook?: string | null;
+  linkedin?: string | null;
+  twitter?: string | null;
 };
 
 type AuthContextType = {
@@ -40,12 +43,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const mapUser = (session: Session | null): User | null => {
     if (!session?.user) return null;
+
     return {
       id: session.user.id,
       email: session.user.email!,
       name: session.user.user_metadata?.name || null,
       phone: session.user.user_metadata?.phone || null,
       country: session.user.user_metadata?.country || null,
+      facebook: session.user.user_metadata?.facebook || null,
+      linkedin: session.user.user_metadata?.linkedin || null,
+      twitter: session.user.user_metadata?.twitter || null,
     };
   };
 
