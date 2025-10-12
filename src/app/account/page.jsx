@@ -118,7 +118,7 @@ export default function ProfilePage() {
             <CountryDropdown
               value={profile.country}
               onChange={(val) => setProfile({ ...profile, country: val })}
-              className="w-full h-11 px-4 rounded-xl border border-gray-200 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full h-11 px-4 rounded-xl border border-gray-200 text-gray-400 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <PhoneInput
               country={"us"}

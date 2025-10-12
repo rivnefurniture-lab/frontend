@@ -1,14 +1,17 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthProvider";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import PhoneInput from "react-phone-input-2";
+import { CountryDropdown } from "react-country-region-selector";
+import "react-phone-input-2/lib/style.css";
 
-export default function AuthPage() {
+function AuthPageInner() {
   const { user, loading, login } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -151,19 +154,20 @@ export default function AuthPage() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                 />
-                <Input
-                  placeholder="Phone (optional)"
+                <PhoneInput
+                  country={"us"}
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
+                  onChange={(value) => setPhone(value)}
+                  inputClass="w-full! h-11! pl-12! pr-4! rounded-xl! border! border-gray-200! text-gray-900! placeholder-gray-400! focus:outline-none! focus:ring-2! focus:ring-blue-500!"
+                  placeholder="Phone (optional)"
                 />
-                <Input
-                  placeholder="Country (optional)"
+                <CountryDropdown
                   value={country}
-                  onChange={(e) => setCountry(e.target.value)}
+                  onChange={(value) => setCountry(value)}
+                  className="w-full h-11 px-4 rounded-xl border border-gray-200 text-gray-400 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </>
             )}
-
             <Input
               placeholder="Email"
               type="email"
@@ -260,5 +264,17 @@ export default function AuthPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function AuthPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="p-6 text-gray-500 text-center">Loading auth...</div>
+      }
+    >
+      <AuthPageInner />
+    </Suspense>
   );
 }
