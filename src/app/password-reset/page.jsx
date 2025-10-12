@@ -10,7 +10,7 @@ import { supabase } from "@/lib/supabase";
 export default function PasswordResetPage() {
   const router = useRouter();
   const [password, setPassword] = useState("");
-  const [confirm, setConfirm] = useState("");
+  const [confirmPassword, setConfirm] = useState("");
   const [error, setError] = useState(null);
   const [message, setMessage] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -20,8 +20,23 @@ export default function PasswordResetPage() {
     setError(null);
     setMessage(null);
 
-    if (password !== confirm) {
+    if (!password || !confirmPassword) {
+      setError("Please fill out all required fields.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
       setError("Passwords do not match.");
+      return;
+    }
+
+    const strongPasswordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{9,}$/;
+
+    if (!strongPasswordRegex.test(password)) {
+      setError(
+        "Password must be at least 9 characters long and include uppercase, lowercase, number, and special character.",
+      );
       return;
     }
 
@@ -47,7 +62,7 @@ export default function PasswordResetPage() {
   };
 
   return (
-    <div className="container py-10 max-w-md">
+    <div className="w-full max-w-lg">
       <Card>
         <CardContent className="p-6">
           <h1 className="text-2xl font-semibold mb-1">Reset your password</h1>
@@ -66,7 +81,7 @@ export default function PasswordResetPage() {
             <Input
               type="password"
               placeholder="Confirm new password"
-              value={confirm}
+              value={confirmPassword}
               onChange={(e) => setConfirm(e.target.value)}
               required
             />
