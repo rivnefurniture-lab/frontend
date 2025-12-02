@@ -275,7 +275,7 @@ export default function ConnectPage() {
                 🎉 Exchange Connected!
               </h3>
               <p className="text-green-700 mb-4">
-                You're ready to start trading. Here's what you can do next:
+                You&apos;re ready to start trading. Here&apos;s what you can do next:
               </p>
               <div className="flex flex-wrap gap-3">
                 <Link href="/backtest">
