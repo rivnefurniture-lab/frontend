@@ -8,14 +8,11 @@ import { Menu, User } from "lucide-react";
 import { useAuth } from "@/context/AuthProvider";
 
 const nav = [
+  { to: "/dashboard", label: "Dashboard" },
   { to: "/strategies", label: "Strategies" },
-  { to: "/portfolio", label: "Portfolio" },
-  { to: "/invest", label: "Invest" },
-  { to: "/risk", label: "Risk" },
-  { to: "/reports", label: "Reports" },
-  { to: "/pricing", label: "Pricing" },
+  { to: "/backtest", label: "Backtest" },
   { to: "/connect", label: "Connect" },
-  { to: "/live", label: "Live" },
+  { to: "/pricing", label: "Pricing" },
 ];
 
 export default function Navbar() {

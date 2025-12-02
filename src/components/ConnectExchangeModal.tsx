@@ -32,11 +32,15 @@ export default function ConnectExchangeModal({
     setStatus(null);
     try {
       if (provider === "binance") {
-        const res = await apiFetch("/api/exchange/binance/connect", {
+        await apiFetch("/exchange/connect", {
           method: "POST",
-          body: { apiKey, apiSecret },
+          body: JSON.stringify({
+            exchange: "binance",
+            apiKey,
+            secret: apiSecret,
+            testnet: true,
+          }),
         });
-        if (!res.ok) throw new Error("Failed to save keys");
         setStatus("Connected!");
         onConnected();
       }
