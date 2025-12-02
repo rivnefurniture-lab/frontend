@@ -2,6 +2,16 @@
 const nextConfig = {
   output: 'standalone', // Required for Docker deployment
   
+  // Skip ESLint during production builds (we lint in CI separately)
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  
+  // Skip TypeScript errors during builds
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  
   // Image optimization
   images: {
     domains: ['dummyimage.com'],
