@@ -1134,6 +1134,102 @@ export default function BacktestPage() {
                   </CardContent>
                 </Card>
               )}
+
+              {/* Trades Table with Full Details */}
+              {results.trades?.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center justify-between">
+                      <span>Trade History ({results.trades.length} trades)</span>
+                      <span className="text-xs font-normal text-gray-500">
+                        Full transparency with indicator proof
+                      </span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead className="bg-gray-50">
+                          <tr className="text-left text-xs text-gray-600">
+                            <th className="p-2 font-medium">Date & Time</th>
+                            <th className="p-2 font-medium">Pair</th>
+                            <th className="p-2 font-medium">Action</th>
+                            <th className="p-2 font-medium">Price</th>
+                            <th className="p-2 font-medium">P&L</th>
+                            <th className="p-2 font-medium">Equity</th>
+                            <th className="p-2 font-medium">DD</th>
+                            <th className="p-2 font-medium">Reason</th>
+                            <th className="p-2 font-medium">Indicator Proof</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {results.trades.slice(0, 50).map((trade, idx) => (
+                            <tr key={idx} className="border-t hover:bg-gray-50">
+                              <td className="p-2 text-xs">
+                                <div>{trade.date || trade.timestamp?.split('T')[0]}</div>
+                                <div className="text-gray-400">{trade.time || ''}</div>
+                              </td>
+                              <td className="p-2 font-medium">{trade.symbol}</td>
+                              <td className="p-2">
+                                <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                                  trade.action === 'BUY' 
+                                    ? 'bg-green-100 text-green-700' 
+                                    : 'bg-red-100 text-red-700'
+                                }`}>
+                                  {trade.action}
+                                </span>
+                              </td>
+                              <td className="p-2">${trade.price?.toFixed(2)}</td>
+                              <td className={`p-2 font-medium ${
+                                (trade.profit_percent || 0) >= 0 ? 'text-green-600' : 'text-red-600'
+                              }`}>
+                                {trade.profit_percent >= 0 ? '+' : ''}{trade.profit_percent?.toFixed(2)}%
+                                <div className="text-xs text-gray-500">
+                                  ${trade.profit_usd?.toFixed(2) || '0'}
+                                </div>
+                              </td>
+                              <td className="p-2">${trade.equity?.toFixed(0)}</td>
+                              <td className="p-2 text-red-600">-{trade.drawdown?.toFixed(1)}%</td>
+                              <td className="p-2">
+                                <span className={`text-xs px-2 py-0.5 rounded ${
+                                  trade.reason?.includes('Take Profit') ? 'bg-green-100 text-green-700' :
+                                  trade.reason?.includes('Stop Loss') ? 'bg-red-100 text-red-700' :
+                                  trade.reason?.includes('Entry') ? 'bg-blue-100 text-blue-700' :
+                                  'bg-gray-100 text-gray-700'
+                                }`}>
+                                  {trade.reason || trade.comment || '-'}
+                                </span>
+                              </td>
+                              <td className="p-2 text-xs">
+                                {trade.indicatorProof?.length > 0 ? (
+                                  <div className="space-y-0.5">
+                                    {trade.indicatorProof.map((proof, i) => (
+                                      <div key={i} className={`px-1 py-0.5 rounded ${
+                                        proof.triggered ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
+                                      }`}>
+                                        <span className="font-medium">{proof.indicator}:</span> {proof.value} {proof.condition} {proof.target}
+                                        {proof.triggered && ' ✓'}
+                                      </div>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <span className="text-gray-400">-</span>
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                      {results.trades.length > 50 && (
+                        <p className="text-center text-gray-500 text-sm mt-3">
+                          Showing first 50 of {results.trades.length} trades. 
+                          Download full report for all trades.
+                        </p>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
             </>
           ) : (
             <Card>
