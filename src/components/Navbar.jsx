@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Sheet } from "@/components/ui/sheet";
+import { MobileMenu } from "@/components/ui/MobileMenu";
 import { Button } from "@/components/ui/button";
 import { Menu, User } from "lucide-react";
 import { useAuth } from "@/context/AuthProvider";
@@ -67,7 +67,7 @@ export default function Navbar() {
             </>
           ) : (
             <div className="flex items-center gap-3">
-              <Link href="/profile">
+              <Link href="/account">
                 <Button
                   variant="ghost"
                   size="sm"
@@ -86,7 +86,7 @@ export default function Navbar() {
 
         {/* Mobile menu */}
         <div className="md:hidden">
-          <Sheet
+          <MobileMenu
             trigger={
               <Button variant="secondary" size="sm">
                 <Menu size={18} />
@@ -128,8 +128,8 @@ export default function Navbar() {
                       <p className="text-sm text-gray-600">{user.phone}</p>
                     )}
                   </div>
-                  <Link href="/profile" className="text-gray-800">
-                    Profile
+                  <Link href="/account" className="text-gray-800">
+                    Account
                   </Link>
                   <button
                     onClick={handleLogout}
@@ -140,7 +140,7 @@ export default function Navbar() {
                 </>
               )}
             </div>
-          </Sheet>
+          </MobileMenu>
         </div>
       </div>
     </header>
