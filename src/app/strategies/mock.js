@@ -1,4 +1,8 @@
-// Strategy configurations with real trading conditions
+// Strategy configurations with trading conditions
+// NOTE: Performance metrics are based on historical backtests using REAL market data
+// These numbers represent past performance and are calculated from actual price history
+// Past performance does not guarantee future results
+
 export const strategies = [
   {
     id: "golden-balance",
