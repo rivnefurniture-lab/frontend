@@ -374,17 +374,20 @@ export default function BacktestPage() {
   const exportTradesCSV = () => {
     if (!results?.trades?.length) return;
     
-    const headers = ["Date", "Pair", "Side", "Entry Price", "Exit Price", "Quantity", "P&L", "P&L %", "Duration"];
+    const headers = ["Date", "Time", "Pair", "Action", "Price", "Quantity", "P&L %", "P&L USD", "Equity", "Drawdown", "Reason", "Indicator Proof"];
     const rows = results.trades.map(t => [
-      t.date || t.entry_time,
-      t.symbol || t.pair,
-      t.side,
-      t.entry_price,
-      t.exit_price,
-      t.quantity || t.amount,
-      t.profit_loss?.toFixed(2) || '0',
+      t.date || '',
+      t.time || '',
+      t.symbol || '',
+      t.action || '',
+      t.price?.toFixed(2) || '',
+      t.quantity?.toFixed(6) || '',
       t.profit_percent?.toFixed(2) || '0',
-      t.duration || '-'
+      t.profit_usd?.toFixed(2) || '0',
+      t.equity?.toFixed(2) || '',
+      t.drawdown?.toFixed(2) || '',
+      `"${t.reason || t.comment || ''}"`,
+      `"${(t.indicatorProof || []).map(p => `${p.indicator}: ${p.value} ${p.condition} ${p.target}`).join('; ')}"`
     ]);
     
     const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
@@ -456,29 +459,37 @@ export default function BacktestPage() {
         <table>
           <thead>
             <tr>
-              <th>Date</th>
+              <th>Date & Time</th>
               <th>Pair</th>
-              <th>Side</th>
-              <th>Entry</th>
-              <th>Exit</th>
+              <th>Action</th>
+              <th>Price</th>
+              <th>Equity</th>
               <th>P&L %</th>
+              <th>Reason</th>
             </tr>
           </thead>
           <tbody>
             ${results.trades.map(t => `
               <tr>
-                <td>${t.date || t.entry_time || '-'}</td>
-                <td>${t.symbol || t.pair || '-'}</td>
-                <td>${t.side || '-'}</td>
-                <td>$${t.entry_price || '-'}</td>
-                <td>$${t.exit_price || '-'}</td>
+                <td>${t.date || '-'} ${t.time || ''}</td>
+                <td>${t.symbol || '-'}</td>
+                <td style="color: ${t.action === 'BUY' ? 'green' : 'red'}; font-weight: bold;">${t.action || '-'}</td>
+                <td>$${t.price?.toFixed(2) || '-'}</td>
+                <td>$${t.equity?.toFixed(0) || '-'}</td>
                 <td class="${(t.profit_percent || 0) >= 0 ? 'profit' : 'loss'}">
                   ${(t.profit_percent || 0) >= 0 ? '+' : ''}${(t.profit_percent || 0).toFixed(2)}%
                 </td>
+                <td style="font-size: 11px;">${t.reason || t.comment || '-'}</td>
               </tr>
             `).join('')}
           </tbody>
         </table>
+        
+        <h3 style="margin-top: 30px;">Indicator Proof (Sample)</h3>
+        <p style="font-size: 12px; color: #666;">
+          Each trade shows the exact indicator values that triggered the signal. 
+          This proves the backtest accuracy based on real historical data.
+        </p>
         
         <div class="footer">
           <p>© ${new Date().getFullYear()} Algotcha. All rights reserved.</p>

@@ -50,10 +50,18 @@ function PayContent() {
     try {
       setLoading(true);
       setError(null);
-      const { formAction, formData } = await publicFetch("/pay/wayforpay/create", {
+      const result = await publicFetch("/pay/wayforpay/create", {
         method: "POST",
         body: JSON.stringify({ planId: plan, email: user?.email }),
       });
+
+      // Check if WayForPay is configured
+      if (result.error) {
+        setError(`WayForPay is not configured yet. Please contact support or use another payment method.`);
+        return;
+      }
+
+      const { formAction, formData } = result;
 
       // Create and submit form
       const form = document.createElement("form");
