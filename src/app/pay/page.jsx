@@ -4,11 +4,13 @@ import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { apiFetch } from "@/lib/api";
+import { apiFetch, publicFetch } from "@/lib/api";
+import { useAuth } from "@/context/AuthProvider";
 
 function PayContent() {
   const router = useRouter();
   const params = useSearchParams();
+  const { user } = useAuth();
 
   const plan = params.get("plan") || "starter";
   const redirect = params.get("redirect") || "/";
@@ -27,9 +29,9 @@ function PayContent() {
     try {
       setLoading(true);
       setError(null);
-      const result = await apiFetch("/pay/binance/create", {
+      const result = await publicFetch("/pay/binance/create", {
         method: "POST",
-        body: JSON.stringify({ planId: plan }),
+        body: JSON.stringify({ planId: plan, email: user?.email }),
       });
 
       if (result.checkoutUrl) {
@@ -48,9 +50,9 @@ function PayContent() {
     try {
       setLoading(true);
       setError(null);
-      const { formAction, formData } = await apiFetch("/pay/wayforpay/create", {
+      const { formAction, formData } = await publicFetch("/pay/wayforpay/create", {
         method: "POST",
-        body: JSON.stringify({ planId: plan }),
+        body: JSON.stringify({ planId: plan, email: user?.email }),
       });
 
       // Create and submit form
@@ -90,9 +92,9 @@ function PayContent() {
     try {
       setLoading(true);
       setError(null);
-      const result = await apiFetch("/pay/crypto/create", {
+      const result = await publicFetch("/pay/crypto/create", {
         method: "POST",
-        body: JSON.stringify({ planId: plan }),
+        body: JSON.stringify({ planId: plan, email: user?.email }),
       });
 
       setCryptoDetails(result);
