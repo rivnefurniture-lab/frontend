@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { apiFetch } from "@/lib/api";
 
-export default function Pay() {
+function PayContent() {
   const router = useRouter();
   const params = useSearchParams();
 
@@ -215,5 +215,17 @@ export default function Pay() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function Pay() {
+  return (
+    <Suspense fallback={
+      <div className="container py-10 max-w-xl text-center">
+        <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto"></div>
+      </div>
+    }>
+      <PayContent />
+    </Suspense>
   );
 }

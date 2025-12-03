@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthProvider";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
-export default function AuthPage() {
+// Inner component that uses useSearchParams
+function AuthForm() {
   const { user, loading, error: authError, isConfigured, login, loginWithGoogle } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -293,5 +294,19 @@ export default function AuthPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+// Main page component with Suspense wrapper
+export default function AuthPage() {
+  return (
+    <Suspense fallback={
+      <div className="container py-16 max-w-md text-center">
+        <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto"></div>
+        <p className="mt-4 text-gray-600">Loading...</p>
+      </div>
+    }>
+      <AuthForm />
+    </Suspense>
   );
 }
