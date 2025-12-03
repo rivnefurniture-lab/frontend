@@ -1,8 +1,8 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
-import { AuthChangeEvent, Session } from "@supabase/supabase-js";
+import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import { AuthChangeEvent, Session, AuthError } from "@supabase/supabase-js";
 
 type User = {
   id: string;
@@ -18,6 +18,8 @@ type User = {
 type AuthContextType = {
   user: User | null;
   loading: boolean;
+  error: string | null;
+  isConfigured: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (
     email: string,
@@ -27,19 +29,25 @@ type AuthContextType = {
     country?: string,
   ) => Promise<void>;
   logout: () => Promise<void>;
+  loginWithGoogle: () => Promise<void>;
 };
 
 const AuthCtx = createContext<AuthContextType>({
   user: null,
   loading: true,
+  error: null,
+  isConfigured: false,
   login: async () => {},
   register: async () => {},
   logout: async () => {},
+  loginWithGoogle: async () => {},
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isConfigured] = useState(isSupabaseConfigured());
 
   const mapUser = (session: Session | null): User | null => {
     if (!session?.user) return null;
@@ -47,7 +55,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return {
       id: session.user.id,
       email: session.user.email!,
-      name: session.user.user_metadata?.name || null,
+      name: session.user.user_metadata?.name || session.user.user_metadata?.full_name || null,
       phone: session.user.user_metadata?.phone || null,
       country: session.user.user_metadata?.country || null,
       facebook: session.user.user_metadata?.facebook || null,
@@ -56,31 +64,83 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
   };
 
-  useEffect(() => {
-    // initial session fetch
-    supabase.auth.getSession().then(({ data }) => {
-      setUser(mapUser(data.session));
-      setLoading(false);
-    });
+  const handleAuthError = (err: AuthError | Error): string => {
+    const message = err.message || 'An error occurred';
+    
+    // Common Supabase errors with user-friendly messages
+    if (message.includes('Failed to fetch')) {
+      return 'Unable to connect to authentication server. Please check your internet connection.';
+    }
+    if (message.includes('Invalid login credentials')) {
+      return 'Invalid email or password. Please try again.';
+    }
+    if (message.includes('Email not confirmed')) {
+      return 'Please verify your email before logging in.';
+    }
+    if (message.includes('User already registered')) {
+      return 'This email is already registered. Please login instead.';
+    }
+    if (message.includes('Password should be')) {
+      return 'Password must be at least 6 characters long.';
+    }
+    
+    return message;
+  };
 
-    // subscribe to auth state changes
+  useEffect(() => {
+    if (!isConfigured) {
+      setLoading(false);
+      setError('Authentication is not configured. Please set up Supabase environment variables.');
+      return;
+    }
+
+    // Initial session fetch
+    supabase.auth.getSession()
+      .then(({ data, error }) => {
+        if (error) {
+          console.error('Session fetch error:', error);
+          setError(handleAuthError(error));
+        } else {
+          setUser(mapUser(data.session));
+        }
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error('Session fetch exception:', err);
+        setError(handleAuthError(err));
+        setLoading(false);
+      });
+
+    // Subscribe to auth state changes
     const { data: listener } = supabase.auth.onAuthStateChange(
       (_event: AuthChangeEvent, session: Session | null) => {
         setUser(mapUser(session));
+        setError(null);
       },
     );
 
     return () => {
       listener.subscription.unsubscribe();
     };
-  }, []);
+  }, [isConfigured]);
 
   const login = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    if (error) throw error;
+    if (!isConfigured) {
+      throw new Error('Authentication is not configured');
+    }
+    
+    setError(null);
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (error) throw error;
+    } catch (err: any) {
+      const message = handleAuthError(err);
+      setError(message);
+      throw new Error(message);
+    }
   };
 
   const register = async (
@@ -90,27 +150,75 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     phone?: string,
     country?: string,
   ) => {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          name,
-          phone,
-          country,
+    if (!isConfigured) {
+      throw new Error('Authentication is not configured');
+    }
+
+    setError(null);
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name,
+            phone,
+            country,
+          },
         },
-      },
-    });
-    if (error) throw error;
+      });
+      if (error) throw error;
+    } catch (err: any) {
+      const message = handleAuthError(err);
+      setError(message);
+      throw new Error(message);
+    }
+  };
+
+  const loginWithGoogle = async () => {
+    if (!isConfigured) {
+      throw new Error('Authentication is not configured');
+    }
+
+    setError(null);
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: typeof window !== 'undefined' 
+            ? `${window.location.origin}/auth/callback`
+            : undefined,
+        },
+      });
+      if (error) throw error;
+    } catch (err: any) {
+      const message = handleAuthError(err);
+      setError(message);
+      throw new Error(message);
+    }
   };
 
   const logout = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
+    try {
+      await supabase.auth.signOut();
+      setUser(null);
+      setError(null);
+    } catch (err: any) {
+      console.error('Logout error:', err);
+    }
   };
 
   return (
-    <AuthCtx.Provider value={{ user, loading, login, register, logout }}>
+    <AuthCtx.Provider value={{ 
+      user, 
+      loading, 
+      error, 
+      isConfigured,
+      login, 
+      register, 
+      logout,
+      loginWithGoogle,
+    }}>
       {children}
     </AuthCtx.Provider>
   );

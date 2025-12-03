@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, Suspense } from "react";
+import { Suspense, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { setSubscribed } from "@/lib/utils";
 
-function PaySuccessInner() {
+function PaySuccessContent() {
   const router = useRouter();
   const params = useSearchParams();
 
@@ -27,8 +27,12 @@ function PaySuccessInner() {
 
 export default function PaySuccess() {
   return (
-    <Suspense fallback={<div>Processing payment...</div>}>
-      <PaySuccessInner />
+    <Suspense fallback={
+      <div className="container py-16">
+        <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto"></div>
+      </div>
+    }>
+      <PaySuccessContent />
     </Suspense>
   );
 }

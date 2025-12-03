@@ -6,8 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useRouter, useSearchParams } from "next/navigation";
 
-// inner component that actually uses useSearchParams
-function PricingInner() {
+function PricingContent() {
   const router = useRouter();
   const params = useSearchParams();
   const redirect = params.get("redirect") || "/";
@@ -51,8 +50,12 @@ function PricingInner() {
 
 export default function Pricing() {
   return (
-    <Suspense fallback={<div>Loading pricing...</div>}>
-      <PricingInner />
+    <Suspense fallback={
+      <div className="container py-10 text-center">
+        <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto"></div>
+      </div>
+    }>
+      <PricingContent />
     </Suspense>
   );
 }

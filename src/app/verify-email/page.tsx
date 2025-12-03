@@ -1,12 +1,12 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import React, { useEffect, useState, Suspense } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/lib/supabase";
 
-function VerifyEmailInner() {
+function VerifyEmailContent() {
   const searchParams = useSearchParams();
   const email = searchParams.get("email") || "";
   const [status, setStatus] = useState<
@@ -53,7 +53,7 @@ function VerifyEmailInner() {
             <>
               <h1 className="text-2xl font-semibold">Almost there!</h1>
               <p className="text-sm text-gray-600">
-                We’ve sent you an email at <strong>{email}</strong>. Please
+                We&apos;ve sent you an email at <strong>{email}</strong>. Please
                 follow the instructions in the email.
               </p>
             </>
@@ -85,8 +85,12 @@ function VerifyEmailInner() {
 
 export default function VerifyEmailPage() {
   return (
-    <Suspense fallback={<div>Loading verification...</div>}>
-      <VerifyEmailInner />
+    <Suspense fallback={
+      <div className="container py-10 max-w-md mx-auto text-center">
+        <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto"></div>
+      </div>
+    }>
+      <VerifyEmailContent />
     </Suspense>
   );
 }
