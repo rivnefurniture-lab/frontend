@@ -256,6 +256,18 @@ export default function BacktestPage() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
+  // Risk Management
+  const [takeProfit, setTakeProfit] = useState(5); // 5%
+  const [stopLoss, setStopLoss] = useState(3); // 3%
+  const [trailingStop, setTrailingStop] = useState(false);
+  const [trailingStopPercent, setTrailingStopPercent] = useState(1);
+  
+  // Safety Orders (DCA)
+  const [useSafetyOrders, setUseSafetyOrders] = useState(false);
+  const [safetyOrdersCount, setSafetyOrdersCount] = useState(3);
+  const [safetyOrderDeviation, setSafetyOrderDeviation] = useState(2); // Price deviation %
+  const [safetyOrderVolumeScale, setSafetyOrderVolumeScale] = useState(1.5);
+
   // Market state mode
   const [useMarketState, setUseMarketState] = useState(false);
 
@@ -317,7 +329,17 @@ export default function BacktestPage() {
         bullish_exit_conditions: useMarketState ? bullishExitConditions : [],
         bearish_exit_conditions: useMarketState ? bearishExitConditions : [],
         useMarketState,
-        intervalMs: 60000, // Check every minute
+        intervalMs: 60000,
+        // Risk management
+        takeProfit,
+        stopLoss,
+        trailingStop,
+        trailingStopPercent,
+        // Safety orders
+        useSafetyOrders,
+        safetyOrdersCount,
+        safetyOrderDeviation,
+        safetyOrderVolumeScale,
       };
 
       await apiFetch("/strategies/save", {
@@ -330,6 +352,7 @@ export default function BacktestPage() {
           pairs: selectedPairs,
           maxDeals: maxActiveDeals,
           orderSize: baseOrderSize,
+          isPublic: true, // Make strategy visible in strategies list
           backtestResults: {
             net_profit: results.metrics?.net_profit || 0,
             max_drawdown: results.metrics?.max_drawdown || 0,
@@ -347,6 +370,130 @@ export default function BacktestPage() {
     }
   };
 
+  // Export trades as CSV
+  const exportTradesCSV = () => {
+    if (!results?.trades?.length) return;
+    
+    const headers = ["Date", "Pair", "Side", "Entry Price", "Exit Price", "Quantity", "P&L", "P&L %", "Duration"];
+    const rows = results.trades.map(t => [
+      t.date || t.entry_time,
+      t.symbol || t.pair,
+      t.side,
+      t.entry_price,
+      t.exit_price,
+      t.quantity || t.amount,
+      t.profit_loss?.toFixed(2) || '0',
+      t.profit_percent?.toFixed(2) || '0',
+      t.duration || '-'
+    ]);
+    
+    const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${strategyName.replace(/\s+/g, '_')}_trades_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  // Export trades as PDF report
+  const exportTradesPDF = () => {
+    if (!results?.trades?.length) return;
+    
+    // Generate HTML for print
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Algotcha Trade Report - ${strategyName}</title>
+        <style>
+          body { font-family: Arial, sans-serif; padding: 40px; }
+          .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #2563eb; padding-bottom: 20px; }
+          .logo { font-size: 32px; font-weight: bold; color: #2563eb; }
+          .subtitle { color: #666; margin-top: 5px; }
+          .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin: 30px 0; }
+          .metric { padding: 15px; background: #f8f9fa; border-radius: 8px; text-align: center; }
+          .metric-value { font-size: 24px; font-weight: bold; color: #2563eb; }
+          .metric-label { font-size: 12px; color: #666; }
+          table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+          th, td { padding: 10px; text-align: left; border-bottom: 1px solid #eee; }
+          th { background: #f8f9fa; font-weight: 600; }
+          .profit { color: #16a34a; }
+          .loss { color: #dc2626; }
+          .footer { margin-top: 40px; text-align: center; color: #999; font-size: 12px; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <div class="logo">📊 Algotcha</div>
+          <div class="subtitle">Professional Trade Report</div>
+        </div>
+        
+        <h1>${strategyName}</h1>
+        <p>Generated: ${new Date().toLocaleString()}</p>
+        
+        <div class="metrics">
+          <div class="metric">
+            <div class="metric-value">${results.metrics?.net_profit}%</div>
+            <div class="metric-label">Net Profit</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value">${results.metrics?.win_rate}%</div>
+            <div class="metric-label">Win Rate</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value">${results.metrics?.total_trades}</div>
+            <div class="metric-label">Total Trades</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value">${results.metrics?.sharpe_ratio}</div>
+            <div class="metric-label">Sharpe Ratio</div>
+          </div>
+        </div>
+        
+        <h2>Trade History</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Pair</th>
+              <th>Side</th>
+              <th>Entry</th>
+              <th>Exit</th>
+              <th>P&L %</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${results.trades.map(t => `
+              <tr>
+                <td>${t.date || t.entry_time || '-'}</td>
+                <td>${t.symbol || t.pair || '-'}</td>
+                <td>${t.side || '-'}</td>
+                <td>$${t.entry_price || '-'}</td>
+                <td>$${t.exit_price || '-'}</td>
+                <td class="${(t.profit_percent || 0) >= 0 ? 'profit' : 'loss'}">
+                  ${(t.profit_percent || 0) >= 0 ? '+' : ''}${(t.profit_percent || 0).toFixed(2)}%
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+        
+        <div class="footer">
+          <p>© ${new Date().getFullYear()} Algotcha. All rights reserved.</p>
+          <p>Past performance does not guarantee future results.</p>
+        </div>
+      </body>
+      </html>
+    `;
+    
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(html);
+    printWindow.document.close();
+    printWindow.print();
+  };
+
   const runBacktest = async () => {
     setLoading(true);
     setError(null);
@@ -360,12 +507,23 @@ export default function BacktestPage() {
         base_order_size: baseOrderSize,
         start_date: startDate,
         end_date: endDate,
+        // Indicator conditions
         entry_conditions: useMarketState ? [] : entryConditions,
         exit_conditions: useMarketState ? [] : exitConditions,
         bullish_entry_conditions: useMarketState ? bullishEntryConditions : [],
         bearish_entry_conditions: useMarketState ? bearishEntryConditions : [],
         bullish_exit_conditions: useMarketState ? bullishExitConditions : [],
         bearish_exit_conditions: useMarketState ? bearishExitConditions : [],
+        // Risk management
+        take_profit: takeProfit,
+        stop_loss: stopLoss,
+        trailing_stop: trailingStop,
+        trailing_stop_percent: trailingStopPercent,
+        // Safety orders
+        use_safety_orders: useSafetyOrders,
+        safety_orders_count: safetyOrdersCount,
+        safety_order_deviation: safetyOrderDeviation,
+        safety_order_volume_scale: safetyOrderVolumeScale,
       };
 
       const result = await apiFetch("/backtest/demo", {
@@ -481,6 +639,124 @@ export default function BacktestPage() {
                 </div>
               </div>
             </CardContent>
+          </Card>
+
+          {/* Risk Management */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Risk Management</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium block mb-1">Take Profit (%)</label>
+                  <Input
+                    type="number"
+                    value={takeProfit}
+                    onChange={(e) => setTakeProfit(parseFloat(e.target.value))}
+                    min={0.1}
+                    step={0.1}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Close position at this profit %</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium block mb-1">Stop Loss (%)</label>
+                  <Input
+                    type="number"
+                    value={stopLoss}
+                    onChange={(e) => setStopLoss(parseFloat(e.target.value))}
+                    min={0.1}
+                    step={0.1}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Close position at this loss %</p>
+                </div>
+                <div className="md:col-span-2">
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      checked={trailingStop}
+                      onChange={(e) => setTrailingStop(e.target.checked)}
+                      className="rounded"
+                    />
+                    <label className="text-sm font-medium">Enable Trailing Stop</label>
+                    {trailingStop && (
+                      <Input
+                        type="number"
+                        value={trailingStopPercent}
+                        onChange={(e) => setTrailingStopPercent(parseFloat(e.target.value))}
+                        min={0.1}
+                        step={0.1}
+                        className="w-24"
+                      />
+                    )}
+                    {trailingStop && <span className="text-sm text-gray-500">%</span>}
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Safety Orders (DCA) */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <span>Safety Orders (DCA)</span>
+                <button
+                  onClick={() => setUseSafetyOrders(!useSafetyOrders)}
+                  className={`w-12 h-6 rounded-full transition ${
+                    useSafetyOrders ? "bg-blue-600" : "bg-gray-300"
+                  }`}
+                >
+                  <div
+                    className={`w-5 h-5 bg-white rounded-full shadow transform transition ${
+                      useSafetyOrders ? "translate-x-6" : "translate-x-0.5"
+                    }`}
+                  />
+                </button>
+              </CardTitle>
+            </CardHeader>
+            {useSafetyOrders && (
+              <CardContent>
+                <div className="grid md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="text-sm font-medium block mb-1">Number of Safety Orders</label>
+                    <Input
+                      type="number"
+                      value={safetyOrdersCount}
+                      onChange={(e) => setSafetyOrdersCount(parseInt(e.target.value))}
+                      min={1}
+                      max={10}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium block mb-1">Price Deviation (%)</label>
+                    <Input
+                      type="number"
+                      value={safetyOrderDeviation}
+                      onChange={(e) => setSafetyOrderDeviation(parseFloat(e.target.value))}
+                      min={0.5}
+                      step={0.5}
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Drop % to trigger each SO</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium block mb-1">Volume Scale</label>
+                    <Input
+                      type="number"
+                      value={safetyOrderVolumeScale}
+                      onChange={(e) => setSafetyOrderVolumeScale(parseFloat(e.target.value))}
+                      min={1}
+                      step={0.1}
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Multiply each SO size</p>
+                  </div>
+                </div>
+                <div className="mt-3 p-3 bg-blue-50 rounded-lg text-sm text-blue-700">
+                  <strong>DCA Strategy:</strong> If price drops {safetyOrderDeviation}%, place safety order at {safetyOrderVolumeScale}x base size.
+                  Max {safetyOrdersCount} safety orders.
+                </div>
+              </CardContent>
+            )}
           </Card>
 
           {/* Market State Toggle */}
@@ -722,11 +998,33 @@ export default function BacktestPage() {
                   </div>
                   {saved && (
                     <p className="text-blue-100 text-sm mt-2">
-                      ✓ Strategy saved! Go to <a href="/dashboard" className="underline">Dashboard</a> to start trading.
+                      ✓ Strategy saved! Go to <a href="/strategies" className="underline">Strategies</a> to view or <a href="/dashboard" className="underline">Dashboard</a> to start trading.
                     </p>
                   )}
                 </CardContent>
               </Card>
+
+              {/* Export Trades */}
+              {results.trades?.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Export Trade Report</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex gap-3">
+                      <Button onClick={exportTradesCSV} variant="outline" className="flex-1">
+                        📥 Download CSV
+                      </Button>
+                      <Button onClick={exportTradesPDF} variant="outline" className="flex-1">
+                        📄 Print PDF Report
+                      </Button>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-2 text-center">
+                      Export {results.trades.length} trades for your records
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
 
               <Card>
                 <CardHeader>

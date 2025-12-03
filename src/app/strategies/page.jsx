@@ -16,6 +16,13 @@ import Link from "next/link";
 import { apiFetch } from "@/lib/api";
 import { useAuth } from "@/context/AuthProvider";
 
+// Helper to format returns properly (no +- issue)
+const formatReturn = (value) => {
+  const num = parseFloat(value) || 0;
+  const formatted = Math.abs(num).toFixed(num >= 1 || num <= -1 ? 1 : 3);
+  return num >= 0 ? `+${formatted}` : `-${formatted}`;
+};
+
 export default function StrategiesPage() {
   const { user } = useAuth();
   const [query, setQuery] = useState("");
@@ -245,25 +252,27 @@ export default function StrategiesPage() {
                 {/* Returns */}
                 <div className="grid grid-cols-4 gap-2 text-center mb-4">
                   <div className="p-2 bg-gray-50 rounded">
-                    <div className="text-sm font-semibold text-green-600">
-                      +{s.returns?.daily || (s.cagr / 365).toFixed(3)}%
+                    <div className={`text-sm font-semibold ${(s.cagr || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {formatReturn(s.returns?.daily || (s.cagr / 365))}%
                     </div>
                     <div className="text-xs text-gray-500">Daily</div>
                   </div>
                   <div className="p-2 bg-gray-50 rounded">
-                    <div className="text-sm font-semibold text-green-600">
-                      +{s.returns?.weekly || (s.cagr / 52).toFixed(2)}%
+                    <div className={`text-sm font-semibold ${(s.cagr || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {formatReturn(s.returns?.weekly || (s.cagr / 52))}%
                     </div>
                     <div className="text-xs text-gray-500">Weekly</div>
                   </div>
                   <div className="p-2 bg-gray-50 rounded">
-                    <div className="text-sm font-semibold text-green-600">
-                      +{s.returns?.monthly || (s.cagr / 12).toFixed(1)}%
+                    <div className={`text-sm font-semibold ${(s.cagr || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {formatReturn(s.returns?.monthly || (s.cagr / 12))}%
                     </div>
                     <div className="text-xs text-gray-500">Monthly</div>
                   </div>
                   <div className="p-2 bg-gray-50 rounded">
-                    <div className="text-sm font-semibold text-green-600">+{s.cagr?.toFixed(1) || 0}%</div>
+                    <div className={`text-sm font-semibold ${(s.cagr || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {formatReturn(s.cagr)}%
+                    </div>
                     <div className="text-xs text-gray-500">Yearly</div>
                   </div>
                 </div>

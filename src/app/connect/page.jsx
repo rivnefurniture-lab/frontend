@@ -49,6 +49,9 @@ function ExchangeCard({ exchange, onConnect }) {
   const [status, setStatus] = useState(null);
   const [connected, setConnected] = useState(false);
   const [balance, setBalance] = useState(null);
+  const [showKey, setShowKey] = useState(false);
+  const [showSecret, setShowSecret] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handle = (k, v) => setForm((prev) => ({ ...prev, [k]: v }));
 
@@ -139,36 +142,66 @@ function ExchangeCard({ exchange, onConnect }) {
         <form onSubmit={submit} className="space-y-4">
           <div>
             <label className="text-sm font-medium block mb-1">API Key</label>
-            <Input
-              type="password"
-              placeholder="Enter your API key"
-              value={form.apiKey || ""}
-              onChange={(e) => handle("apiKey", e.target.value)}
-              required
-            />
+            <div className="relative">
+              <Input
+                type={showKey ? "text" : "password"}
+                placeholder="Enter your API key"
+                value={form.apiKey || ""}
+                onChange={(e) => handle("apiKey", e.target.value)}
+                required
+                className="pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowKey(!showKey)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                {showKey ? "🙈" : "👁️"}
+              </button>
+            </div>
           </div>
           
           <div>
             <label className="text-sm font-medium block mb-1">API Secret</label>
-            <Input
-              type="password"
-              placeholder="Enter your API secret"
-              value={form.secret || ""}
-              onChange={(e) => handle("secret", e.target.value)}
-              required
-            />
+            <div className="relative">
+              <Input
+                type={showSecret ? "text" : "password"}
+                placeholder="Enter your API secret"
+                value={form.secret || ""}
+                onChange={(e) => handle("secret", e.target.value)}
+                required
+                className="pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowSecret(!showSecret)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                {showSecret ? "🙈" : "👁️"}
+              </button>
+            </div>
           </div>
           
           {exchange.fields.includes("password") && (
             <div>
               <label className="text-sm font-medium block mb-1">Passphrase</label>
-              <Input
-                type="password"
-                placeholder="Enter your passphrase"
-                value={form.password || ""}
-                onChange={(e) => handle("password", e.target.value)}
-                required
-              />
+              <div className="relative">
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Enter your passphrase"
+                  value={form.password || ""}
+                  onChange={(e) => handle("password", e.target.value)}
+                  required
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  {showPassword ? "🙈" : "👁️"}
+                </button>
+              </div>
             </div>
           )}
           
