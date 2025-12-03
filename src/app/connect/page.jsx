@@ -58,7 +58,7 @@ function ExchangeCard({ exchange, onConnect }) {
     setStatus(null);
     
     try {
-      await apiFetch("/exchange/connect", {
+      const result = await apiFetch("/exchange/connect", {
         method: "POST",
         body: JSON.stringify({
           exchange: exchange.id,
@@ -68,11 +68,28 @@ function ExchangeCard({ exchange, onConnect }) {
           testnet: form.testnet,
         }),
       });
-      setStatus({ ok: true, msg: "✓ Connected successfully!" });
-      setConnected(true);
-      onConnect?.(exchange.id);
+      
+      if (result?.ok) {
+        setStatus({ ok: true, msg: "✓ Connected successfully!" });
+        setConnected(true);
+        onConnect?.(exchange.id);
+      } else {
+        throw new Error(result?.message || "Connection failed");
+      }
     } catch (e) {
-      setStatus({ ok: false, msg: e.message });
+      console.error("Exchange connection error:", e);
+      let errorMsg = e.message || "Connection failed";
+      
+      // Provide helpful error messages
+      if (errorMsg.includes("401") || errorMsg.includes("Unauthorized")) {
+        errorMsg = "Please login first to connect your exchange";
+      } else if (errorMsg.includes("Invalid") || errorMsg.includes("authentication")) {
+        errorMsg = "Invalid API key or secret. Please check your credentials.";
+      } else if (errorMsg.includes("network") || errorMsg.includes("fetch")) {
+        errorMsg = "Network error. Please check your connection and try again.";
+      }
+      
+      setStatus({ ok: false, msg: errorMsg });
     } finally {
       setLoading(false);
     }
@@ -230,6 +247,37 @@ export default function ConnectPage() {
       setConnectedExchanges([...connectedExchanges, exchangeId]);
     }
   };
+
+  // Show login prompt if not authenticated
+  if (!authLoading && !user) {
+    return (
+      <div className="container py-10">
+        <div className="max-w-md mx-auto text-center">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="text-6xl mb-4">🔐</div>
+              <h2 className="text-2xl font-bold mb-2">Login Required</h2>
+              <p className="text-gray-600 mb-6">
+                You need to be logged in to connect your exchange account.
+              </p>
+              <Link href="/auth">
+                <Button className="w-full">Login / Sign Up</Button>
+              </Link>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  if (authLoading) {
+    return (
+      <div className="container py-10 text-center">
+        <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto"></div>
+        <p className="mt-4 text-gray-600">Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="container py-10">
