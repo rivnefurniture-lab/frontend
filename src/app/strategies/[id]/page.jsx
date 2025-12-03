@@ -1,9 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
-import { getStrategyById, strategies } from "../mock";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,14 +21,55 @@ export default function StrategyDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { user } = useAuth();
-  const strategy = getStrategyById(params.id);
-
+  
+  const [strategy, setStrategy] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [exchange, setExchange] = useState("binance");
   const [symbol, setSymbol] = useState("BTC/USDT");
   const [timeframe, setTimeframe] = useState("1h");
   const [amount, setAmount] = useState(100);
   const [starting, setStarting] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
+
+  useEffect(() => {
+    fetchStrategy();
+  }, [params.id]);
+
+  const fetchStrategy = async () => {
+    try {
+      const allStrategies = await apiFetch("/backtest/strategies");
+      const found = allStrategies?.find(s => s.id === params.id || s.id === parseInt(params.id));
+      if (found) {
+        // Generate chart data based on yearly return
+        const yearlyReturn = found.cagr || 0;
+        const monthlyReturn = yearlyReturn / 12 / 100;
+        found.history = Array.from({ length: 24 }, (_, i) => ({
+          month: i + 1,
+          value: 10000 * Math.pow(1 + monthlyReturn, i) * (1 + Math.sin(i / 3) / 20),
+        }));
+        found.returns = {
+          daily: (yearlyReturn / 365).toFixed(3),
+          weekly: (yearlyReturn / 52).toFixed(2),
+          monthly: (yearlyReturn / 12).toFixed(1),
+          yearly: yearlyReturn.toFixed(1),
+        };
+        setStrategy(found);
+      }
+    } catch (err) {
+      console.error("Failed to fetch strategy:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="container py-16 text-center">
+        <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto"></div>
+        <p className="mt-4 text-gray-600">Loading strategy...</p>
+      </div>
+    );
+  }
 
   if (!strategy) {
     return (
