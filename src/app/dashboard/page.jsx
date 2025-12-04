@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthProvider";
+import { useLanguage } from "@/context/LanguageContext";
 import { apiFetch } from "@/lib/api";
 import {
   ResponsiveContainer,
@@ -20,8 +21,42 @@ import Link from "next/link";
 
 export default function Dashboard() {
   const { user, loading: authLoading } = useAuth();
+  const { language } = useLanguage();
   const router = useRouter();
   
+  // Translations
+  const t = {
+    title: language === "uk" ? "Панель управління" : "Dashboard",
+    welcome: language === "uk" ? "З поверненням" : "Welcome back",
+    portfolioValue: language === "uk" ? "Вартість портфеля" : "Portfolio Value",
+    todayPnL: language === "uk" ? "Сьогоднішній P&L" : "Today's P&L",
+    activeStrategies: language === "uk" ? "Активних стратегій" : "Active Strategies",
+    totalTrades: language === "uk" ? "Всього угод" : "Total Trades",
+    myStrategies: language === "uk" ? "Мої стратегії" : "My Strategies",
+    savedStrategies: language === "uk" ? "Збережені стратегії" : "Saved Strategies",
+    runningStrategies: language === "uk" ? "Запущені стратегії" : "Running Strategies",
+    recentBacktests: language === "uk" ? "Останні бектести" : "Recent Backtests",
+    noStrategies: language === "uk" ? "Немає збережених стратегій" : "No saved strategies yet",
+    createNew: language === "uk" ? "Створити нову стратегію" : "Create your first strategy",
+    goToBacktest: language === "uk" ? "Перейти до бектестера" : "Go to Backtester",
+    start: language === "uk" ? "Запустити" : "Start",
+    stop: language === "uk" ? "Зупинити" : "Stop",
+    delete: language === "uk" ? "Видалити" : "Delete",
+    running: language === "uk" ? "Працює" : "Running",
+    profit: language === "uk" ? "Прибуток" : "Profit",
+    trades: language === "uk" ? "Угод" : "Trades",
+    sharpe: language === "uk" ? "Шарп" : "Sharpe",
+    loading: language === "uk" ? "Завантаження..." : "Loading...",
+    noRunning: language === "uk" ? "Немає запущених стратегій" : "No running strategies",
+    noBacktests: language === "uk" ? "Немає бектестів" : "No backtests yet",
+    connectExchange: language === "uk" ? "Підключити біржу" : "Connect Exchange",
+    viewDetails: language === "uk" ? "Детальніше" : "View Details",
+    performance: language === "uk" ? "Показники" : "Performance",
+    quickActions: language === "uk" ? "Швидкі дії" : "Quick Actions",
+    newBacktest: language === "uk" ? "Новий бектест" : "New Backtest",
+    browseStrategies: language === "uk" ? "Переглянути стратегії" : "Browse Strategies",
+  };
+
   const [strategies, setStrategies] = useState([]);
   const [runningStrategies, setRunningStrategies] = useState([]);
   const [backtestResults, setBacktestResults] = useState([]);
@@ -111,7 +146,7 @@ export default function Dashboard() {
     return (
       <div className="container py-16 text-center">
         <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto"></div>
-        <p className="mt-4 text-gray-600">Loading dashboard...</p>
+        <p className="mt-4 text-gray-600">{t.loading}</p>
       </div>
     );
   }
@@ -131,17 +166,17 @@ export default function Dashboard() {
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold">Dashboard</h1>
-          <p className="text-gray-600">Welcome back, {user.name || user.email}</p>
+          <h1 className="text-3xl font-bold">{t.title}</h1>
+          <p className="text-gray-600">{t.welcome}, {user.name || user.email}</p>
         </div>
         <div className="flex gap-3">
           <Link href="/connect">
             <Button variant="outline">
-              {exchangeConnected ? "✓ Exchange Connected" : "Connect Exchange"}
+              {exchangeConnected ? "✓" : ""} {t.connectExchange}
             </Button>
           </Link>
           <Link href="/backtest">
-            <Button>New Strategy</Button>
+            <Button>{t.newBacktest}</Button>
           </Link>
         </div>
       </div>
@@ -150,13 +185,13 @@ export default function Dashboard() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         <Card>
           <CardContent className="pt-6">
-            <p className="text-sm text-gray-500">Active Strategies</p>
+            <p className="text-sm text-gray-500">{t.activeStrategies}</p>
             <p className="text-3xl font-bold">{runningStrategies.length}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <p className="text-sm text-gray-500">Total Profit</p>
+            <p className="text-sm text-gray-500">{t.profit}</p>
             <p className={`text-3xl font-bold ${totalProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
               ${totalProfit.toFixed(2)}
             </p>
@@ -164,13 +199,13 @@ export default function Dashboard() {
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <p className="text-sm text-gray-500">Total Trades</p>
+            <p className="text-sm text-gray-500">{t.totalTrades}</p>
             <p className="text-3xl font-bold">{totalTrades}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <p className="text-sm text-gray-500">Win Rate</p>
+            <p className="text-sm text-gray-500">{language === "uk" ? "Виграш" : "Win Rate"}</p>
             <p className="text-3xl font-bold">{winRate}%</p>
           </CardContent>
         </Card>
@@ -182,7 +217,7 @@ export default function Dashboard() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
-                <span>🚀 Running Strategies</span>
+                <span>🚀 {t.runningStrategies}</span>
                 <span className="text-sm font-normal text-gray-500">
                   {runningStrategies.length} active
                 </span>
@@ -191,9 +226,9 @@ export default function Dashboard() {
             <CardContent>
               {runningStrategies.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">
-                  <p className="mb-4">No strategies running</p>
+                  <p className="mb-4">{t.noRunning}</p>
                   <Link href="/backtest">
-                    <Button>Create Your First Strategy</Button>
+                    <Button>{t.newBacktest}</Button>
                   </Link>
                 </div>
               ) : (

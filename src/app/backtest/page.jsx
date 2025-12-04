@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { apiFetch } from "@/lib/api";
+import { useLanguage } from "@/context/LanguageContext";
 import {
   ResponsiveContainer,
   LineChart,
@@ -248,6 +249,7 @@ function ConditionBuilder({ condition, onChange, onRemove }) {
 }
 
 export default function BacktestPage() {
+  const { t } = useLanguage();
   const [strategyName, setStrategyName] = useState("My Strategy");
   const [selectedPairs, setSelectedPairs] = useState(["BTC/USDT", "ETH/USDT", "SOL/USDT"]);
   const [maxActiveDeals, setMaxActiveDeals] = useState(5);
@@ -558,8 +560,8 @@ export default function BacktestPage() {
     <div className="container py-8">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-bold">Strategy Backtest</h1>
-          <p className="text-gray-600 mt-1">Build, test, and optimize your trading strategies</p>
+          <h1 className="text-3xl font-bold">{t("backtest.title")}</h1>
+          <p className="text-gray-600 mt-1">{t("backtest.subtitle")}</p>
         </div>
       </div>
 
@@ -569,12 +571,12 @@ export default function BacktestPage() {
           {/* Basic Settings */}
           <Card>
             <CardHeader>
-              <CardTitle>Strategy Settings</CardTitle>
+              <CardTitle>{t("backtest.strategySettings")}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium block mb-1">Strategy Name</label>
+                  <label className="text-sm font-medium block mb-1">{t("backtest.strategyName")}</label>
                   <Input
                     value={strategyName}
                     onChange={(e) => setStrategyName(e.target.value)}
@@ -582,7 +584,7 @@ export default function BacktestPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium block mb-1">Max Active Deals</label>
+                  <label className="text-sm font-medium block mb-1">{t("backtest.maxActiveDeals")}</label>
                   <Input
                     type="number"
                     value={maxActiveDeals}
@@ -592,7 +594,7 @@ export default function BacktestPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium block mb-1">Initial Balance ($)</label>
+                  <label className="text-sm font-medium block mb-1">{t("backtest.initialBalance")}</label>
                   <Input
                     type="number"
                     value={initialBalance}
@@ -600,7 +602,7 @@ export default function BacktestPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium block mb-1">Base Order Size ($)</label>
+                  <label className="text-sm font-medium block mb-1">{t("backtest.baseOrderSize")}</label>
                   <Input
                     type="number"
                     value={baseOrderSize}
@@ -608,7 +610,7 @@ export default function BacktestPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium block mb-1">Start Date</label>
+                  <label className="text-sm font-medium block mb-1">{t("backtest.startDate")}</label>
                   <Input
                     type="date"
                     value={startDate}
@@ -616,7 +618,7 @@ export default function BacktestPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium block mb-1">End Date</label>
+                  <label className="text-sm font-medium block mb-1">{t("backtest.endDate")}</label>
                   <Input
                     type="date"
                     value={endDate}
@@ -626,7 +628,7 @@ export default function BacktestPage() {
               </div>
 
               <div className="mt-4">
-                <label className="text-sm font-medium block mb-2">Trading Pairs</label>
+                <label className="text-sm font-medium block mb-2">{t("backtest.tradingPairs")}</label>
                 <div className="flex flex-wrap gap-2">
                   {PAIRS.map((pair) => (
                     <button
@@ -655,12 +657,12 @@ export default function BacktestPage() {
           {/* Risk Management */}
           <Card>
             <CardHeader>
-              <CardTitle>Risk Management</CardTitle>
+              <CardTitle>{t("backtest.riskManagement")}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium block mb-1">Take Profit (%)</label>
+                  <label className="text-sm font-medium block mb-1">{t("backtest.takeProfit")}</label>
                   <Input
                     type="number"
                     value={takeProfit}
@@ -668,10 +670,10 @@ export default function BacktestPage() {
                     min={0.1}
                     step={0.1}
                   />
-                  <p className="text-xs text-gray-500 mt-1">Close position at this profit %</p>
+                  <p className="text-xs text-gray-500 mt-1">{t("backtest.takeProfitDesc")}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium block mb-1">Stop Loss (%)</label>
+                  <label className="text-sm font-medium block mb-1">{t("backtest.stopLoss")}</label>
                   <Input
                     type="number"
                     value={stopLoss}
@@ -679,7 +681,7 @@ export default function BacktestPage() {
                     min={0.1}
                     step={0.1}
                   />
-                  <p className="text-xs text-gray-500 mt-1">Close position at this loss %</p>
+                  <p className="text-xs text-gray-500 mt-1">{t("backtest.stopLossDesc")}</p>
                 </div>
                 <div className="md:col-span-2">
                   <div className="flex items-center gap-3">
@@ -689,7 +691,7 @@ export default function BacktestPage() {
                       onChange={(e) => setTrailingStop(e.target.checked)}
                       className="rounded"
                     />
-                    <label className="text-sm font-medium">Enable Trailing Stop</label>
+                    <label className="text-sm font-medium">{t("backtest.enableTrailingStop")}</label>
                     {trailingStop && (
                       <Input
                         type="number"
@@ -711,7 +713,7 @@ export default function BacktestPage() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
-                <span>Safety Orders (DCA)</span>
+                <span>{t("backtest.safetyOrders")}</span>
                 <button
                   onClick={() => setUseSafetyOrders(!useSafetyOrders)}
                   className={`w-12 h-6 rounded-full transition ${
@@ -730,7 +732,7 @@ export default function BacktestPage() {
               <CardContent>
                 <div className="grid md:grid-cols-3 gap-4">
                   <div>
-                    <label className="text-sm font-medium block mb-1">Number of Safety Orders</label>
+                    <label className="text-sm font-medium block mb-1">{t("backtest.numSafetyOrders")}</label>
                     <Input
                       type="number"
                       value={safetyOrdersCount}
@@ -740,7 +742,7 @@ export default function BacktestPage() {
                     />
                   </div>
                   <div>
-                    <label className="text-sm font-medium block mb-1">Price Deviation (%)</label>
+                    <label className="text-sm font-medium block mb-1">{t("backtest.priceDeviation")}</label>
                     <Input
                       type="number"
                       value={safetyOrderDeviation}
@@ -748,10 +750,10 @@ export default function BacktestPage() {
                       min={0.5}
                       step={0.5}
                     />
-                    <p className="text-xs text-gray-500 mt-1">Drop % to trigger each SO</p>
+                    <p className="text-xs text-gray-500 mt-1">{t("backtest.priceDeviationDesc")}</p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium block mb-1">Volume Scale</label>
+                    <label className="text-sm font-medium block mb-1">{t("backtest.volumeScale")}</label>
                     <Input
                       type="number"
                       value={safetyOrderVolumeScale}
@@ -759,7 +761,7 @@ export default function BacktestPage() {
                       min={1}
                       step={0.1}
                     />
-                    <p className="text-xs text-gray-500 mt-1">Multiply each SO size</p>
+                    <p className="text-xs text-gray-500 mt-1">{t("backtest.volumeScaleDesc")}</p>
                   </div>
                 </div>
                 <div className="mt-3 p-3 bg-blue-50 rounded-lg text-sm text-blue-700">
@@ -775,9 +777,9 @@ export default function BacktestPage() {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="font-medium">Use Market State Conditions</h3>
+                  <h3 className="font-medium">{t("backtest.marketStateConditions")}</h3>
                   <p className="text-sm text-gray-500">
-                    Enable separate bullish/bearish conditions based on BTC market state
+                    {t("backtest.marketStateDesc")}
                   </p>
                 </div>
                 <button
@@ -801,9 +803,9 @@ export default function BacktestPage() {
             <>
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
-                  <CardTitle className="text-green-600">Entry Conditions</CardTitle>
+                  <CardTitle className="text-green-600">{t("backtest.entryConditions")}</CardTitle>
                   <Button size="sm" variant="outline" onClick={() => addCondition("entry")}>
-                    + Add Condition
+                    {t("backtest.addCondition")}
                   </Button>
                 </CardHeader>
                 <CardContent className="space-y-3">
@@ -821,7 +823,7 @@ export default function BacktestPage() {
                   ))}
                   {entryConditions.length === 0 && (
                     <p className="text-gray-500 text-sm text-center py-4">
-                      No entry conditions. Add one to start.
+                      {t("backtest.noEntryConditions")}
                     </p>
                   )}
                 </CardContent>
@@ -829,9 +831,9 @@ export default function BacktestPage() {
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
-                  <CardTitle className="text-red-600">Exit Conditions</CardTitle>
+                  <CardTitle className="text-red-600">{t("backtest.exitConditions")}</CardTitle>
                   <Button size="sm" variant="outline" onClick={() => addCondition("exit")}>
-                    + Add Condition
+                    {t("backtest.addCondition")}
                   </Button>
                 </CardHeader>
                 <CardContent className="space-y-3">
@@ -849,7 +851,7 @@ export default function BacktestPage() {
                   ))}
                   {exitConditions.length === 0 && (
                     <p className="text-gray-500 text-sm text-center py-4">
-                      No exit conditions. Add one to complete your strategy.
+                      {t("backtest.noExitConditions")}
                     </p>
                   )}
                 </CardContent>
@@ -973,10 +975,10 @@ export default function BacktestPage() {
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                Running Backtest...
+                {t("backtest.runningBacktest")}
               </>
             ) : (
-              "🚀 Run Backtest"
+              t("backtest.runBacktest")
             )}
           </Button>
 
@@ -996,15 +998,15 @@ export default function BacktestPage() {
                 <CardContent className="pt-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="font-bold text-lg">Like these results?</h3>
-                      <p className="text-blue-100 text-sm">Save this strategy to run it live</p>
+                      <h3 className="font-bold text-lg">{t("backtest.likeResults")}</h3>
+                      <p className="text-blue-100 text-sm">{t("backtest.saveToRunLive")}</p>
                     </div>
                     <Button
                       onClick={saveStrategy}
                       disabled={saving || saved}
                       className="bg-white text-blue-600 hover:bg-blue-50"
                     >
-                      {saving ? "Saving..." : saved ? "✓ Saved!" : "💾 Save Strategy"}
+                      {saving ? t("backtest.saving") : saved ? t("backtest.saved") : t("backtest.saveStrategy")}
                     </Button>
                   </div>
                   {saved && (
@@ -1039,41 +1041,41 @@ export default function BacktestPage() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Performance Metrics</CardTitle>
+                  <CardTitle>{t("backtest.performanceMetrics")}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="bg-green-50 rounded-lg p-3">
-                      <p className="text-xs text-green-600 font-medium">Net Profit</p>
+                      <p className="text-xs text-green-600 font-medium">{t("backtest.netProfit")}</p>
                       <p className="text-xl font-bold text-green-700">{results.metrics?.net_profit}%</p>
                       <p className="text-sm text-green-600">{results.metrics?.net_profit_usd}</p>
                     </div>
                     <div className="bg-red-50 rounded-lg p-3">
-                      <p className="text-xs text-red-600 font-medium">Max Drawdown</p>
+                      <p className="text-xs text-red-600 font-medium">{t("backtest.maxDrawdown")}</p>
                       <p className="text-xl font-bold text-red-700">{results.metrics?.max_drawdown}%</p>
                     </div>
                     <div className="bg-blue-50 rounded-lg p-3">
-                      <p className="text-xs text-blue-600 font-medium">Sharpe Ratio</p>
+                      <p className="text-xs text-blue-600 font-medium">{t("strategies.sharpeRatio")}</p>
                       <p className="text-xl font-bold text-blue-700">{results.metrics?.sharpe_ratio}</p>
                     </div>
                     <div className="bg-purple-50 rounded-lg p-3">
-                      <p className="text-xs text-purple-600 font-medium">Win Rate</p>
+                      <p className="text-xs text-purple-600 font-medium">{t("strategies.winRate")}</p>
                       <p className="text-xl font-bold text-purple-700">{results.metrics?.win_rate}%</p>
                     </div>
                     <div className="bg-gray-50 rounded-lg p-3">
-                      <p className="text-xs text-gray-600 font-medium">Total Trades</p>
+                      <p className="text-xs text-gray-600 font-medium">{t("backtest.totalTrades")}</p>
                       <p className="text-xl font-bold">{results.metrics?.total_trades}</p>
                     </div>
                     <div className="bg-yellow-50 rounded-lg p-3">
-                      <p className="text-xs text-yellow-600 font-medium">Profit Factor</p>
+                      <p className="text-xs text-yellow-600 font-medium">{t("backtest.profitFactor")}</p>
                       <p className="text-xl font-bold text-yellow-700">{results.metrics?.profit_factor}</p>
                     </div>
                     <div className="bg-indigo-50 rounded-lg p-3">
-                      <p className="text-xs text-indigo-600 font-medium">Sortino Ratio</p>
+                      <p className="text-xs text-indigo-600 font-medium">{t("backtest.sortinoRatio")}</p>
                       <p className="text-xl font-bold text-indigo-700">{results.metrics?.sortino_ratio}</p>
                     </div>
                     <div className="bg-teal-50 rounded-lg p-3">
-                      <p className="text-xs text-teal-600 font-medium">Yearly Return</p>
+                      <p className="text-xs text-teal-600 font-medium">{t("backtest.yearlyReturn")}</p>
                       <p className="text-xl font-bold text-teal-700">{results.metrics?.yearly_return}%</p>
                     </div>
                   </div>
@@ -1084,7 +1086,7 @@ export default function BacktestPage() {
               {results.chartData && (
                 <Card>
                   <CardHeader>
-                    <CardTitle>Equity Curve</CardTitle>
+                    <CardTitle>{t("backtest.equityCurve")}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="h-64">
@@ -1117,7 +1119,7 @@ export default function BacktestPage() {
               {results.chartData && (
                 <Card>
                   <CardHeader>
-                    <CardTitle>Drawdown</CardTitle>
+                    <CardTitle>{t("backtest.drawdown")}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="h-48">
@@ -1151,9 +1153,9 @@ export default function BacktestPage() {
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center justify-between">
-                      <span>Trade History ({results.trades.length} trades)</span>
+                      <span>{t("backtest.tradeHistory")} ({results.trades.length})</span>
                       <span className="text-xs font-normal text-gray-500">
-                        Full transparency with indicator proof
+                        {t("backtest.transparency")}
                       </span>
                     </CardTitle>
                   </CardHeader>
@@ -1246,9 +1248,9 @@ export default function BacktestPage() {
             <Card>
               <CardContent className="py-12 text-center">
                 <div className="text-6xl mb-4">📊</div>
-                <h3 className="font-medium text-lg mb-2">No Results Yet</h3>
+                <h3 className="font-medium text-lg mb-2">{t("backtest.noResultsYet")}</h3>
                 <p className="text-gray-500 text-sm">
-                  Configure your strategy and run a backtest to see results here.
+                  {t("backtest.configureToSee")}
                 </p>
               </CardContent>
             </Card>

@@ -39,13 +39,14 @@ export default function Page() {
   const [loading, setLoading] = useState(true);
   const [chartData] = useState(generateEquityCurve);
 
-  // Testimonials data - using initials for now, can add images later
+  // Testimonials data with real photos
   const testimonials = [
     {
       id: 1,
       name: "Олег К.",
       role: language === "uk" ? "Активний трейдер" : "Active Trader",
       initials: "ОК",
+      image: "/testimonials/oleg.jpg",
       gradient: "from-blue-500 to-cyan-500",
       rating: 5,
       text: t("testimonialContent.oleg"),
@@ -55,6 +56,7 @@ export default function Page() {
       name: "Назар Г.",
       role: language === "uk" ? "Криптоінвестор" : "Crypto Investor",
       initials: "НГ",
+      image: "/testimonials/nazar.jpg",
       gradient: "from-purple-500 to-pink-500",
       rating: 5,
       text: t("testimonialContent.nazar"),
@@ -325,7 +327,22 @@ export default function Page() {
                 </p>
 
                 <div className="flex items-center gap-3 pt-4 border-t border-gray-100">
-                  <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${testimonial.gradient} flex items-center justify-center text-white font-semibold flex-shrink-0 shadow-lg`}>
+                  {testimonial.image ? (
+                    <img 
+                      src={testimonial.image} 
+                      alt={testimonial.name}
+                      className="w-12 h-12 rounded-full object-cover flex-shrink-0 shadow-lg"
+                      onError={(e) => {
+                        // Hide the image and show initials fallback
+                        e.target.style.display = 'none';
+                        e.target.nextElementSibling.style.display = 'flex';
+                      }}
+                    />
+                  ) : null}
+                  <div 
+                    className={`w-12 h-12 rounded-full bg-gradient-to-br ${testimonial.gradient} flex items-center justify-center text-white font-semibold flex-shrink-0 shadow-lg`}
+                    style={{ display: testimonial.image ? 'none' : 'flex' }}
+                  >
                     {testimonial.initials}
                   </div>
                   <div>
