@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import { useAuth } from "@/context/AuthProvider";
 import { supabase } from "@/lib/supabase";
 import { apiFetch } from "@/lib/api";
@@ -162,7 +162,7 @@ function StatCard({ icon: Icon, label, value, subtext, color = "blue" }) {
   );
 }
 
-export default function AccountPage() {
+function AccountPageContent() {
   const { user } = useAuth();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(true);
@@ -717,5 +717,20 @@ export default function AccountPage() {
         )}
       </div>
     </div>
+  );
+}
+
+// Wrap with Suspense for useSearchParams
+export default function AccountPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white flex items-center justify-center">
+          <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full"></div>
+        </div>
+      }
+    >
+      <AccountPageContent />
+    </Suspense>
   );
 }
