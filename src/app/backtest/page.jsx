@@ -398,8 +398,8 @@ export default function BacktestPage() {
         (t.profit_usd || t.pnl_usd || 0).toFixed(2),
         (t.equity || t.balance || 0).toFixed(2),
         (t.drawdown || 0).toFixed(2),
-        `"${(t.reason || t.comment || t.trigger || '').replace(/"/g, "'')}"`,
-        `"${(t.indicatorProof || []).map(p => `${p.indicator}: ${p.value} ${p.condition} ${p.target}`).join('; ')}"`
+        '"' + (t.reason || t.comment || t.trigger || '').replace(/"/g, "'") + '"',
+        '"' + (t.indicatorProof || []).map(function(p) { return p.indicator + ': ' + p.value + ' ' + p.condition + ' ' + p.target; }).join('; ') + '"'
       ];
     });
     
@@ -569,28 +569,13 @@ export default function BacktestPage() {
           </tbody>
         </table>
         
-        ${results.trades.some(t => t.indicatorProof?.length > 0) ? `
-        <div class="indicator-proof">
-          <h3>Indicator Proof (Sample from first trades)</h3>
-          <p style="font-size: 11px; color: #666; margin-bottom: 10px;">
-            Each trade shows the exact indicator values that triggered the signal:
-          </p>
-          ${results.trades.slice(0, 5).filter(t => t.indicatorProof?.length > 0).map(t => `
-            <div style="background: white; padding: 10px; margin: 5px 0; border-radius: 4px; font-size: 11px;">
-              <strong>${t.symbol} ${t.action}</strong> @ $${t.price?.toFixed(2)} - 
-              ${t.indicatorProof.map(p => `${p.indicator}: ${p.value} ${p.condition} ${p.target}${p.triggered ? ' ✓' : ''}`).join(' | ')}
-            </div>
-          `).join('')}
-        </div>
-        ` : `
         <div class="indicator-proof">
           <h3>Indicator-Based Trading</h3>
           <p style="font-size: 11px; color: #666;">
-            All trades were executed based on technical indicator conditions. 
+            All trades were executed based on technical indicator conditions configured in your strategy.
             The backtest uses real historical price data from Binance to ensure accuracy.
           </p>
         </div>
-        `}
         
         <div class="footer">
           <p>© ${new Date().getFullYear()} Algotcha. All rights reserved.</p>
