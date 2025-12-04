@@ -4,10 +4,37 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Hero from "@/app/hero";
 import { apiFetch } from "@/lib/api";
+import {
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  Tooltip,
+} from "recharts";
+
+// Generate sample equity curve data
+const generateEquityCurve = () => {
+  const data = [];
+  let value = 10000;
+  for (let i = 0; i < 365; i++) {
+    const dailyReturn = 0.002 + Math.random() * 0.008 - 0.003; // ~0.5% avg daily
+    value = value * (1 + dailyReturn);
+    if (i % 7 === 0) { // Weekly data points
+      data.push({
+        week: Math.floor(i / 7),
+        value: Math.round(value),
+        label: `Week ${Math.floor(i / 7)}`,
+      });
+    }
+  }
+  return data;
+};
 
 export default function Page() {
   const [strategies, setStrategies] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [chartData] = useState(generateEquityCurve);
 
   useEffect(() => {
     fetchStrategies();
@@ -29,11 +56,58 @@ export default function Page() {
       <section className="container pt-16 pb-12 grid lg:grid-cols-2 gap-10 items-center">
         <Hero />
         <div className="bg-white p-6 rounded-2xl shadow-soft border border-gray-100">
-          <img
-            src="https://dummyimage.com/800x480/edf2f7/1a202c&text=Performance+Overview"
-            alt="preview"
-            className="rounded-xl w-full"
-          />
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold text-gray-700">Sample Portfolio Growth</h3>
+            <span className="text-green-600 text-sm font-medium">+127% yearly</span>
+          </div>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={chartData}>
+                <defs>
+                  <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#2563eb" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#2563eb" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <XAxis dataKey="week" hide />
+                <YAxis 
+                  hide 
+                  domain={['dataMin - 1000', 'dataMax + 1000']} 
+                />
+                <Tooltip 
+                  formatter={(value) => [`$${value.toLocaleString()}`, 'Portfolio']}
+                  labelFormatter={(label) => `Week ${label}`}
+                  contentStyle={{ 
+                    borderRadius: '8px', 
+                    border: '1px solid #e5e7eb',
+                    boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
+                  }}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="value"
+                  stroke="#2563eb"
+                  strokeWidth={2}
+                  fillOpacity={1}
+                  fill="url(#colorValue)"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="mt-4 grid grid-cols-3 gap-4 text-center text-sm">
+            <div className="p-2 bg-gray-50 rounded-lg">
+              <div className="text-gray-500">Starting</div>
+              <div className="font-semibold">$10,000</div>
+            </div>
+            <div className="p-2 bg-gray-50 rounded-lg">
+              <div className="text-gray-500">Final</div>
+              <div className="font-semibold text-green-600">$22,700</div>
+            </div>
+            <div className="p-2 bg-gray-50 rounded-lg">
+              <div className="text-gray-500">Max DD</div>
+              <div className="font-semibold text-red-600">-12%</div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -85,6 +159,117 @@ export default function Page() {
 
         <div className="mt-6 p-4 bg-blue-50 border border-blue-100 rounded-lg text-sm text-blue-800">
           📊 All metrics are calculated from real historical market data and updated hourly.
+        </div>
+      </section>
+
+      {/* How it Works */}
+      <section className="bg-gray-50 py-16">
+        <div className="container">
+          <h2 className="text-3xl font-bold text-center mb-4">How It Works</h2>
+          <p className="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
+            Start automated trading in 3 simple steps. No coding required.
+          </p>
+          
+          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4">
+                1️⃣
+              </div>
+              <h3 className="font-semibold text-lg mb-2">Choose a Strategy</h3>
+              <p className="text-gray-600 text-sm">
+                Browse our curated strategies with real performance data, or build your own using our visual backtester.
+              </p>
+            </div>
+            
+            <div className="text-center">
+              <div className="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4">
+                2️⃣
+              </div>
+              <h3 className="font-semibold text-lg mb-2">Connect Exchange</h3>
+              <p className="text-gray-600 text-sm">
+                Link your Binance, Bybit, or OKX account with API keys. We only need trading permissions, never withdrawals.
+              </p>
+            </div>
+            
+            <div className="text-center">
+              <div className="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4">
+                3️⃣
+              </div>
+              <h3 className="font-semibold text-lg mb-2">Start Trading</h3>
+              <p className="text-gray-600 text-sm">
+                Activate your strategy and let it trade 24/7. Monitor performance in real-time from your dashboard.
+              </p>
+            </div>
+          </div>
+
+          <div className="text-center mt-10">
+            <Link href="/auth?mode=signup">
+              <button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium transition">
+                Get Started Free →
+              </button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Why Algotcha */}
+      <section className="container py-16">
+        <h2 className="text-3xl font-bold text-center mb-12">Why Algotcha?</h2>
+        
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="p-6 bg-white rounded-2xl border border-gray-100 shadow-soft">
+            <div className="text-3xl mb-3">📊</div>
+            <h3 className="font-semibold mb-2">Real Data</h3>
+            <p className="text-sm text-gray-600">
+              5 years of minute-by-minute historical data. No fake backtests.
+            </p>
+          </div>
+          
+          <div className="p-6 bg-white rounded-2xl border border-gray-100 shadow-soft">
+            <div className="text-3xl mb-3">🔒</div>
+            <h3 className="font-semibold mb-2">Secure</h3>
+            <p className="text-sm text-gray-600">
+              Your API keys are encrypted. Trading only — never withdrawals.
+            </p>
+          </div>
+          
+          <div className="p-6 bg-white rounded-2xl border border-gray-100 shadow-soft">
+            <div className="text-3xl mb-3">⚡</div>
+            <h3 className="font-semibold mb-2">Fast Execution</h3>
+            <p className="text-sm text-gray-600">
+              Dedicated trading server with static IP for reliable order execution.
+            </p>
+          </div>
+          
+          <div className="p-6 bg-white rounded-2xl border border-gray-100 shadow-soft">
+            <div className="text-3xl mb-3">🎯</div>
+            <h3 className="font-semibold mb-2">Transparent</h3>
+            <p className="text-sm text-gray-600">
+              See every trade with indicator proof. No black box algorithms.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="bg-gradient-to-r from-blue-600 to-blue-700 py-16">
+        <div className="container text-center text-white">
+          <h2 className="text-3xl font-bold mb-4">Ready to automate your trading?</h2>
+          <p className="text-blue-100 mb-8 max-w-xl mx-auto">
+            Join thousands of traders using algorithmic strategies to grow their portfolios.
+          </p>
+          <div className="flex gap-4 justify-center flex-wrap">
+            <Link href="/auth?mode=signup">
+              <button className="bg-white text-blue-600 px-8 py-3 rounded-lg font-medium hover:bg-blue-50 transition">
+                Create Free Account
+              </button>
+            </Link>
+            <Link href="/strategies">
+              <button className="border-2 border-white text-white px-8 py-3 rounded-lg font-medium hover:bg-white/10 transition">
+                View Strategies
+              </button>
+            </Link>
+          </div>
         </div>
       </section>
     </div>

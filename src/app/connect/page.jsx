@@ -337,6 +337,33 @@ export default function ConnectPage() {
           </ul>
         </div>
 
+        {/* IP Whitelisting Guide */}
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-8">
+          <h3 className="font-medium text-amber-800 flex items-center gap-2">
+            🌐 IP Whitelisting (Recommended)
+          </h3>
+          <p className="mt-2 text-sm text-amber-700">
+            For maximum security, whitelist our trading server IP on your exchange:
+          </p>
+          <div className="mt-3 flex items-center gap-3">
+            <code className="bg-white px-4 py-2 rounded border border-amber-300 font-mono text-lg">
+              46.224.99.27
+            </code>
+            <button 
+              onClick={() => {
+                navigator.clipboard.writeText("46.224.99.27");
+                alert("IP copied to clipboard!");
+              }}
+              className="text-sm text-amber-700 hover:text-amber-800 underline"
+            >
+              Copy
+            </button>
+          </div>
+          <p className="mt-3 text-xs text-amber-600">
+            This ensures only our server can execute trades with your API keys.
+          </p>
+        </div>
+
         {/* Exchange Cards */}
         <div className="grid md:grid-cols-2 gap-6 mb-8">
           {EXCHANGES.map((exchange) => (
