@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import Hero from "@/app/hero";
 import { apiFetch } from "@/lib/api";
+import { useLanguage } from "@/context/LanguageContext";
 import {
   ResponsiveContainer,
   AreaChart,
@@ -15,52 +16,14 @@ import {
 } from "recharts";
 import { Star, Quote } from "lucide-react";
 
-// Testimonials data
-const testimonials = [
-  {
-    id: 1,
-    name: "Олег К.",
-    role: "Активний трейдер",
-    image: "/testimonials/oleg.jpg",
-    rating: 5,
-    text: "Вже 3 місяці використовую Algotcha для автоматизації торгівлі. Результати вражають — стабільний прибуток без постійного моніторингу ринку. Рекомендую всім!",
-  },
-  {
-    id: 2,
-    name: "Назар Г.",
-    role: "Криптоінвестор",
-    image: "/testimonials/nazar.jpg",
-    rating: 5,
-    text: "Нарешті знайшов платформу, яка реально працює. Бектести на реальних даних — це те, що мене переконало. Тепер торгую без стресу.",
-  },
-  {
-    id: 3,
-    name: "Дмитро С.",
-    role: "Початківець",
-    image: null,
-    initials: "ДС",
-    rating: 5,
-    text: "Почав з нуля, без досвіду в трейдингу. Завдяки готовим стратегіям вже маю перші результати. Підтримка відповідає швидко і допомагає розібратися.",
-  },
-  {
-    id: 4,
-    name: "Каріна Г.",
-    role: "Фінансовий аналітик",
-    image: null,
-    initials: "КГ",
-    rating: 5,
-    text: "Як аналітик, ціную прозорість. Тут бачу кожну угоду з доказами по індикаторах. Жодних чорних ящиків — все чесно і зрозуміло.",
-  },
-];
-
 // Generate sample equity curve data
 const generateEquityCurve = () => {
   const data = [];
   let value = 10000;
   for (let i = 0; i < 365; i++) {
-    const dailyReturn = 0.002 + Math.random() * 0.008 - 0.003; // ~0.5% avg daily
+    const dailyReturn = 0.002 + Math.random() * 0.008 - 0.003;
     value = value * (1 + dailyReturn);
-    if (i % 7 === 0) { // Weekly data points
+    if (i % 7 === 0) {
       data.push({
         week: Math.floor(i / 7),
         value: Math.round(value),
@@ -72,9 +35,48 @@ const generateEquityCurve = () => {
 };
 
 export default function Page() {
+  const { t, language } = useLanguage();
   const [strategies, setStrategies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [chartData] = useState(generateEquityCurve);
+
+  // Testimonials data
+  const testimonials = [
+    {
+      id: 1,
+      name: "Олег К.",
+      role: language === "uk" ? "Активний трейдер" : "Active Trader",
+      image: "/testimonials/oleg.jpg",
+      rating: 5,
+      text: t("testimonialContent.oleg"),
+    },
+    {
+      id: 2,
+      name: "Назар Г.",
+      role: language === "uk" ? "Криптоінвестор" : "Crypto Investor",
+      image: "/testimonials/nazar.jpg",
+      rating: 5,
+      text: t("testimonialContent.nazar"),
+    },
+    {
+      id: 3,
+      name: "Дмитро С.",
+      role: language === "uk" ? "Початківець" : "Beginner",
+      image: null,
+      initials: "ДС",
+      rating: 5,
+      text: t("testimonialContent.dmytro"),
+    },
+    {
+      id: 4,
+      name: "Каріна Г.",
+      role: language === "uk" ? "Фінансовий аналітик" : "Financial Analyst",
+      image: null,
+      initials: "КГ",
+      rating: 5,
+      text: t("testimonialContent.karina"),
+    },
+  ];
 
   useEffect(() => {
     fetchStrategies();
@@ -83,7 +85,7 @@ export default function Page() {
   const fetchStrategies = async () => {
     try {
       const data = await apiFetch("/backtest/strategies");
-      setStrategies((data || []).slice(0, 6)); // Show top 6
+      setStrategies((data || []).slice(0, 6));
     } catch (err) {
       console.error("Failed to fetch strategies:", err);
     } finally {
@@ -97,8 +99,8 @@ export default function Page() {
         <Hero />
         <div className="bg-white p-6 rounded-2xl shadow-soft border border-gray-100">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-gray-700">Sample Portfolio Growth</h3>
-            <span className="text-green-600 text-sm font-medium">+127% yearly</span>
+            <h3 className="font-semibold text-gray-700">{t("landing.sampleGrowth")}</h3>
+            <span className="text-green-600 text-sm font-medium">+127% {t("landing.yearly")}</span>
           </div>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
@@ -136,15 +138,15 @@ export default function Page() {
           </div>
           <div className="mt-4 grid grid-cols-3 gap-4 text-center text-sm">
             <div className="p-2 bg-gray-50 rounded-lg">
-              <div className="text-gray-500">Starting</div>
+              <div className="text-gray-500">{t("landing.starting")}</div>
               <div className="font-semibold">$10,000</div>
             </div>
             <div className="p-2 bg-gray-50 rounded-lg">
-              <div className="text-gray-500">Final</div>
+              <div className="text-gray-500">{t("landing.final")}</div>
               <div className="font-semibold text-green-600">$22,700</div>
             </div>
             <div className="p-2 bg-gray-50 rounded-lg">
-              <div className="text-gray-500">Max DD</div>
+              <div className="text-gray-500">{t("landing.maxDD")}</div>
               <div className="font-semibold text-red-600">-12%</div>
             </div>
           </div>
@@ -153,9 +155,9 @@ export default function Page() {
 
       <section className="container py-12">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-semibold">Featured Strategies</h2>
+          <h2 className="text-2xl font-semibold">{t("landing.featuredStrategies")}</h2>
           <Link href="/strategies" className="text-blue-600 hover:underline">
-            View all →
+            {t("landing.viewAll")}
           </Link>
         </div>
 
@@ -179,11 +181,11 @@ export default function Page() {
                     <p className="text-sm text-gray-500">{s.category}</p>
                   </div>
                   <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full">
-                    Live
+                    {t("landing.live")}
                   </span>
                 </div>
                 <div className="mt-3 flex items-center gap-4 text-sm">
-                  <span className="text-green-600">⚡ +{s.cagr?.toFixed(1) || 0}%/yr</span>
+                  <span className="text-green-600">⚡ +{s.cagr?.toFixed(1) || 0}%{t("landing.yr")}</span>
                   <span className="text-red-600">📉 -{s.maxDD?.toFixed(1) || 0}%</span>
                   <span>📈 {s.sharpe?.toFixed(2) || 0}</span>
                 </div>
@@ -192,22 +194,22 @@ export default function Page() {
           </div>
         ) : (
           <div className="text-center py-8 text-gray-500">
-            <p>Loading strategies from real market data...</p>
-            <p className="text-sm mt-2">Please check back soon.</p>
+            <p>{t("landing.loadingStrategies")}</p>
+            <p className="text-sm mt-2">{t("landing.checkBackSoon")}</p>
           </div>
         )}
 
         <div className="mt-6 p-4 bg-blue-50 border border-blue-100 rounded-lg text-sm text-blue-800">
-          📊 All metrics are calculated from real historical market data and updated hourly.
+          {t("landing.metricsNote")}
         </div>
       </section>
 
       {/* How it Works */}
       <section className="bg-gray-50 py-16">
         <div className="container">
-          <h2 className="text-3xl font-bold text-center mb-4">How It Works</h2>
+          <h2 className="text-3xl font-bold text-center mb-4">{t("landing.howItWorks")}</h2>
           <p className="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
-            Start automated trading in 3 simple steps. No coding required.
+            {t("landing.howItWorksSubtitle")}
           </p>
           
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
@@ -215,9 +217,9 @@ export default function Page() {
               <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4">
                 1️⃣
               </div>
-              <h3 className="font-semibold text-lg mb-2">Choose a Strategy</h3>
+              <h3 className="font-semibold text-lg mb-2">{t("landing.step1Title")}</h3>
               <p className="text-gray-600 text-sm">
-                Browse our curated strategies with real performance data, or build your own using our visual backtester.
+                {t("landing.step1Text")}
               </p>
             </div>
             
@@ -225,9 +227,9 @@ export default function Page() {
               <div className="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4">
                 2️⃣
               </div>
-              <h3 className="font-semibold text-lg mb-2">Connect Exchange</h3>
+              <h3 className="font-semibold text-lg mb-2">{t("landing.step2Title")}</h3>
               <p className="text-gray-600 text-sm">
-                Link your Binance, Bybit, or OKX account with API keys. We only need trading permissions, never withdrawals.
+                {t("landing.step2Text")}
               </p>
             </div>
             
@@ -235,9 +237,9 @@ export default function Page() {
               <div className="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4">
                 3️⃣
               </div>
-              <h3 className="font-semibold text-lg mb-2">Start Trading</h3>
+              <h3 className="font-semibold text-lg mb-2">{t("landing.step3Title")}</h3>
               <p className="text-gray-600 text-sm">
-                Activate your strategy and let it trade 24/7. Monitor performance in real-time from your dashboard.
+                {t("landing.step3Text")}
               </p>
             </div>
           </div>
@@ -245,7 +247,7 @@ export default function Page() {
           <div className="text-center mt-10">
             <Link href="/auth?mode=signup">
               <button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium transition">
-                Get Started Free →
+                {t("landing.getStartedFree")}
               </button>
             </Link>
           </div>
@@ -254,38 +256,38 @@ export default function Page() {
 
       {/* Why Algotcha */}
       <section className="container py-16">
-        <h2 className="text-3xl font-bold text-center mb-12">Why Algotcha?</h2>
+        <h2 className="text-3xl font-bold text-center mb-12">{t("landing.whyAlgotcha")}</h2>
         
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div className="p-6 bg-white rounded-2xl border border-gray-100 shadow-soft">
             <div className="text-3xl mb-3">📊</div>
-            <h3 className="font-semibold mb-2">Real Data</h3>
+            <h3 className="font-semibold mb-2">{t("landing.realData")}</h3>
             <p className="text-sm text-gray-600">
-              5 years of minute-by-minute historical data. No fake backtests.
+              {t("landing.realDataText")}
             </p>
           </div>
           
           <div className="p-6 bg-white rounded-2xl border border-gray-100 shadow-soft">
             <div className="text-3xl mb-3">🔒</div>
-            <h3 className="font-semibold mb-2">Secure</h3>
+            <h3 className="font-semibold mb-2">{t("landing.secure")}</h3>
             <p className="text-sm text-gray-600">
-              Your API keys are encrypted. Trading only — never withdrawals.
+              {t("landing.secureText")}
             </p>
           </div>
           
           <div className="p-6 bg-white rounded-2xl border border-gray-100 shadow-soft">
             <div className="text-3xl mb-3">⚡</div>
-            <h3 className="font-semibold mb-2">Fast Execution</h3>
+            <h3 className="font-semibold mb-2">{t("landing.fastExecution")}</h3>
             <p className="text-sm text-gray-600">
-              Dedicated trading server with static IP for reliable order execution.
+              {t("landing.fastExecutionText")}
             </p>
           </div>
           
           <div className="p-6 bg-white rounded-2xl border border-gray-100 shadow-soft">
             <div className="text-3xl mb-3">🎯</div>
-            <h3 className="font-semibold mb-2">Transparent</h3>
+            <h3 className="font-semibold mb-2">{t("landing.transparent")}</h3>
             <p className="text-sm text-gray-600">
-              See every trade with indicator proof. No black box algorithms.
+              {t("landing.transparentText")}
             </p>
           </div>
         </div>
@@ -295,9 +297,9 @@ export default function Page() {
       <section className="bg-gradient-to-b from-gray-50 to-white py-20">
         <div className="container">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">Що кажуть наші користувачі</h2>
+            <h2 className="text-3xl font-bold mb-4">{t("landing.testimonials")}</h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
-              Реальні відгуки від трейдерів, які вже автоматизували свою торгівлю з Algotcha
+              {t("landing.testimonialsSubtitle")}
             </p>
           </div>
 
@@ -307,24 +309,20 @@ export default function Page() {
                 key={testimonial.id}
                 className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow relative"
               >
-                {/* Quote icon */}
                 <div className="absolute top-4 right-4 text-blue-100">
                   <Quote className="w-8 h-8" />
                 </div>
 
-                {/* Rating */}
                 <div className="flex gap-1 mb-4">
                   {[...Array(testimonial.rating)].map((_, i) => (
                     <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
                   ))}
                 </div>
 
-                {/* Text */}
                 <p className="text-gray-600 text-sm mb-6 leading-relaxed">
                   "{testimonial.text}"
                 </p>
 
-                {/* User */}
                 <div className="flex items-center gap-3 pt-4 border-t border-gray-100">
                   {testimonial.image ? (
                     <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
@@ -350,19 +348,18 @@ export default function Page() {
             ))}
           </div>
 
-          {/* Trust badges */}
           <div className="mt-12 flex flex-wrap items-center justify-center gap-8 text-gray-400">
             <div className="flex items-center gap-2">
               <span className="text-2xl">🔐</span>
-              <span className="text-sm">256-bit SSL</span>
+              <span className="text-sm">{t("landing.ssl")}</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-2xl">✅</span>
-              <span className="text-sm">Верифіковані відгуки</span>
+              <span className="text-sm">{t("landing.verifiedReviews")}</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-2xl">🇺🇦</span>
-              <span className="text-sm">Українська платформа</span>
+              <span className="text-sm">{t("landing.ukrainianPlatform")}</span>
             </div>
           </div>
         </div>
@@ -371,19 +368,19 @@ export default function Page() {
       {/* CTA */}
       <section className="bg-gradient-to-r from-blue-600 to-blue-700 py-16">
         <div className="container text-center text-white">
-          <h2 className="text-3xl font-bold mb-4">Ready to automate your trading?</h2>
+          <h2 className="text-3xl font-bold mb-4">{t("landing.readyToAutomate")}</h2>
           <p className="text-blue-100 mb-8 max-w-xl mx-auto">
-            Join thousands of traders using algorithmic strategies to grow their portfolios.
+            {t("landing.ctaSubtitle")}
           </p>
           <div className="flex gap-4 justify-center flex-wrap">
             <Link href="/auth?mode=signup">
               <button className="bg-white text-blue-600 px-8 py-3 rounded-lg font-medium hover:bg-blue-50 transition">
-                Create Free Account
+                {t("landing.createFreeAccount")}
               </button>
             </Link>
             <Link href="/strategies">
               <button className="border-2 border-white text-white px-8 py-3 rounded-lg font-medium hover:bg-white/10 transition">
-                View Strategies
+                {t("landing.viewStrategies")}
               </button>
             </Link>
           </div>

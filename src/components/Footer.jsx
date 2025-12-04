@@ -1,6 +1,11 @@
+"use client";
+
 import Link from 'next/link';
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function Footer() {
+  const { t, language } = useLanguage();
+
   return (
     <footer className='bg-gray-900 text-white mt-16'>
       {/* Main Footer */}
@@ -8,11 +13,14 @@ export default function Footer() {
         <div className='grid grid-cols-2 md:grid-cols-4 gap-8'>
           {/* Brand */}
           <div className='col-span-2 md:col-span-1'>
-            <Link href="/" className="text-xl font-bold">
+            <Link href="/" className="text-xl font-bold flex items-center gap-2">
+              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
+                <span className="text-white text-sm font-bold">A</span>
+              </div>
               Algotcha
             </Link>
             <p className='text-gray-400 text-sm mt-3 leading-relaxed'>
-              Algorithmic trading made simple. Automate your crypto strategies with real data and transparent performance.
+              {t("footer.description")}
             </p>
             {/* Social Links */}
             <div className='flex gap-4 mt-4'>
@@ -30,32 +38,32 @@ export default function Footer() {
 
           {/* Product */}
           <div>
-            <h4 className='font-semibold mb-4'>Product</h4>
+            <h4 className='font-semibold mb-4'>{t("footer.product")}</h4>
             <nav className='flex flex-col gap-2 text-sm text-gray-400'>
-              <Link href='/strategies' className='hover:text-white transition'>Strategies</Link>
-              <Link href='/backtest' className='hover:text-white transition'>Backtest</Link>
-              <Link href='/connect' className='hover:text-white transition'>Connect Exchange</Link>
-              <Link href='/pricing' className='hover:text-white transition'>Pricing</Link>
+              <Link href='/strategies' className='hover:text-white transition'>{t("nav.strategies")}</Link>
+              <Link href='/backtest' className='hover:text-white transition'>{t("nav.backtest")}</Link>
+              <Link href='/connect' className='hover:text-white transition'>{t("nav.connectExchange")}</Link>
+              <Link href='/pricing' className='hover:text-white transition'>{t("nav.pricing")}</Link>
             </nav>
           </div>
 
           {/* Company */}
           <div>
-            <h4 className='font-semibold mb-4'>Company</h4>
+            <h4 className='font-semibold mb-4'>{t("footer.company")}</h4>
             <nav className='flex flex-col gap-2 text-sm text-gray-400'>
-              <Link href='/about' className='hover:text-white transition'>About</Link>
-              <Link href='/faq' className='hover:text-white transition'>FAQ</Link>
-              <Link href='/support' className='hover:text-white transition'>Support</Link>
+              <Link href='/about' className='hover:text-white transition'>{t("footer.about")}</Link>
+              <Link href='/faq' className='hover:text-white transition'>{t("footer.faq")}</Link>
+              <Link href='/support' className='hover:text-white transition'>{t("footer.support")}</Link>
             </nav>
           </div>
 
           {/* Legal */}
           <div>
-            <h4 className='font-semibold mb-4'>Legal</h4>
+            <h4 className='font-semibold mb-4'>{t("footer.legal")}</h4>
             <nav className='flex flex-col gap-2 text-sm text-gray-400'>
-              <Link href='/legal#terms' className='hover:text-white transition'>Terms of Service</Link>
-              <Link href='/legal#privacy' className='hover:text-white transition'>Privacy Policy</Link>
-              <Link href='/legal#risk' className='hover:text-white transition'>Risk Disclosure</Link>
+              <Link href='/legal#terms' className='hover:text-white transition'>{t("footer.terms")}</Link>
+              <Link href='/legal#privacy' className='hover:text-white transition'>{t("footer.privacy")}</Link>
+              <Link href='/legal#risk' className='hover:text-white transition'>{t("footer.risk")}</Link>
             </nav>
           </div>
         </div>
@@ -64,15 +72,15 @@ export default function Footer() {
       {/* Bottom Bar */}
       <div className='border-t border-gray-800'>
         <div className='container py-6 flex flex-col md:flex-row gap-4 justify-between items-center text-sm text-gray-400'>
-          <p>© {new Date().getFullYear()} Algotcha. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Algotcha. {t("footer.allRightsReserved")}</p>
           <div className='flex gap-6'>
             <span className='flex items-center gap-2'>
               <span className='w-2 h-2 bg-green-500 rounded-full animate-pulse'></span>
-              All systems operational
+              {language === "uk" ? "Всі системи працюють" : "All systems operational"}
             </span>
           </div>
         </div>
       </div>
     </footer>
-  )
+  );
 }

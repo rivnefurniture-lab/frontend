@@ -6,8 +6,10 @@ import Metric from "@/components/Metric";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { apiFetch } from "@/lib/api";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function Hero() {
+  const { t, language } = useLanguage();
   const [metrics, setMetrics] = useState({
     strategies: "...",
     avgSharpe: "...",
@@ -43,27 +45,35 @@ export default function Hero() {
         transition={{ duration: 0.5 }}
         className="text-4xl md:text-5xl font-bold leading-tight"
       >
-        Automate your{" "}
-        <span className="text-blue-600">crypto trading</span>
+        {t("hero.title")}{" "}
+        <span className="text-blue-600">{t("hero.titleHighlight")}</span>
       </motion.h1>
       <p className="mt-4 text-gray-600 max-w-xl">
-        Copy proven trading strategies or build your own. Real-time backtesting 
-        on 5 years of data. Connect your exchange and let algorithms trade 24/7.
+        {t("hero.subtitle")}
       </p>
       <div className="mt-6 flex gap-3 flex-wrap">
         <Link href="/strategies">
-          <Button size="lg">Explore Strategies</Button>
+          <Button size="lg">{t("hero.ctaSecondary")}</Button>
         </Link>
         <Link href="/backtest">
           <Button size="lg" variant="secondary">
-            Build Your Own
+            {language === "uk" ? "Створити власну" : "Build Your Own"}
           </Button>
         </Link>
       </div>
       <div className="mt-8 grid grid-cols-3 gap-4">
-        <Metric label="Strategies" value={metrics.strategies} />
-        <Metric label="Avg. Sharpe" value={metrics.avgSharpe} />
-        <Metric label="Best Return/yr" value={metrics.bestReturn} />
+        <Metric 
+          label={language === "uk" ? "Стратегій" : "Strategies"} 
+          value={metrics.strategies} 
+        />
+        <Metric 
+          label={language === "uk" ? "Сер. Sharpe" : "Avg. Sharpe"} 
+          value={metrics.avgSharpe} 
+        />
+        <Metric 
+          label={language === "uk" ? "Найкращий ROI" : "Best Return/yr"} 
+          value={metrics.bestReturn} 
+        />
       </div>
     </div>
   );

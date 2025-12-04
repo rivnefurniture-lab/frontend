@@ -14,24 +14,70 @@ import {
   Target, 
   ChevronDown,
   Zap,
-  CreditCard
+  CreditCard,
+  Globe
 } from "lucide-react";
 import { useAuth } from "@/context/AuthProvider";
+import { useLanguage } from "@/context/LanguageContext";
 import { useState, useRef, useEffect } from "react";
 
-const nav = [
-  { to: "/dashboard", label: "Dashboard" },
-  { to: "/strategies", label: "Strategies" },
-  { to: "/backtest", label: "Backtest" },
-  { to: "/connect", label: "Connect" },
-  { to: "/pricing", label: "Pricing" },
-];
+function LanguageSwitcher() {
+  const { language, setLang } = useLanguage();
+  const [isOpen, setIsOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (ref.current && !ref.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg hover:bg-gray-100 transition-colors text-sm font-medium text-gray-700"
+      >
+        <Globe className="w-4 h-4" />
+        <span className="uppercase">{language}</span>
+        <ChevronDown className={`w-3 h-3 transition-transform ${isOpen ? "rotate-180" : ""}`} />
+      </button>
+
+      {isOpen && (
+        <div className="absolute right-0 top-full mt-1 bg-white rounded-lg shadow-xl border border-gray-100 py-1 z-50 min-w-[120px]">
+          <button
+            onClick={() => { setLang("uk"); setIsOpen(false); }}
+            className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 ${
+              language === "uk" ? "text-blue-600 font-medium" : "text-gray-700"
+            }`}
+          >
+            <span className="text-base">🇺🇦</span>
+            Українська
+          </button>
+          <button
+            onClick={() => { setLang("en"); setIsOpen(false); }}
+            className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 ${
+              language === "en" ? "text-blue-600 font-medium" : "text-gray-700"
+            }`}
+          >
+            <span className="text-base">🇬🇧</span>
+            English
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
 
 function UserDropdown({ user, onLogout }) {
+  const { t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
   
-  // Close on outside click
   useEffect(() => {
     function handleClickOutside(event) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -64,16 +110,13 @@ function UserDropdown({ user, onLogout }) {
         <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${isOpen ? "rotate-180" : ""}`} />
       </button>
 
-      {/* Dropdown Menu */}
       {isOpen && (
         <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-          {/* User Info */}
           <div className="px-4 py-3 border-b border-gray-100">
             <p className="font-semibold text-gray-900 truncate">{user.name || "Trader"}</p>
             <p className="text-sm text-gray-500 truncate">{user.email}</p>
           </div>
 
-          {/* Menu Items */}
           <div className="py-2">
             <Link
               href="/account"
@@ -81,7 +124,7 @@ function UserDropdown({ user, onLogout }) {
               className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors"
             >
               <User className="w-4 h-4 text-gray-500" />
-              <span>My Profile</span>
+              <span>{t("nav.myProfile")}</span>
             </Link>
             <Link
               href="/account?tab=achievements"
@@ -89,7 +132,7 @@ function UserDropdown({ user, onLogout }) {
               className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors"
             >
               <Trophy className="w-4 h-4 text-amber-500" />
-              <span>Achievements</span>
+              <span>{t("nav.achievements")}</span>
             </Link>
             <Link
               href="/dashboard"
@@ -97,7 +140,7 @@ function UserDropdown({ user, onLogout }) {
               className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors"
             >
               <BarChart3 className="w-4 h-4 text-blue-500" />
-              <span>Dashboard</span>
+              <span>{t("nav.dashboard")}</span>
             </Link>
             <Link
               href="/strategies"
@@ -105,14 +148,12 @@ function UserDropdown({ user, onLogout }) {
               className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors"
             >
               <Target className="w-4 h-4 text-purple-500" />
-              <span>My Strategies</span>
+              <span>{t("nav.myStrategies")}</span>
             </Link>
           </div>
 
-          {/* Divider */}
           <div className="border-t border-gray-100 my-1"></div>
 
-          {/* Secondary Actions */}
           <div className="py-1">
             <Link
               href="/connect"
@@ -120,7 +161,7 @@ function UserDropdown({ user, onLogout }) {
               className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors"
             >
               <Zap className="w-4 h-4 text-green-500" />
-              <span>Connect Exchange</span>
+              <span>{t("nav.connectExchange")}</span>
             </Link>
             <Link
               href="/pricing"
@@ -128,7 +169,7 @@ function UserDropdown({ user, onLogout }) {
               className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors"
             >
               <CreditCard className="w-4 h-4 text-indigo-500" />
-              <span>Upgrade Plan</span>
+              <span>{t("nav.upgradePlan")}</span>
             </Link>
             <Link
               href="/account?tab=settings"
@@ -136,11 +177,10 @@ function UserDropdown({ user, onLogout }) {
               className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors"
             >
               <Settings className="w-4 h-4 text-gray-500" />
-              <span>Settings</span>
+              <span>{t("nav.settings")}</span>
             </Link>
           </div>
 
-          {/* Logout */}
           <div className="border-t border-gray-100 mt-1 pt-2">
             <button
               onClick={() => {
@@ -150,7 +190,7 @@ function UserDropdown({ user, onLogout }) {
               className="flex items-center gap-3 px-4 py-2.5 text-red-600 hover:bg-red-50 transition-colors w-full"
             >
               <LogOut className="w-4 h-4" />
-              <span>Log Out</span>
+              <span>{t("nav.logOut")}</span>
             </button>
           </div>
         </div>
@@ -163,6 +203,15 @@ export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuth();
+  const { t } = useLanguage();
+
+  const nav = [
+    { to: "/dashboard", label: t("nav.dashboard") },
+    { to: "/strategies", label: t("nav.strategies") },
+    { to: "/backtest", label: t("nav.backtest") },
+    { to: "/connect", label: t("nav.connect") },
+    { to: "/pricing", label: t("nav.pricing") },
+  ];
 
   const handleLogout = async () => {
     await logout();
@@ -199,18 +248,20 @@ export default function Navbar() {
           })}
         </nav>
 
-        {/* Right side: profile or auth buttons */}
-        <div className="hidden md:flex items-center gap-3">
+        {/* Right side: language + profile/auth */}
+        <div className="hidden md:flex items-center gap-2">
+          <LanguageSwitcher />
+          
           {!user ? (
             <>
               <Link href="/auth">
                 <Button variant="ghost" size="sm">
-                  Sign in
+                  {t("nav.signIn")}
                 </Button>
               </Link>
               <Link href="/auth?mode=signup">
                 <Button size="sm" className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
-                  Get started
+                  {t("nav.getStarted")}
                 </Button>
               </Link>
             </>
@@ -220,7 +271,8 @@ export default function Navbar() {
         </div>
 
         {/* Mobile menu */}
-        <div className="md:hidden">
+        <div className="md:hidden flex items-center gap-2">
+          <LanguageSwitcher />
           <MobileMenu
             trigger={
               <Button variant="secondary" size="sm">
@@ -246,10 +298,10 @@ export default function Navbar() {
                 <>
                   <div className="border-t border-gray-100 my-2"></div>
                   <Link href="/auth" className="text-gray-800">
-                    Sign in
+                    {t("nav.signIn")}
                   </Link>
                   <Link href="/auth?mode=signup" className="text-blue-600 font-medium">
-                    Get started
+                    {t("nav.getStarted")}
                   </Link>
                 </>
               ) : (
@@ -268,26 +320,26 @@ export default function Navbar() {
                   </div>
                   <Link href="/account" className="flex items-center gap-2 text-gray-800">
                     <User className="w-4 h-4" />
-                    My Profile
+                    {t("nav.myProfile")}
                   </Link>
                   <Link href="/dashboard" className="flex items-center gap-2 text-gray-800">
                     <BarChart3 className="w-4 h-4" />
-                    Dashboard
+                    {t("nav.dashboard")}
                   </Link>
                   <Link href="/connect" className="flex items-center gap-2 text-gray-800">
                     <Zap className="w-4 h-4" />
-                    Connect Exchange
+                    {t("nav.connectExchange")}
                   </Link>
                   <Link href="/account?tab=settings" className="flex items-center gap-2 text-gray-800">
                     <Settings className="w-4 h-4" />
-                    Settings
+                    {t("nav.settings")}
                   </Link>
                   <button
                     onClick={handleLogout}
                     className="flex items-center gap-2 text-left text-red-600"
                   >
                     <LogOut className="w-4 h-4" />
-                    Log Out
+                    {t("nav.logOut")}
                   </button>
                 </>
               )}
