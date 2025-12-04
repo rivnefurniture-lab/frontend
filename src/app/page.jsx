@@ -354,6 +354,80 @@ export default function Page() {
         </div>
       </section>
 
+      {/* Trusted Partners */}
+      <section className="py-16 border-t border-gray-100">
+        <div className="container">
+          <p className="text-center text-gray-500 mb-10">
+            {language === "uk" 
+              ? "Інтегровано з провідними платформами та постачальниками даних" 
+              : "Integrated with leading platforms and data providers"}
+          </p>
+          
+          <div className="flex flex-wrap items-center justify-center gap-8 md:gap-12 opacity-70 grayscale hover:grayscale-0 transition-all duration-500">
+            {/* Exchanges */}
+            <div className="flex items-center gap-2 text-2xl font-bold text-yellow-500">
+              <svg className="w-8 h-8" viewBox="0 0 126 126" fill="currentColor">
+                <path d="M63 0L78.75 25.2H47.25L63 0Z"/>
+                <path d="M63 126L47.25 100.8H78.75L63 126Z"/>
+                <path d="M31.5 37.8L0 63L31.5 88.2V63V37.8Z"/>
+                <path d="M94.5 37.8V63V88.2L126 63L94.5 37.8Z"/>
+                <path d="M31.5 63L63 37.8L94.5 63L63 88.2L31.5 63Z"/>
+              </svg>
+              <span>Binance</span>
+            </div>
+            
+            <div className="flex items-center gap-2 text-2xl font-bold text-gray-800">
+              <svg className="w-7 h-7" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+              </svg>
+              <span>Bybit</span>
+            </div>
+            
+            <div className="flex items-center gap-2 text-2xl font-bold text-gray-800">
+              <span className="text-blue-500">OKX</span>
+            </div>
+
+            <div className="h-8 w-px bg-gray-300 hidden md:block"></div>
+            
+            {/* Data Providers */}
+            <div className="flex items-center gap-2">
+              <svg className="w-7 h-7 text-purple-600" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="12,2 22,8.5 22,15.5 12,22 2,15.5 2,8.5"/>
+              </svg>
+              <span className="text-xl font-semibold text-purple-600">Polygon</span>
+            </div>
+            
+            <div className="flex items-center gap-1">
+              <span className="text-2xl font-bold text-purple-700">Y!</span>
+              <span className="text-xl font-semibold text-gray-700">Finance</span>
+            </div>
+
+            <div className="h-8 w-px bg-gray-300 hidden md:block"></div>
+            
+            {/* Tech Partners */}
+            <div className="flex items-center gap-2">
+              <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                <path d="M2 17l10 5 10-5"/>
+                <path d="M2 12l10 5 10-5"/>
+              </svg>
+              <span className="text-lg font-semibold text-gray-700">TradingView</span>
+            </div>
+            
+            <div className="flex items-center gap-1">
+              <svg className="w-6 h-6 text-green-600" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+              </svg>
+              <span className="text-lg font-semibold text-gray-700">CoinGecko</span>
+            </div>
+
+            <div className="flex items-center gap-1">
+              <span className="text-lg font-semibold text-orange-500">CoinMarketCap</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="bg-gradient-to-r from-blue-600 to-blue-700 py-16">
         <div className="container text-center text-white">
