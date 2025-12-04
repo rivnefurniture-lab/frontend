@@ -15,6 +15,34 @@ import {
 } from "recharts";
 import { Star, Quote } from "lucide-react";
 
+// Testimonial avatar with photo fallback
+function TestimonialAvatar({ testimonial }) {
+  const [imgError, setImgError] = useState(false);
+  
+  return (
+    <div className="flex items-center gap-3 pt-4 border-t border-gray-100">
+      {testimonial.photo && !imgError ? (
+        <img 
+          src={testimonial.photo}
+          alt={testimonial.name}
+          className="w-12 h-12 rounded-full object-cover flex-shrink-0 shadow-lg border-2 border-white"
+          onError={() => setImgError(true)}
+        />
+      ) : (
+        <div 
+          className={`w-12 h-12 rounded-full bg-gradient-to-br ${testimonial.gradient} flex items-center justify-center text-white font-semibold flex-shrink-0 shadow-lg`}
+        >
+          {testimonial.initials}
+        </div>
+      )}
+      <div>
+        <p className="font-semibold text-gray-900">{testimonial.name}</p>
+        <p className="text-sm text-gray-500">{testimonial.role}</p>
+      </div>
+    </div>
+  );
+}
+
 // Generate sample equity curve data
 const generateEquityCurve = () => {
   const data = [];
@@ -39,13 +67,15 @@ export default function Page() {
   const [loading, setLoading] = useState(true);
   const [chartData] = useState(generateEquityCurve);
 
-  // Testimonials data - using initials with gradients
+  // Testimonials data with photos
   const testimonials = [
     {
       id: 1,
       name: "Олег К.",
       role: language === "uk" ? "Активний трейдер" : "Active Trader",
       initials: "ОК",
+      // Photo: guy with beard and sunglasses in front of КРАМАТОРСЬК sign
+      photo: "/testimonials/oleg.jpg",
       gradient: "from-blue-500 to-cyan-500",
       rating: 5,
       text: t("testimonialContent.oleg"),
@@ -55,6 +85,8 @@ export default function Page() {
       name: "Назар Г.",
       role: language === "uk" ? "Криптоінвестор" : "Crypto Investor",
       initials: "НГ",
+      // Photo: guy in black hoodie
+      photo: "/testimonials/nazar.jpg",
       gradient: "from-purple-500 to-pink-500",
       rating: 5,
       text: t("testimonialContent.nazar"),
@@ -324,17 +356,7 @@ export default function Page() {
                   "{testimonial.text}"
                 </p>
 
-                <div className="flex items-center gap-3 pt-4 border-t border-gray-100">
-                  <div 
-                    className={`w-12 h-12 rounded-full bg-gradient-to-br ${testimonial.gradient} flex items-center justify-center text-white font-semibold flex-shrink-0 shadow-lg`}
-                  >
-                    {testimonial.initials}
-                  </div>
-                  <div>
-                    <p className="font-semibold text-gray-900">{testimonial.name}</p>
-                    <p className="text-sm text-gray-500">{testimonial.role}</p>
-                  </div>
-                </div>
+                <TestimonialAvatar testimonial={testimonial} />
               </div>
             ))}
           </div>

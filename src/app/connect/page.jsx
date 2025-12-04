@@ -43,13 +43,14 @@ const EXCHANGES = [
   }
 ];
 
-function ExchangeCard({ exchange, onConnect, t, language }) {
+function ExchangeCard({ exchange, onConnect, onDisconnect, isConnected, t, language }) {
   const [form, setForm] = useState({ testnet: true });
   const [loading, setLoading] = useState(false);
   const [testing, setTesting] = useState(false);
+  const [disconnecting, setDisconnecting] = useState(false);
   const [status, setStatus] = useState(null);
-  const [connected, setConnected] = useState(false);
   const [balance, setBalance] = useState(null);
+  const [showForm, setShowForm] = useState(!isConnected);
   const [showKey, setShowKey] = useState(false);
   const [showSecret, setShowSecret] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -69,19 +70,19 @@ function ExchangeCard({ exchange, onConnect, t, language }) {
         testnet: form.testnet,
       };
       
-      // Only include password for OKX
       if (exchange.fields.includes("password") && form.password) {
         payload.password = form.password;
       }
       
       const result = await apiFetch("/exchange/connect", {
         method: "POST",
-        body: JSON.stringify(payload),
+        body: payload,
       });
       
       if (result?.ok) {
         setStatus({ ok: true, msg: t.connectedSuccess });
-        setConnected(true);
+        setShowForm(false);
+        setForm({ testnet: true }); // Clear sensitive data
         onConnect?.(exchange.id);
       } else {
         throw new Error(result?.message || t.connectionFailed);
@@ -101,6 +102,23 @@ function ExchangeCard({ exchange, onConnect, t, language }) {
       setStatus({ ok: false, msg: errorMsg });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const disconnect = async () => {
+    setDisconnecting(true);
+    try {
+      await apiFetch(`/exchange/disconnect/${exchange.id}`, {
+        method: "POST",
+      });
+      setShowForm(true);
+      setBalance(null);
+      setStatus({ ok: true, msg: t.disconnected });
+      onDisconnect?.(exchange.id);
+    } catch (e) {
+      setStatus({ ok: false, msg: e.message });
+    } finally {
+      setDisconnecting(false);
     }
   };
 
@@ -126,17 +144,17 @@ function ExchangeCard({ exchange, onConnect, t, language }) {
   };
 
   return (
-    <Card className={`overflow-hidden ${connected ? 'ring-2 ring-green-500' : ''}`}>
+    <Card className={`overflow-hidden ${isConnected ? 'ring-2 ring-green-500' : ''}`}>
       <div className={`h-2 bg-gradient-to-r ${exchange.color}`}></div>
       <CardHeader>
         <CardTitle className="flex items-center gap-3">
           <span className="text-3xl">{exchange.logo}</span>
-          <div>
+          <div className="flex-1">
             <div className="flex items-center gap-2">
               {exchange.name}
-              {connected && (
-                <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full">
-                  {t.connected}
+              {isConnected && (
+                <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full font-medium">
+                  ✓ {t.connected}
                 </span>
               )}
             </div>
@@ -145,111 +163,161 @@ function ExchangeCard({ exchange, onConnect, t, language }) {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={submit} className="space-y-4">
-          <div>
-            <label className="text-sm font-medium block mb-1">{t.apiKey}</label>
-            <div className="relative">
-              <Input
-                type={showKey ? "text" : "password"}
-                placeholder={t.enterApiKey}
-                value={form.apiKey || ""}
-                onChange={(e) => handle("apiKey", e.target.value)}
-                required
-                className="pr-10"
-              />
-              <button
-                type="button"
-                onClick={() => setShowKey(!showKey)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-              >
-                {showKey ? "🙈" : "👁️"}
-              </button>
+        {/* Connected state - no form, just actions */}
+        {isConnected && !showForm ? (
+          <div className="space-y-4">
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+              <p className="text-green-700 text-sm font-medium">
+                ✓ {t.exchangeConnectedInfo}
+              </p>
+              <p className="text-green-600 text-xs mt-1">{t.keysSecure}</p>
             </div>
-          </div>
-          
-          <div>
-            <label className="text-sm font-medium block mb-1">{t.apiSecret}</label>
-            <div className="relative">
-              <Input
-                type={showSecret ? "text" : "password"}
-                placeholder={t.enterApiSecret}
-                value={form.secret || ""}
-                onChange={(e) => handle("secret", e.target.value)}
-                required
-                className="pr-10"
-              />
-              <button
-                type="button"
-                onClick={() => setShowSecret(!showSecret)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            
+            {balance && (
+              <div className="p-3 bg-gray-50 rounded-lg text-sm">
+                <p className="font-medium text-gray-700">{t.balance}:</p>
+                <p className="text-gray-600">{balance}</p>
+              </div>
+            )}
+            
+            <div className="flex gap-2">
+              <Button 
+                type="button" 
+                onClick={testBalance}
+                disabled={testing}
+                className="flex-1"
               >
-                {showSecret ? "🙈" : "👁️"}
-              </button>
+                {testing ? t.testing : t.testBalance}
+              </Button>
+              <Button 
+                type="button" 
+                variant="outline"
+                onClick={() => setShowForm(true)}
+              >
+                {t.updateKeys}
+              </Button>
+              <Button 
+                type="button" 
+                variant="destructive"
+                onClick={disconnect}
+                disabled={disconnecting}
+              >
+                {disconnecting ? "..." : t.disconnect}
+              </Button>
             </div>
+            
+            {status && (
+              <p className={`text-sm ${status.ok ? "text-green-600" : "text-red-600"}`}>
+                {status.msg}
+              </p>
+            )}
           </div>
-          
-          {exchange.fields.includes("password") && (
+        ) : (
+          /* Form to connect/update */
+          <form onSubmit={submit} className="space-y-4">
+            {isConnected && (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-sm text-yellow-700">
+                {t.updateKeysInfo}
+              </div>
+            )}
+            
             <div>
-              <label className="text-sm font-medium block mb-1">{t.passphrase}</label>
+              <label className="text-sm font-medium block mb-1">{t.apiKey}</label>
               <div className="relative">
                 <Input
-                  type={showPassword ? "text" : "password"}
-                  placeholder={t.enterPassphrase}
-                  value={form.password || ""}
-                  onChange={(e) => handle("password", e.target.value)}
+                  type={showKey ? "text" : "password"}
+                  placeholder={t.enterApiKey}
+                  value={form.apiKey || ""}
+                  onChange={(e) => handle("apiKey", e.target.value)}
                   required
                   className="pr-10"
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
+                  onClick={() => setShowKey(!showKey)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
-                  {showPassword ? "🙈" : "👁️"}
+                  {showKey ? "🙈" : "👁️"}
                 </button>
               </div>
             </div>
-          )}
-          
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={form.testnet}
-              onChange={(e) => handle("testnet", e.target.checked)}
-              className="rounded"
-            />
-            <span>{t.useTestnet}</span>
-          </label>
-          
-          <div className="flex gap-2">
-            <Button type="submit" disabled={loading} className="flex-1">
-              {loading ? t.connecting : connected ? t.reconnect : t.connect}
-            </Button>
-            {connected && (
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={testBalance}
-                disabled={testing}
-              >
-                {testing ? t.testing : t.testBalance}
-              </Button>
-            )}
-          </div>
-          
-          {status && (
-            <p className={`text-sm ${status.ok ? "text-green-600" : "text-red-600"}`}>
-              {status.msg}
-            </p>
-          )}
-          
-          {balance && (
-            <div className="p-3 bg-gray-50 rounded-lg text-sm">
-              <p className="font-medium text-gray-700">{t.balance}:</p>
-              <p className="text-gray-600">{balance}</p>
+            
+            <div>
+              <label className="text-sm font-medium block mb-1">{t.apiSecret}</label>
+              <div className="relative">
+                <Input
+                  type={showSecret ? "text" : "password"}
+                  placeholder={t.enterApiSecret}
+                  value={form.secret || ""}
+                  onChange={(e) => handle("secret", e.target.value)}
+                  required
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowSecret(!showSecret)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  {showSecret ? "🙈" : "👁️"}
+                </button>
+              </div>
             </div>
-          )}
-        </form>
+            
+            {exchange.fields.includes("password") && (
+              <div>
+                <label className="text-sm font-medium block mb-1">{t.passphrase}</label>
+                <div className="relative">
+                  <Input
+                    type={showPassword ? "text" : "password"}
+                    placeholder={t.enterPassphrase}
+                    value={form.password || ""}
+                    onChange={(e) => handle("password", e.target.value)}
+                    required
+                    className="pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    {showPassword ? "🙈" : "👁️"}
+                  </button>
+                </div>
+              </div>
+            )}
+            
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={form.testnet}
+                onChange={(e) => handle("testnet", e.target.checked)}
+                className="rounded"
+              />
+              <span>{t.useTestnet}</span>
+            </label>
+            
+            <div className="flex gap-2">
+              <Button type="submit" disabled={loading} className="flex-1">
+                {loading ? t.connecting : isConnected ? t.updateAndSave : t.connect}
+              </Button>
+              {isConnected && (
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setShowForm(false)}
+                >
+                  {t.cancel}
+                </Button>
+              )}
+            </div>
+            
+            {status && (
+              <p className={`text-sm ${status.ok ? "text-green-600" : "text-red-600"}`}>
+                {status.msg}
+              </p>
+            )}
+          </form>
+        )}
         
         <div className="mt-4 pt-4 border-t flex gap-4 text-xs">
           <a 
@@ -260,7 +328,7 @@ function ExchangeCard({ exchange, onConnect, t, language }) {
           >
             {t.howToCreate} →
           </a>
-          {form.testnet && (
+          {!isConnected && (
             <a 
               href={exchange.testnetUrl} 
               target="_blank" 
@@ -281,6 +349,32 @@ export default function ConnectPage() {
   const { language } = useLanguage();
   const router = useRouter();
   const [connectedExchanges, setConnectedExchanges] = useState([]);
+  const [loadingConnections, setLoadingConnections] = useState(true);
+
+  // Fetch existing connections on mount
+  useEffect(() => {
+    if (user) {
+      fetchConnectedExchanges();
+    } else {
+      setLoadingConnections(false);
+    }
+  }, [user]);
+
+  const fetchConnectedExchanges = async () => {
+    try {
+      const result = await apiFetch("/exchange/connections");
+      if (result?.connections) {
+        const connected = result.connections
+          .filter(c => c.isActive)
+          .map(c => c.exchange);
+        setConnectedExchanges(connected);
+      }
+    } catch (e) {
+      console.error("Failed to fetch connections:", e);
+    } finally {
+      setLoadingConnections(false);
+    }
+  };
 
   const t = {
     title: language === "uk" ? "Підключення біржі" : "Connect Your Exchange",
@@ -340,12 +434,24 @@ export default function ConnectPage() {
     faq: language === "uk" ? "FAQ" : "FAQ",
     or: language === "uk" ? "або" : "or",
     contactSupport: language === "uk" ? "зв'яжіться з підтримкою" : "contact support",
+    disconnect: language === "uk" ? "Відключити" : "Disconnect",
+    disconnected: language === "uk" ? "Біржу відключено" : "Exchange disconnected",
+    updateKeys: language === "uk" ? "Оновити ключі" : "Update Keys",
+    updateAndSave: language === "uk" ? "Оновити та зберегти" : "Update & Save",
+    cancel: language === "uk" ? "Скасувати" : "Cancel",
+    exchangeConnectedInfo: language === "uk" ? "Ваш обліковий запис біржі підключено та готовий до торгівлі" : "Your exchange account is connected and ready to trade",
+    keysSecure: language === "uk" ? "API ключі зберігаються зашифрованими" : "API keys are stored encrypted",
+    updateKeysInfo: language === "uk" ? "Введіть нові API ключі для оновлення підключення" : "Enter new API keys to update the connection",
   };
 
   const handleConnect = (exchangeId) => {
     if (!connectedExchanges.includes(exchangeId)) {
       setConnectedExchanges([...connectedExchanges, exchangeId]);
     }
+  };
+
+  const handleDisconnect = (exchangeId) => {
+    setConnectedExchanges(connectedExchanges.filter(id => id !== exchangeId));
   };
 
   if (!authLoading && !user) {
@@ -415,15 +521,24 @@ export default function ConnectPage() {
         </div>
 
         <div className="grid md:grid-cols-2 gap-6 mb-8">
-          {EXCHANGES.map((exchange) => (
-            <ExchangeCard 
-              key={exchange.id} 
-              exchange={exchange}
-              onConnect={handleConnect}
-              t={t}
-              language={language}
-            />
-          ))}
+          {loadingConnections ? (
+            <div className="col-span-2 text-center py-8">
+              <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto"></div>
+              <p className="mt-4 text-gray-600">{t.loading}</p>
+            </div>
+          ) : (
+            EXCHANGES.map((exchange) => (
+              <ExchangeCard 
+                key={exchange.id} 
+                exchange={exchange}
+                isConnected={connectedExchanges.includes(exchange.id)}
+                onConnect={handleConnect}
+                onDisconnect={handleDisconnect}
+                t={t}
+                language={language}
+              />
+            ))
+          )}
         </div>
 
         {connectedExchanges.length > 0 && (
