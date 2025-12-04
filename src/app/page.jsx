@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import Hero from "@/app/hero";
 import { apiFetch } from "@/lib/api";
 import {
@@ -12,6 +13,45 @@ import {
   YAxis,
   Tooltip,
 } from "recharts";
+import { Star, Quote } from "lucide-react";
+
+// Testimonials data
+const testimonials = [
+  {
+    id: 1,
+    name: "Олег К.",
+    role: "Активний трейдер",
+    image: "/testimonials/oleg.jpg",
+    rating: 5,
+    text: "Вже 3 місяці використовую Algotcha для автоматизації торгівлі. Результати вражають — стабільний прибуток без постійного моніторингу ринку. Рекомендую всім!",
+  },
+  {
+    id: 2,
+    name: "Назар Г.",
+    role: "Криптоінвестор",
+    image: "/testimonials/nazar.jpg",
+    rating: 5,
+    text: "Нарешті знайшов платформу, яка реально працює. Бектести на реальних даних — це те, що мене переконало. Тепер торгую без стресу.",
+  },
+  {
+    id: 3,
+    name: "Дмитро С.",
+    role: "Початківець",
+    image: null,
+    initials: "ДС",
+    rating: 5,
+    text: "Почав з нуля, без досвіду в трейдингу. Завдяки готовим стратегіям вже маю перші результати. Підтримка відповідає швидко і допомагає розібратися.",
+  },
+  {
+    id: 4,
+    name: "Каріна Г.",
+    role: "Фінансовий аналітик",
+    image: null,
+    initials: "КГ",
+    rating: 5,
+    text: "Як аналітик, ціную прозорість. Тут бачу кожну угоду з доказами по індикаторах. Жодних чорних ящиків — все чесно і зрозуміло.",
+  },
+];
 
 // Generate sample equity curve data
 const generateEquityCurve = () => {
@@ -247,6 +287,83 @@ export default function Page() {
             <p className="text-sm text-gray-600">
               See every trade with indicator proof. No black box algorithms.
             </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials */}
+      <section className="bg-gradient-to-b from-gray-50 to-white py-20">
+        <div className="container">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4">Що кажуть наші користувачі</h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              Реальні відгуки від трейдерів, які вже автоматизували свою торгівлю з Algotcha
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {testimonials.map((testimonial) => (
+              <div
+                key={testimonial.id}
+                className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow relative"
+              >
+                {/* Quote icon */}
+                <div className="absolute top-4 right-4 text-blue-100">
+                  <Quote className="w-8 h-8" />
+                </div>
+
+                {/* Rating */}
+                <div className="flex gap-1 mb-4">
+                  {[...Array(testimonial.rating)].map((_, i) => (
+                    <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
+                  ))}
+                </div>
+
+                {/* Text */}
+                <p className="text-gray-600 text-sm mb-6 leading-relaxed">
+                  "{testimonial.text}"
+                </p>
+
+                {/* User */}
+                <div className="flex items-center gap-3 pt-4 border-t border-gray-100">
+                  {testimonial.image ? (
+                    <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
+                      <Image
+                        src={testimonial.image}
+                        alt={testimonial.name}
+                        width={48}
+                        height={48}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-semibold flex-shrink-0">
+                      {testimonial.initials}
+                    </div>
+                  )}
+                  <div>
+                    <p className="font-semibold text-gray-900">{testimonial.name}</p>
+                    <p className="text-sm text-gray-500">{testimonial.role}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Trust badges */}
+          <div className="mt-12 flex flex-wrap items-center justify-center gap-8 text-gray-400">
+            <div className="flex items-center gap-2">
+              <span className="text-2xl">🔐</span>
+              <span className="text-sm">256-bit SSL</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-2xl">✅</span>
+              <span className="text-sm">Верифіковані відгуки</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-2xl">🇺🇦</span>
+              <span className="text-sm">Українська платформа</span>
+            </div>
           </div>
         </div>
       </section>
