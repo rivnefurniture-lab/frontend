@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { apiFetch } from "@/lib/api";
 import { useAuth } from "@/context/AuthProvider";
+import { useLanguage } from "@/context/LanguageContext";
 import Link from "next/link";
 
 const EXCHANGES = [
@@ -15,7 +16,7 @@ const EXCHANGES = [
     name: "Binance",
     logo: "🟡",
     color: "from-yellow-400 to-yellow-600",
-    description: "World's largest crypto exchange",
+    description: { en: "World's largest crypto exchange", uk: "Найбільша криптобіржа у світі" },
     fields: ["apiKey", "secret"],
     testnetUrl: "https://testnet.binance.vision/",
     docsUrl: "https://www.binance.com/en/support/faq/how-to-create-api-keys-on-binance-360002502072"
@@ -25,7 +26,7 @@ const EXCHANGES = [
     name: "Bybit",
     logo: "🔶",
     color: "from-orange-400 to-orange-600",
-    description: "Fast derivatives exchange",
+    description: { en: "Fast derivatives exchange", uk: "Швидка біржа деривативів" },
     fields: ["apiKey", "secret"],
     testnetUrl: "https://testnet.bybit.com/",
     docsUrl: "https://learn.bybit.com/bybit-guide/how-to-create-bybit-api-key/"
@@ -35,14 +36,14 @@ const EXCHANGES = [
     name: "OKX",
     logo: "⚫",
     color: "from-gray-700 to-gray-900",
-    description: "Advanced trading platform",
+    description: { en: "Advanced trading platform", uk: "Просунута торгова платформа" },
     fields: ["apiKey", "secret", "password"],
     testnetUrl: "https://www.okx.com/docs-v5/en/",
     docsUrl: "https://www.okx.com/support/hc/en-us/articles/360048917891"
   }
 ];
 
-function ExchangeCard({ exchange, onConnect }) {
+function ExchangeCard({ exchange, onConnect, t, language }) {
   const [form, setForm] = useState({ testnet: true });
   const [loading, setLoading] = useState(false);
   const [testing, setTesting] = useState(false);
@@ -61,35 +62,40 @@ function ExchangeCard({ exchange, onConnect }) {
     setStatus(null);
     
     try {
+      const payload = {
+        exchange: exchange.id,
+        apiKey: form.apiKey,
+        secret: form.secret,
+        testnet: form.testnet,
+      };
+      
+      // Only include password for OKX
+      if (exchange.fields.includes("password") && form.password) {
+        payload.password = form.password;
+      }
+      
       const result = await apiFetch("/exchange/connect", {
         method: "POST",
-        body: JSON.stringify({
-          exchange: exchange.id,
-          apiKey: form.apiKey,
-          secret: form.secret,
-          password: form.password,
-          testnet: form.testnet,
-        }),
+        body: JSON.stringify(payload),
       });
       
       if (result?.ok) {
-        setStatus({ ok: true, msg: "✓ Connected successfully!" });
+        setStatus({ ok: true, msg: t.connectedSuccess });
         setConnected(true);
         onConnect?.(exchange.id);
       } else {
-        throw new Error(result?.message || "Connection failed");
+        throw new Error(result?.message || t.connectionFailed);
       }
     } catch (e) {
       console.error("Exchange connection error:", e);
-      let errorMsg = e.message || "Connection failed";
+      let errorMsg = e.message || t.connectionFailed;
       
-      // Provide helpful error messages
       if (errorMsg.includes("401") || errorMsg.includes("Unauthorized")) {
-        errorMsg = "Please login first to connect your exchange";
+        errorMsg = t.loginFirst;
       } else if (errorMsg.includes("Invalid") || errorMsg.includes("authentication")) {
-        errorMsg = "Invalid API key or secret. Please check your credentials.";
+        errorMsg = t.invalidCredentials;
       } else if (errorMsg.includes("network") || errorMsg.includes("fetch")) {
-        errorMsg = "Network error. Please check your connection and try again.";
+        errorMsg = t.networkError;
       }
       
       setStatus({ ok: false, msg: errorMsg });
@@ -107,11 +113,11 @@ function ExchangeCard({ exchange, onConnect }) {
         .slice(0, 5);
       
       if (assets.length === 0) {
-        setBalance("No assets (balance is 0)");
+        setBalance(t.noAssets);
       } else {
         setBalance(assets.map(([k, v]) => `${k}: ${v}`).join(", "));
       }
-      setStatus({ ok: true, msg: "Balance fetched successfully" });
+      setStatus({ ok: true, msg: t.balanceFetched });
     } catch (e) {
       setStatus({ ok: false, msg: e.message });
     } finally {
@@ -130,22 +136,22 @@ function ExchangeCard({ exchange, onConnect }) {
               {exchange.name}
               {connected && (
                 <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full">
-                  Connected
+                  {t.connected}
                 </span>
               )}
             </div>
-            <p className="text-sm font-normal text-gray-500">{exchange.description}</p>
+            <p className="text-sm font-normal text-gray-500">{exchange.description[language]}</p>
           </div>
         </CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={submit} className="space-y-4">
           <div>
-            <label className="text-sm font-medium block mb-1">API Key</label>
+            <label className="text-sm font-medium block mb-1">{t.apiKey}</label>
             <div className="relative">
               <Input
                 type={showKey ? "text" : "password"}
-                placeholder="Enter your API key"
+                placeholder={t.enterApiKey}
                 value={form.apiKey || ""}
                 onChange={(e) => handle("apiKey", e.target.value)}
                 required
@@ -162,11 +168,11 @@ function ExchangeCard({ exchange, onConnect }) {
           </div>
           
           <div>
-            <label className="text-sm font-medium block mb-1">API Secret</label>
+            <label className="text-sm font-medium block mb-1">{t.apiSecret}</label>
             <div className="relative">
               <Input
                 type={showSecret ? "text" : "password"}
-                placeholder="Enter your API secret"
+                placeholder={t.enterApiSecret}
                 value={form.secret || ""}
                 onChange={(e) => handle("secret", e.target.value)}
                 required
@@ -184,11 +190,11 @@ function ExchangeCard({ exchange, onConnect }) {
           
           {exchange.fields.includes("password") && (
             <div>
-              <label className="text-sm font-medium block mb-1">Passphrase</label>
+              <label className="text-sm font-medium block mb-1">{t.passphrase}</label>
               <div className="relative">
                 <Input
                   type={showPassword ? "text" : "password"}
-                  placeholder="Enter your passphrase"
+                  placeholder={t.enterPassphrase}
                   value={form.password || ""}
                   onChange={(e) => handle("password", e.target.value)}
                   required
@@ -212,12 +218,12 @@ function ExchangeCard({ exchange, onConnect }) {
               onChange={(e) => handle("testnet", e.target.checked)}
               className="rounded"
             />
-            <span>Use Testnet (recommended for testing)</span>
+            <span>{t.useTestnet}</span>
           </label>
           
           <div className="flex gap-2">
             <Button type="submit" disabled={loading} className="flex-1">
-              {loading ? "Connecting..." : connected ? "Reconnect" : "Connect"}
+              {loading ? t.connecting : connected ? t.reconnect : t.connect}
             </Button>
             {connected && (
               <Button 
@@ -226,7 +232,7 @@ function ExchangeCard({ exchange, onConnect }) {
                 onClick={testBalance}
                 disabled={testing}
               >
-                {testing ? "Testing..." : "Test Balance"}
+                {testing ? t.testing : t.testBalance}
               </Button>
             )}
           </div>
@@ -239,7 +245,7 @@ function ExchangeCard({ exchange, onConnect }) {
           
           {balance && (
             <div className="p-3 bg-gray-50 rounded-lg text-sm">
-              <p className="font-medium text-gray-700">Balance:</p>
+              <p className="font-medium text-gray-700">{t.balance}:</p>
               <p className="text-gray-600">{balance}</p>
             </div>
           )}
@@ -252,7 +258,7 @@ function ExchangeCard({ exchange, onConnect }) {
             rel="noopener noreferrer"
             className="text-blue-600 hover:underline"
           >
-            How to create API keys →
+            {t.howToCreate} →
           </a>
           {form.testnet && (
             <a 
@@ -261,7 +267,7 @@ function ExchangeCard({ exchange, onConnect }) {
               rel="noopener noreferrer"
               className="text-blue-600 hover:underline"
             >
-              Get testnet account →
+              {t.getTestnet} →
             </a>
           )}
         </div>
@@ -272,8 +278,69 @@ function ExchangeCard({ exchange, onConnect }) {
 
 export default function ConnectPage() {
   const { user, loading: authLoading } = useAuth();
+  const { language } = useLanguage();
   const router = useRouter();
   const [connectedExchanges, setConnectedExchanges] = useState([]);
+
+  const t = {
+    title: language === "uk" ? "Підключення біржі" : "Connect Your Exchange",
+    subtitle: language === "uk" 
+      ? "Підключіть свій обліковий запис біржі для автоматичної торгівлі. Нам потрібні лише права на торгівлю - ніколи на виведення." 
+      : "Connect your exchange account to start automated trading. We only need trading permissions - never withdrawal access.",
+    securityTitle: language === "uk" ? "🔒 Безпека насамперед" : "🔒 Security First",
+    securityItem1: language === "uk" ? "API ключі зберігаються зашифрованими і ніколи не передаються" : "API keys are stored encrypted and never shared",
+    securityItem2: language === "uk" ? "Створюйте ключі лише з правами на торгівлю (без виведення)" : "Create keys with trading only permissions (no withdrawals)",
+    securityItem3: language === "uk" ? "Використовуйте тестнет для тестування перед запуском" : "Use testnet for testing before going live",
+    securityItem4: language === "uk" ? "Ви можете відкликати доступ у будь-який час з біржі" : "You can revoke access anytime from your exchange",
+    ipTitle: language === "uk" ? "🌐 Білий список IP (Рекомендовано)" : "🌐 IP Whitelisting (Recommended)",
+    ipText: language === "uk" 
+      ? "Для максимальної безпеки додайте IP нашого торгового сервера у білий список на біржі:" 
+      : "For maximum security, whitelist our trading server IP on your exchange:",
+    ipNote: language === "uk" 
+      ? "Це гарантує, що тільки наш сервер може виконувати угоди з вашими API ключами." 
+      : "This ensures only our server can execute trades with your API keys.",
+    copy: language === "uk" ? "Копіювати" : "Copy",
+    copied: language === "uk" ? "Скопійовано!" : "Copied!",
+    loginRequired: language === "uk" ? "Потрібна авторизація" : "Login Required",
+    loginText: language === "uk" 
+      ? "Щоб підключити біржу, потрібно увійти в обліковий запис." 
+      : "You need to be logged in to connect your exchange account.",
+    login: language === "uk" ? "Увійти / Зареєструватись" : "Login / Sign Up",
+    loading: language === "uk" ? "Завантаження..." : "Loading...",
+    connected: language === "uk" ? "Підключено" : "Connected",
+    apiKey: language === "uk" ? "API Ключ" : "API Key",
+    apiSecret: language === "uk" ? "API Секрет" : "API Secret",
+    passphrase: language === "uk" ? "Пароль" : "Passphrase",
+    enterApiKey: language === "uk" ? "Введіть API ключ" : "Enter your API key",
+    enterApiSecret: language === "uk" ? "Введіть API секрет" : "Enter your API secret",
+    enterPassphrase: language === "uk" ? "Введіть пароль" : "Enter your passphrase",
+    useTestnet: language === "uk" ? "Використовувати Testnet (рекомендовано для тестування)" : "Use Testnet (recommended for testing)",
+    connect: language === "uk" ? "Підключити" : "Connect",
+    reconnect: language === "uk" ? "Перепідключити" : "Reconnect",
+    connecting: language === "uk" ? "Підключення..." : "Connecting...",
+    testBalance: language === "uk" ? "Перевірити баланс" : "Test Balance",
+    testing: language === "uk" ? "Перевірка..." : "Testing...",
+    balance: language === "uk" ? "Баланс" : "Balance",
+    howToCreate: language === "uk" ? "Як створити API ключі" : "How to create API keys",
+    getTestnet: language === "uk" ? "Отримати testnet акаунт" : "Get testnet account",
+    connectedSuccess: language === "uk" ? "✓ Підключено успішно!" : "✓ Connected successfully!",
+    connectionFailed: language === "uk" ? "Помилка підключення" : "Connection failed",
+    loginFirst: language === "uk" ? "Спочатку увійдіть, щоб підключити біржу" : "Please login first to connect your exchange",
+    invalidCredentials: language === "uk" ? "Невірний API ключ або секрет. Перевірте дані." : "Invalid API key or secret. Please check your credentials.",
+    networkError: language === "uk" ? "Помилка мережі. Перевірте з'єднання і спробуйте ще раз." : "Network error. Please check your connection and try again.",
+    noAssets: language === "uk" ? "Немає активів (баланс 0)" : "No assets (balance is 0)",
+    balanceFetched: language === "uk" ? "Баланс отримано успішно" : "Balance fetched successfully",
+    exchangeConnected: language === "uk" ? "🎉 Біржу підключено!" : "🎉 Exchange Connected!",
+    whatNext: language === "uk" 
+      ? "Ви готові почати торгувати. Ось що можна зробити далі:" 
+      : "You're ready to start trading. Here's what you can do next:",
+    createStrategy: language === "uk" ? "Створити стратегію" : "Create Strategy",
+    goToDashboard: language === "uk" ? "До панелі управління" : "Go to Dashboard",
+    needHelp: language === "uk" ? "Потрібна допомога? Перегляньте" : "Need help? Check our",
+    faq: language === "uk" ? "FAQ" : "FAQ",
+    or: language === "uk" ? "або" : "or",
+    contactSupport: language === "uk" ? "зв'яжіться з підтримкою" : "contact support",
+  };
 
   const handleConnect = (exchangeId) => {
     if (!connectedExchanges.includes(exchangeId)) {
@@ -281,7 +348,6 @@ export default function ConnectPage() {
     }
   };
 
-  // Show login prompt if not authenticated
   if (!authLoading && !user) {
     return (
       <div className="container py-10">
@@ -289,12 +355,10 @@ export default function ConnectPage() {
           <Card>
             <CardContent className="pt-6">
               <div className="text-6xl mb-4">🔐</div>
-              <h2 className="text-2xl font-bold mb-2">Login Required</h2>
-              <p className="text-gray-600 mb-6">
-                You need to be logged in to connect your exchange account.
-              </p>
+              <h2 className="text-2xl font-bold mb-2">{t.loginRequired}</h2>
+              <p className="text-gray-600 mb-6">{t.loginText}</p>
               <Link href="/auth">
-                <Button className="w-full">Login / Sign Up</Button>
+                <Button className="w-full">{t.login}</Button>
               </Link>
             </CardContent>
           </Card>
@@ -307,7 +371,7 @@ export default function ConnectPage() {
     return (
       <div className="container py-10 text-center">
         <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto"></div>
-        <p className="mt-4 text-gray-600">Loading...</p>
+        <p className="mt-4 text-gray-600">{t.loading}</p>
       </div>
     );
   }
@@ -315,36 +379,24 @@ export default function ConnectPage() {
   return (
     <div className="container py-10">
       <div className="max-w-4xl mx-auto">
-        {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold mb-2">Connect Your Exchange</h1>
-          <p className="text-gray-600 max-w-xl mx-auto">
-            Connect your exchange account to start automated trading. 
-            We only need trading permissions - never withdrawal access.
-          </p>
+          <h1 className="text-3xl font-bold mb-2">{t.title}</h1>
+          <p className="text-gray-600 max-w-xl mx-auto">{t.subtitle}</p>
         </div>
 
-        {/* Security Notice */}
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8">
-          <h3 className="font-medium text-blue-800 flex items-center gap-2">
-            🔒 Security First
-          </h3>
+          <h3 className="font-medium text-blue-800 flex items-center gap-2">{t.securityTitle}</h3>
           <ul className="mt-2 text-sm text-blue-700 space-y-1">
-            <li>• API keys are stored encrypted and never shared</li>
-            <li>• Create keys with <strong>trading only</strong> permissions (no withdrawals)</li>
-            <li>• Use testnet for testing before going live</li>
-            <li>• You can revoke access anytime from your exchange</li>
+            <li>• {t.securityItem1}</li>
+            <li>• {t.securityItem2}</li>
+            <li>• {t.securityItem3}</li>
+            <li>• {t.securityItem4}</li>
           </ul>
         </div>
 
-        {/* IP Whitelisting Guide */}
         <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-8">
-          <h3 className="font-medium text-amber-800 flex items-center gap-2">
-            🌐 IP Whitelisting (Recommended)
-          </h3>
-          <p className="mt-2 text-sm text-amber-700">
-            For maximum security, whitelist our trading server IP on your exchange:
-          </p>
+          <h3 className="font-medium text-amber-800 flex items-center gap-2">{t.ipTitle}</h3>
+          <p className="mt-2 text-sm text-amber-700">{t.ipText}</p>
           <div className="mt-3 flex items-center gap-3">
             <code className="bg-white px-4 py-2 rounded border border-amber-300 font-mono text-lg">
               46.224.99.27
@@ -352,54 +404,47 @@ export default function ConnectPage() {
             <button 
               onClick={() => {
                 navigator.clipboard.writeText("46.224.99.27");
-                alert("IP copied to clipboard!");
+                alert(t.copied);
               }}
               className="text-sm text-amber-700 hover:text-amber-800 underline"
             >
-              Copy
+              {t.copy}
             </button>
           </div>
-          <p className="mt-3 text-xs text-amber-600">
-            This ensures only our server can execute trades with your API keys.
-          </p>
+          <p className="mt-3 text-xs text-amber-600">{t.ipNote}</p>
         </div>
 
-        {/* Exchange Cards */}
         <div className="grid md:grid-cols-2 gap-6 mb-8">
           {EXCHANGES.map((exchange) => (
             <ExchangeCard 
               key={exchange.id} 
               exchange={exchange}
               onConnect={handleConnect}
+              t={t}
+              language={language}
             />
           ))}
         </div>
 
-        {/* Next Steps */}
         {connectedExchanges.length > 0 && (
           <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
             <CardContent className="pt-6">
-              <h3 className="font-bold text-lg text-green-800 mb-2">
-                🎉 Exchange Connected!
-              </h3>
-              <p className="text-green-700 mb-4">
-                You&apos;re ready to start trading. Here&apos;s what you can do next:
-              </p>
+              <h3 className="font-bold text-lg text-green-800 mb-2">{t.exchangeConnected}</h3>
+              <p className="text-green-700 mb-4">{t.whatNext}</p>
               <div className="flex flex-wrap gap-3">
                 <Link href="/backtest">
-                  <Button>Create Strategy</Button>
+                  <Button>{t.createStrategy}</Button>
                 </Link>
                 <Link href="/dashboard">
-                  <Button variant="outline">Go to Dashboard</Button>
+                  <Button variant="outline">{t.goToDashboard}</Button>
                 </Link>
               </div>
             </CardContent>
           </Card>
         )}
 
-        {/* Help Section */}
         <div className="mt-8 text-center text-sm text-gray-500">
-          <p>Need help? Check our <Link href="/faq" className="text-blue-600 hover:underline">FAQ</Link> or <Link href="/support" className="text-blue-600 hover:underline">contact support</Link>.</p>
+          <p>{t.needHelp} <Link href="/faq" className="text-blue-600 hover:underline">{t.faq}</Link> {t.or} <Link href="/support" className="text-blue-600 hover:underline">{t.contactSupport}</Link>.</p>
         </div>
       </div>
     </div>
