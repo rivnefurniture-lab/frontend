@@ -4,7 +4,7 @@ import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { apiFetch, publicFetch } from "@/lib/api";
+import { publicFetch } from "@/lib/api";
 import { useAuth } from "@/context/AuthProvider";
 
 function PayContent() {
@@ -46,49 +46,23 @@ function PayContent() {
     }
   };
 
-  const payWayForPay = async () => {
+  const payStripe = async () => {
     try {
       setLoading(true);
       setError(null);
-      const result = await publicFetch("/pay/wayforpay/create", {
+      const result = await publicFetch("/pay/stripe/create", {
         method: "POST",
         body: JSON.stringify({ planId: plan, email: user?.email }),
       });
 
-      // Check if WayForPay is configured
       if (result.error) {
-        setError(`WayForPay is not configured yet. Please contact support or use another payment method.`);
+        setError(result.error);
         return;
       }
 
-      const { formAction, formData } = result;
-
-      // Create and submit form
-      const form = document.createElement("form");
-      form.method = "POST";
-      form.action = formAction;
-      form.acceptCharset = "utf-8";
-
-      Object.entries(formData).forEach(([key, value]) => {
-        if (Array.isArray(value)) {
-          value.forEach((v) => {
-            const input = document.createElement("input");
-            input.type = "hidden";
-            input.name = `${key}[]`;
-            input.value = v;
-            form.appendChild(input);
-          });
-        } else {
-          const input = document.createElement("input");
-          input.type = "hidden";
-          input.name = key;
-          input.value = value;
-          form.appendChild(input);
-        }
-      });
-
-      document.body.appendChild(form);
-      form.submit();
+      if (result.checkoutUrl) {
+        window.location.href = result.checkoutUrl;
+      }
     } catch (e) {
       setError(e.message);
     } finally {
@@ -141,14 +115,14 @@ function PayContent() {
               </Button>
 
               <Button
-                onClick={payWayForPay}
+                onClick={payStripe}
                 disabled={loading}
-                className="!bg-[#00A86B] hover:!bg-[#008f5a] !text-white !border-0"
+                className="!bg-[#635BFF] hover:!bg-[#4F46E5] !text-white !border-0"
               >
                 <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
+                  <path d="M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252.975 15.697 0 12.165 0 9.667 0 7.589.654 6.104 1.872 4.56 3.147 3.757 4.992 3.757 7.218c0 4.039 2.467 5.76 6.476 7.219 2.585.92 3.445 1.574 3.445 2.583 0 .98-.84 1.545-2.354 1.545-1.875 0-4.965-.921-6.99-2.109l-.9 5.555C5.175 22.99 8.385 24 11.714 24c2.641 0 4.843-.624 6.328-1.813 1.664-1.305 2.525-3.236 2.525-5.732 0-4.128-2.524-5.851-6.591-7.305z"/>
                 </svg>
-                Pay with WayForPay (Card)
+                Pay with Card (Stripe)
               </Button>
 
               <Button
