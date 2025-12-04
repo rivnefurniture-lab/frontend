@@ -187,10 +187,10 @@ const translations = {
     
     // Testimonials content
     testimonialContent: {
-      oleg: "I've been using Algotcha for 3 months to automate my trading. The results are impressive — stable profit without constant market monitoring. Highly recommend!",
-      nazar: "Finally found a platform that actually works. Backtests on real data convinced me. Now I trade stress-free.",
-      dmytro: "Started from zero, with no trading experience. Thanks to ready-made strategies, I already have my first results. Support responds quickly and helps figure things out.",
-      karina: "As an analyst, I value transparency. Here I see every trade with indicator proof. No black boxes — everything is honest and clear.",
+      oleg: "Before this, trading honestly felt like me throwing darts in the dark and now I can really tell what looks good before I even risk a dollar.",
+      nazar: "I'm sitting here wondering why I ever paid some guy to do what this thing does on its own for way less.",
+      dmytro: "Using Algotcha feels like letting your smartest friend do the hard part while you just do nothing.",
+      karina: "Feels like Wall Street on autopilot, but simple enough that even I can run it without overthinking.",
     },
   },
   
@@ -375,10 +375,10 @@ const translations = {
     
     // Testimonials content
     testimonialContent: {
-      oleg: "Вже 3 місяці використовую Algotcha для автоматизації торгівлі. Результати вражають — стабільний прибуток без постійного моніторингу ринку. Рекомендую всім!",
-      nazar: "Нарешті знайшов платформу, яка реально працює. Бектести на реальних даних — це те, що мене переконало. Тепер торгую без стресу.",
-      dmytro: "Почав з нуля, без досвіду в трейдингу. Завдяки готовим стратегіям вже маю перші результати. Підтримка відповідає швидко і допомагає розібратися.",
-      karina: "Як аналітик, ціную прозорість. Тут бачу кожну угоду з доказами по індикаторах. Жодних чорних ящиків — все чесно і зрозуміло.",
+      oleg: "До цього трейдинг був як кидати дротики в темряві, а тепер я дійсно бачу, що виглядає перспективно, перш ніж ризикувати хоч долар.",
+      nazar: "Сиджу і думаю, навіщо я раніше платив комусь за те, що ця штука робить сама і набагато дешевше.",
+      dmytro: "Користуватись Algotcha — це як дати своєму найрозумнішому другу зробити всю важку роботу, поки ти просто нічого не робиш.",
+      karina: "Відчуття, ніби Волл-стріт на автопілоті, але настільки просто, що навіть я можу керувати цим без зайвих роздумів.",
     },
   },
 };

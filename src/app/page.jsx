@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import Hero from "@/app/hero";
 import { apiFetch } from "@/lib/api";
 import { useLanguage } from "@/context/LanguageContext";
@@ -40,13 +39,14 @@ export default function Page() {
   const [loading, setLoading] = useState(true);
   const [chartData] = useState(generateEquityCurve);
 
-  // Testimonials data
+  // Testimonials data - using initials for now, can add images later
   const testimonials = [
     {
       id: 1,
       name: "Олег К.",
       role: language === "uk" ? "Активний трейдер" : "Active Trader",
-      image: "/testimonials/oleg.jpg",
+      initials: "ОК",
+      gradient: "from-blue-500 to-cyan-500",
       rating: 5,
       text: t("testimonialContent.oleg"),
     },
@@ -54,25 +54,26 @@ export default function Page() {
       id: 2,
       name: "Назар Г.",
       role: language === "uk" ? "Криптоінвестор" : "Crypto Investor",
-      image: "/testimonials/nazar.jpg",
+      initials: "НГ",
+      gradient: "from-purple-500 to-pink-500",
       rating: 5,
       text: t("testimonialContent.nazar"),
     },
     {
       id: 3,
       name: "Дмитро С.",
-      role: language === "uk" ? "Початківець" : "Beginner",
-      image: null,
+      role: language === "uk" ? "Ентузіаст" : "Enthusiast",
       initials: "ДС",
+      gradient: "from-amber-500 to-orange-500",
       rating: 5,
       text: t("testimonialContent.dmytro"),
     },
     {
       id: 4,
       name: "Каріна Г.",
-      role: language === "uk" ? "Фінансовий аналітик" : "Financial Analyst",
-      image: null,
+      role: language === "uk" ? "Інвестор" : "Investor",
       initials: "КГ",
+      gradient: "from-green-500 to-emerald-500",
       rating: 5,
       text: t("testimonialContent.karina"),
     },
@@ -324,21 +325,9 @@ export default function Page() {
                 </p>
 
                 <div className="flex items-center gap-3 pt-4 border-t border-gray-100">
-                  {testimonial.image ? (
-                    <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
-                      <Image
-                        src={testimonial.image}
-                        alt={testimonial.name}
-                        width={48}
-                        height={48}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  ) : (
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-semibold flex-shrink-0">
-                      {testimonial.initials}
-                    </div>
-                  )}
+                  <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${testimonial.gradient} flex items-center justify-center text-white font-semibold flex-shrink-0 shadow-lg`}>
+                    {testimonial.initials}
+                  </div>
                   <div>
                     <p className="font-semibold text-gray-900">{testimonial.name}</p>
                     <p className="text-sm text-gray-500">{testimonial.role}</p>
