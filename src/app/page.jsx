@@ -75,7 +75,7 @@ export default function Page() {
       role: language === "uk" ? "Активний трейдер" : "Active Trader",
       initials: "ОК",
       // Photo: guy with beard and sunglasses in front of КРАМАТОРСЬК sign
-      photo: "/testimonials/oleg.jpg",
+      photo: "/testimonials/oleg.jpeg",
       gradient: "from-blue-500 to-cyan-500",
       rating: 5,
       text: t("testimonialContent.oleg"),
@@ -86,7 +86,7 @@ export default function Page() {
       role: language === "uk" ? "Криптоінвестор" : "Crypto Investor",
       initials: "НГ",
       // Photo: guy in black hoodie
-      photo: "/testimonials/nazar.jpg",
+      photo: "/testimonials/nazar.jpeg",
       gradient: "from-purple-500 to-pink-500",
       rating: 5,
       text: t("testimonialContent.nazar"),
