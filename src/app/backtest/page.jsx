@@ -376,21 +376,32 @@ export default function BacktestPage() {
   const exportTradesCSV = () => {
     if (!results?.trades?.length) return;
     
-    const headers = ["Date", "Time", "Pair", "Action", "Price", "Quantity", "P&L %", "P&L USD", "Equity", "Drawdown", "Reason", "Indicator Proof"];
-    const rows = results.trades.map(t => [
-      t.date || '',
-      t.time || '',
-      t.symbol || '',
-      t.action || '',
-      t.price?.toFixed(2) || '',
-      t.quantity?.toFixed(6) || '',
-      t.profit_percent?.toFixed(2) || '0',
-      t.profit_usd?.toFixed(2) || '0',
-      t.equity?.toFixed(2) || '',
-      t.drawdown?.toFixed(2) || '',
-      `"${t.reason || t.comment || ''}"`,
-      `"${(t.indicatorProof || []).map(p => `${p.indicator}: ${p.value} ${p.condition} ${p.target}`).join('; ')}"`
-    ]);
+    const headers = ["DateTime", "Pair", "Action", "Price", "Size", "P&L %", "P&L USD", "Balance", "Drawdown", "Reason", "Indicators"];
+    const rows = results.trades.map(t => {
+      // Format date/time
+      const dateValue = t.timestamp || t.date || t.time || t.createdAt;
+      let dateStr = '';
+      try {
+        const d = new Date(dateValue);
+        dateStr = !isNaN(d.getTime()) ? d.toISOString() : (dateValue || '');
+      } catch {
+        dateStr = dateValue || '';
+      }
+      
+      return [
+        dateStr,
+        t.symbol || t.pair || '',
+        t.action || t.side || '',
+        t.price?.toFixed(2) || '',
+        t.size || t.quantity || t.amount || '',
+        (t.profit_percent || t.pnl_percent || 0).toFixed(2),
+        (t.profit_usd || t.pnl_usd || 0).toFixed(2),
+        (t.equity || t.balance || 0).toFixed(2),
+        (t.drawdown || 0).toFixed(2),
+        `"${(t.reason || t.comment || t.trigger || '').replace(/"/g, "'')}"`,
+        `"${(t.indicatorProof || []).map(p => `${p.indicator}: ${p.value} ${p.condition} ${p.target}`).join('; ')}"`
+      ];
+    });
     
     const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
@@ -400,6 +411,27 @@ export default function BacktestPage() {
     a.download = `${strategyName.replace(/\s+/g, '_')}_trades_${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  // Helper to format trade date/time
+  const formatTradeDateTime = (trade) => {
+    // Try various date field names
+    const dateValue = trade.timestamp || trade.date || trade.time || trade.createdAt;
+    if (!dateValue) return '-';
+    
+    try {
+      const d = new Date(dateValue);
+      if (isNaN(d.getTime())) return dateValue;
+      return d.toLocaleString('uk-UA', { 
+        year: 'numeric', 
+        month: '2-digit', 
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch {
+      return dateValue;
+    }
   };
 
   // Export trades as PDF report
@@ -419,14 +451,23 @@ export default function BacktestPage() {
           .subtitle { color: #666; margin-top: 5px; }
           .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin: 30px 0; }
           .metric { padding: 15px; background: #f8f9fa; border-radius: 8px; text-align: center; }
-          .metric-value { font-size: 24px; font-weight: bold; color: #2563eb; }
+          .metric-value { font-size: 24px; font-weight: bold; }
+          .metric-value.profit { color: #16a34a; }
+          .metric-value.loss { color: #dc2626; }
           .metric-label { font-size: 12px; color: #666; }
-          table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-          th, td { padding: 10px; text-align: left; border-bottom: 1px solid #eee; }
-          th { background: #f8f9fa; font-weight: 600; }
-          .profit { color: #16a34a; }
-          .loss { color: #dc2626; }
-          .footer { margin-top: 40px; text-align: center; color: #999; font-size: 12px; }
+          .strategy-info { background: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0; }
+          .strategy-info h3 { margin: 0 0 10px 0; color: #1e40af; }
+          .strategy-info p { margin: 5px 0; color: #334155; }
+          table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 12px; }
+          th, td { padding: 8px 6px; text-align: left; border-bottom: 1px solid #e5e7eb; }
+          th { background: #f1f5f9; font-weight: 600; color: #475569; }
+          .profit { color: #16a34a; font-weight: 600; }
+          .loss { color: #dc2626; font-weight: 600; }
+          .buy { color: #16a34a; font-weight: bold; }
+          .sell { color: #dc2626; font-weight: bold; }
+          .footer { margin-top: 40px; text-align: center; color: #999; font-size: 11px; border-top: 1px solid #eee; padding-top: 20px; }
+          .indicator-proof { background: #fefce8; padding: 15px; border-radius: 8px; margin: 20px 0; }
+          .indicator-proof h3 { margin: 0 0 10px 0; color: #854d0e; }
         </style>
       </head>
       <body>
@@ -436,28 +477,57 @@ export default function BacktestPage() {
         </div>
         
         <h1>${strategyName}</h1>
-        <p>Generated: ${new Date().toLocaleString()}</p>
+        <p>Generated: ${new Date().toLocaleString('uk-UA')}</p>
+        <p>Period: ${startDate} to ${endDate}</p>
+        
+        <div class="strategy-info">
+          <h3>Strategy Configuration</h3>
+          <p><strong>Trading Pairs:</strong> ${selectedPairs.join(', ')}</p>
+          <p><strong>Initial Balance:</strong> $${initialBalance.toLocaleString()}</p>
+          <p><strong>Base Order Size:</strong> $${baseOrderSize}</p>
+          <p><strong>Max Active Deals:</strong> ${maxActiveDeals}</p>
+          <p><strong>Take Profit:</strong> ${takeProfit}% | <strong>Stop Loss:</strong> ${stopLoss}%</p>
+        </div>
         
         <div class="metrics">
           <div class="metric">
-            <div class="metric-value">${results.metrics?.net_profit}%</div>
+            <div class="metric-value ${(results.metrics?.net_profit || 0) >= 0 ? 'profit' : 'loss'}">${results.metrics?.net_profit || 0}%</div>
             <div class="metric-label">Net Profit</div>
           </div>
           <div class="metric">
-            <div class="metric-value">${results.metrics?.win_rate}%</div>
+            <div class="metric-value">${results.metrics?.win_rate || 0}%</div>
             <div class="metric-label">Win Rate</div>
           </div>
           <div class="metric">
-            <div class="metric-value">${results.metrics?.total_trades}</div>
+            <div class="metric-value">${results.metrics?.total_trades || 0}</div>
             <div class="metric-label">Total Trades</div>
           </div>
           <div class="metric">
-            <div class="metric-value">${results.metrics?.sharpe_ratio}</div>
+            <div class="metric-value">${results.metrics?.sharpe_ratio || 0}</div>
             <div class="metric-label">Sharpe Ratio</div>
           </div>
         </div>
+
+        <div class="metrics">
+          <div class="metric">
+            <div class="metric-value loss">-${results.metrics?.max_drawdown || 0}%</div>
+            <div class="metric-label">Max Drawdown</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value">${results.metrics?.profit_factor || 0}</div>
+            <div class="metric-label">Profit Factor</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value">${results.metrics?.sortino_ratio || 0}</div>
+            <div class="metric-label">Sortino Ratio</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value profit">+${results.metrics?.yearly_return || 0}%</div>
+            <div class="metric-label">Yearly Return</div>
+          </div>
+        </div>
         
-        <h2>Trade History</h2>
+        <h2>Trade History (${results.trades.length} trades)</h2>
         <table>
           <thead>
             <tr>
@@ -465,37 +535,67 @@ export default function BacktestPage() {
               <th>Pair</th>
               <th>Action</th>
               <th>Price</th>
-              <th>Equity</th>
+              <th>Size</th>
               <th>P&L %</th>
+              <th>P&L $</th>
+              <th>Balance</th>
               <th>Reason</th>
             </tr>
           </thead>
           <tbody>
-            ${results.trades.map(t => `
+            ${results.trades.map(t => {
+              const pnlPercent = t.profit_percent || t.pnl_percent || t.pnl || 0;
+              const pnlUsd = t.profit_usd || t.pnl_usd || 0;
+              const action = t.action || t.side || 'BUY';
+              const equity = t.equity || t.balance || t.total || 0;
+              const size = t.size || t.quantity || t.amount || 0;
+              return `
               <tr>
-                <td>${t.date || '-'} ${t.time || ''}</td>
-                <td>${t.symbol || '-'}</td>
-                <td style="color: ${t.action === 'BUY' ? 'green' : 'red'}; font-weight: bold;">${t.action || '-'}</td>
-                <td>$${t.price?.toFixed(2) || '-'}</td>
-                <td>$${t.equity?.toFixed(0) || '-'}</td>
-                <td class="${(t.profit_percent || 0) >= 0 ? 'profit' : 'loss'}">
-                  ${(t.profit_percent || 0) >= 0 ? '+' : ''}${(t.profit_percent || 0).toFixed(2)}%
+                <td>${formatTradeDateTime(t)}</td>
+                <td><strong>${t.symbol || t.pair || '-'}</strong></td>
+                <td class="${action.toUpperCase() === 'BUY' ? 'buy' : 'sell'}">${action.toUpperCase()}</td>
+                <td>$${(t.price || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                <td>${typeof size === 'number' ? size.toFixed(6) : size}</td>
+                <td class="${pnlPercent >= 0 ? 'profit' : 'loss'}">
+                  ${pnlPercent >= 0 ? '+' : ''}${pnlPercent.toFixed(2)}%
                 </td>
-                <td style="font-size: 11px;">${t.reason || t.comment || '-'}</td>
+                <td class="${pnlUsd >= 0 ? 'profit' : 'loss'}">
+                  ${pnlUsd >= 0 ? '+' : ''}$${pnlUsd.toFixed(2)}
+                </td>
+                <td>$${equity.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0})}</td>
+                <td style="font-size: 10px; max-width: 150px;">${t.reason || t.comment || t.trigger || '-'}</td>
               </tr>
-            `).join('')}
+            `}).join('')}
           </tbody>
         </table>
         
-        <h3 style="margin-top: 30px;">Indicator Proof (Sample)</h3>
-        <p style="font-size: 12px; color: #666;">
-          Each trade shows the exact indicator values that triggered the signal. 
-          This proves the backtest accuracy based on real historical data.
-        </p>
+        ${results.trades.some(t => t.indicatorProof?.length > 0) ? `
+        <div class="indicator-proof">
+          <h3>Indicator Proof (Sample from first trades)</h3>
+          <p style="font-size: 11px; color: #666; margin-bottom: 10px;">
+            Each trade shows the exact indicator values that triggered the signal:
+          </p>
+          ${results.trades.slice(0, 5).filter(t => t.indicatorProof?.length > 0).map(t => `
+            <div style="background: white; padding: 10px; margin: 5px 0; border-radius: 4px; font-size: 11px;">
+              <strong>${t.symbol} ${t.action}</strong> @ $${t.price?.toFixed(2)} - 
+              ${t.indicatorProof.map(p => `${p.indicator}: ${p.value} ${p.condition} ${p.target}${p.triggered ? ' ✓' : ''}`).join(' | ')}
+            </div>
+          `).join('')}
+        </div>
+        ` : `
+        <div class="indicator-proof">
+          <h3>Indicator-Based Trading</h3>
+          <p style="font-size: 11px; color: #666;">
+            All trades were executed based on technical indicator conditions. 
+            The backtest uses real historical price data from Binance to ensure accuracy.
+          </p>
+        </div>
+        `}
         
         <div class="footer">
           <p>© ${new Date().getFullYear()} Algotcha. All rights reserved.</p>
-          <p>Past performance does not guarantee future results.</p>
+          <p>Past performance does not guarantee future results. Trading involves risk.</p>
+          <p style="margin-top: 10px;">Report generated at ${new Date().toISOString()}</p>
         </div>
       </body>
       </html>
@@ -1176,33 +1276,54 @@ export default function BacktestPage() {
                           </tr>
                         </thead>
                         <tbody>
-                          {results.trades.slice(0, 50).map((trade, idx) => (
+                          {results.trades.slice(0, 50).map((trade, idx) => {
+                            // Format trade date
+                            const dateValue = trade.timestamp || trade.date || trade.time || trade.createdAt;
+                            let formattedDate = '-';
+                            let formattedTime = '';
+                            try {
+                              if (dateValue) {
+                                const d = new Date(dateValue);
+                                if (!isNaN(d.getTime())) {
+                                  formattedDate = d.toLocaleDateString('uk-UA');
+                                  formattedTime = d.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' });
+                                }
+                              }
+                            } catch {}
+                            
+                            const action = trade.action || trade.side || 'BUY';
+                            const pnlPercent = trade.profit_percent ?? trade.pnl_percent ?? 0;
+                            const pnlUsd = trade.profit_usd ?? trade.pnl_usd ?? 0;
+                            const equity = trade.equity ?? trade.balance ?? 0;
+                            const drawdown = trade.drawdown ?? 0;
+                            
+                            return (
                             <tr key={idx} className="border-t hover:bg-gray-50">
                               <td className="p-2 text-xs">
-                                <div>{trade.date || trade.timestamp?.split('T')[0]}</div>
-                                <div className="text-gray-400">{trade.time || ''}</div>
+                                <div>{formattedDate}</div>
+                                <div className="text-gray-400">{formattedTime}</div>
                               </td>
-                              <td className="p-2 font-medium">{trade.symbol}</td>
+                              <td className="p-2 font-medium">{trade.symbol || trade.pair || '-'}</td>
                               <td className="p-2">
                                 <span className={`px-2 py-0.5 rounded text-xs font-medium ${
-                                  trade.action === 'BUY' 
+                                  action.toUpperCase() === 'BUY' 
                                     ? 'bg-green-100 text-green-700' 
                                     : 'bg-red-100 text-red-700'
                                 }`}>
-                                  {trade.action}
+                                  {action.toUpperCase()}
                                 </span>
                               </td>
-                              <td className="p-2">${trade.price?.toFixed(2)}</td>
+                              <td className="p-2">${(trade.price ?? 0).toFixed(2)}</td>
                               <td className={`p-2 font-medium ${
-                                (trade.profit_percent || 0) >= 0 ? 'text-green-600' : 'text-red-600'
+                                pnlPercent >= 0 ? 'text-green-600' : 'text-red-600'
                               }`}>
-                                {trade.profit_percent >= 0 ? '+' : ''}{trade.profit_percent?.toFixed(2)}%
+                                {pnlPercent >= 0 ? '+' : ''}{pnlPercent.toFixed(2)}%
                                 <div className="text-xs text-gray-500">
-                                  ${trade.profit_usd?.toFixed(2) || '0'}
+                                  ${pnlUsd.toFixed(2)}
                                 </div>
                               </td>
-                              <td className="p-2">${trade.equity?.toFixed(0)}</td>
-                              <td className="p-2 text-red-600">-{trade.drawdown?.toFixed(1)}%</td>
+                              <td className="p-2">${equity.toFixed(0)}</td>
+                              <td className="p-2 text-red-600">-{drawdown.toFixed(1)}%</td>
                               <td className="p-2">
                                 <span className={`text-xs px-2 py-0.5 rounded ${
                                   trade.reason?.includes('Take Profit') ? 'bg-green-100 text-green-700' :
@@ -1230,7 +1351,7 @@ export default function BacktestPage() {
                                 )}
                               </td>
                             </tr>
-                          ))}
+                          )})}
                         </tbody>
                       </table>
                       {results.trades.length > 50 && (
