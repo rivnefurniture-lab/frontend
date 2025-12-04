@@ -15,18 +15,15 @@ import {
 } from "recharts";
 import { Star, Quote } from "lucide-react";
 
-// Testimonial avatar with photo fallback
+// Testimonial avatar with photo
 function TestimonialAvatar({ testimonial }) {
-  const [imgError, setImgError] = useState(false);
-  
   return (
     <div className="flex items-center gap-3 pt-4 border-t border-gray-100">
-      {testimonial.photo && !imgError ? (
+      {testimonial.photo ? (
         <img 
           src={testimonial.photo}
           alt={testimonial.name}
           className="w-12 h-12 rounded-full object-cover flex-shrink-0 shadow-lg border-2 border-white"
-          onError={() => setImgError(true)}
         />
       ) : (
         <div 
