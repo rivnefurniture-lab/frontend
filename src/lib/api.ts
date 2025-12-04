@@ -26,8 +26,15 @@ export async function apiFetch<T = any>(
     const url = `${BASE_URL}${path}`;
     console.log(`API Request: ${options.method || 'GET'} ${url}`);
 
+    // Ensure body is properly stringified
+    let body = options.body;
+    if (body && typeof body === 'object' && !(body instanceof FormData)) {
+      body = JSON.stringify(body);
+    }
+
     const res = await fetch(url, {
       ...options,
+      body,
       headers,
       // Important for CORS
       mode: 'cors',

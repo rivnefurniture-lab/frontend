@@ -30,10 +30,23 @@ export default function StrategyDetailPage() {
   const [amount, setAmount] = useState(100);
   const [starting, setStarting] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
+  const [connectedExchanges, setConnectedExchanges] = useState([]);
 
   useEffect(() => {
     fetchStrategy();
-  }, [params.id]);
+    if (user) {
+      fetchExchangeConnections();
+    }
+  }, [params.id, user]);
+
+  const fetchExchangeConnections = async () => {
+    try {
+      const connections = await apiFetch("/exchange/connections");
+      setConnectedExchanges(connections || []);
+    } catch (e) {
+      console.log("No exchange connections found");
+    }
+  };
 
   const fetchStrategy = async () => {
     try {
@@ -379,15 +392,39 @@ export default function StrategyDetailPage() {
 
               <div>
                 <label className="text-sm text-gray-600 block mb-1">Exchange</label>
-                <select
-                  className="w-full h-11 px-4 rounded-lg border border-gray-200"
-                  value={exchange}
-                  onChange={(e) => setExchange(e.target.value)}
-                >
-                  <option value="binance">Binance</option>
-                  <option value="bybit">Bybit</option>
-                  <option value="okx">OKX</option>
-                </select>
+                <div className="space-y-2">
+                  {["binance", "bybit", "okx"].map((ex) => {
+                    const isConnected = connectedExchanges.some(c => c.exchange === ex);
+                    return (
+                      <div
+                        key={ex}
+                        onClick={() => setExchange(ex)}
+                        className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition ${
+                          exchange === ex 
+                            ? "border-blue-500 bg-blue-50" 
+                            : "border-gray-200 hover:border-gray-300"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className={`w-3 h-3 rounded-full ${
+                            isConnected ? "bg-green-500" : "bg-gray-300"
+                          }`}></span>
+                          <span className="font-medium capitalize">{ex}</span>
+                          {isConnected && (
+                            <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                              Connected
+                            </span>
+                          )}
+                        </div>
+                        {!isConnected && (
+                          <Link href="/connect" className="text-xs text-blue-600 hover:underline">
+                            Connect →
+                          </Link>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
 
               <div>

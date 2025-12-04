@@ -64,6 +64,9 @@ export default function Footer() {
               <Link href='/legal#terms' className='hover:text-white transition'>{t("footer.terms")}</Link>
               <Link href='/legal#privacy' className='hover:text-white transition'>{t("footer.privacy")}</Link>
               <Link href='/legal#risk' className='hover:text-white transition'>{t("footer.risk")}</Link>
+              <Link href='/refund' className='hover:text-white transition'>
+                {language === "uk" ? "Повернення коштів" : "Refund Policy"}
+              </Link>
             </nav>
           </div>
         </div>

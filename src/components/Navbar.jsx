@@ -74,7 +74,7 @@ function LanguageSwitcher() {
 }
 
 function UserDropdown({ user, onLogout }) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
   
@@ -141,6 +141,14 @@ function UserDropdown({ user, onLogout }) {
             >
               <BarChart3 className="w-4 h-4 text-blue-500" />
               <span>{t("nav.dashboard")}</span>
+            </Link>
+            <Link
+              href="/trades"
+              onClick={() => setIsOpen(false)}
+              className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              <BarChart3 className="w-4 h-4 text-green-500" />
+              <span>{language === "uk" ? "Історія угод" : "Trade History"}</span>
             </Link>
             <Link
               href="/strategies"
