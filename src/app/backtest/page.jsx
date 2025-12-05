@@ -344,7 +344,7 @@ export default function BacktestPage() {
         safetyOrderVolumeScale,
       };
 
-      await apiFetch("/strategies/save", {
+      const response = await apiFetch("/strategies/save", {
         method: "POST",
         body: {
           name: strategyName,
@@ -363,10 +363,19 @@ export default function BacktestPage() {
           },
         },
       });
-      setSaved(true);
-      setTimeout(() => setSaved(false), 5000);
+      
+      if (response?.success) {
+        setSaved(true);
+        alert(`✓ Strategy "${strategyName}" saved successfully!\n\nView it on the Strategies page or Dashboard.`);
+      } else if (response?.error) {
+        throw new Error(response.error);
+      } else {
+        setSaved(true);
+      }
     } catch (e) {
+      console.error("Save error:", e);
       setError("Failed to save: " + e.message);
+      alert("Failed to save strategy: " + e.message);
     } finally {
       setSaving(false);
     }

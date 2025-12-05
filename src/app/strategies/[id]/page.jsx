@@ -105,22 +105,38 @@ export default function StrategyDetailPage() {
       router.push("/auth");
       return;
     }
+    
+    // Check if exchange is connected
+    const exchangeConnection = connectedExchanges.find(c => c.exchange === exchange || c === exchange);
+    if (!exchangeConnection) {
+      alert(`Please connect your ${exchange} account first on the Connect page.`);
+      router.push("/connect");
+      return;
+    }
+    
     try {
       setStarting(true);
-      await apiFetch("/strategies/start", {
+      const response = await apiFetch("/strategies/start", {
         method: "POST",
         body: {
-          strategyId: strategy.id,
-          config: JSON.stringify(strategy.config),
+          strategyId: String(strategy.id),
+          config: JSON.stringify(strategy.config || {}),
           exchange,
           symbol,
           timeframe,
           orderSize: Number(amount),
         },
       });
-      alert("Live trading started! Check Dashboard for updates.");
+      
+      if (response?.error) {
+        alert("Error: " + response.error);
+        return;
+      }
+      
+      alert("✓ Live trading started successfully!\n\nGo to Dashboard to monitor your strategy.");
       router.push("/dashboard");
     } catch (e) {
+      console.error("Start trading error:", e);
       alert("Error: " + e.message);
     } finally {
       setStarting(false);
