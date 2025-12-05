@@ -55,17 +55,23 @@ function BalanceWidget() {
         return;
       }
 
-      // Fetch balance with timeout
+      // Fetch balance with timeout - use the same endpoint as Connect page
       const balanceRes = await Promise.race([
-        apiFetch("/exchange/balance"),
+        apiFetch("/exchange/balance?exchange=binance"),
         new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), 8000))
-      ]).catch(() => null);
+      ]).catch((e) => {
+        console.log("Balance fetch failed:", e);
+        return null;
+      });
+      
+      console.log("Balance response:", balanceRes);
       
       if (balanceRes && !balanceRes.error) {
         // CCXT returns { total: { USDT: 59.48, ... }, free: {...}, used: {...} }
-        const totalBalances = balanceRes.total || {};
-        const usdtBalance = totalBalances.USDT || totalBalances.usdt || 0;
-        setBalance(typeof usdtBalance === 'number' ? usdtBalance : parseFloat(usdtBalance) || 0);
+        const totalBalances = balanceRes.total || balanceRes || {};
+        const usdtBalance = totalBalances.USDT || totalBalances.usdt || totalBalances['USDT'] || 0;
+        console.log("Parsed USDT balance:", usdtBalance);
+        setBalance(typeof usdtBalance === 'number' ? usdtBalance : parseFloat(String(usdtBalance)) || 0);
       }
 
       // Fetch today's PnL with timeout
