@@ -60,6 +60,7 @@ export default function Dashboard() {
   const [strategies, setStrategies] = useState([]);
   const [runningStrategies, setRunningStrategies] = useState([]);
   const [backtestResults, setBacktestResults] = useState([]);
+  const [tradeStats, setTradeStats] = useState({ totalTrades: 0, totalProfit: 0, winningTrades: 0, winRate: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [exchangeConnected, setExchangeConnected] = useState(false);
@@ -93,15 +94,17 @@ export default function Dashboard() {
       };
       
       // Load all data in parallel with timeouts
-      const [strategiesRes, runningRes, backtestsRes] = await Promise.all([
+      const [strategiesRes, runningRes, backtestsRes, statsRes] = await Promise.all([
         fetchWithTimeout("/strategies/my"),
         fetchWithTimeout("/strategies/running"),
         fetchWithTimeout("/backtest/results"),
+        fetchWithTimeout("/trades/stats"),
       ]);
 
       setStrategies(Array.isArray(strategiesRes) ? strategiesRes : []);
       setRunningStrategies(Array.isArray(runningRes) ? runningRes : []);
       setBacktestResults(Array.isArray(backtestsRes) ? backtestsRes : []);
+      setTradeStats(statsRes || { totalTrades: 0, totalProfit: 0, winningTrades: 0, winRate: 0 });
     } catch (e) {
       console.error("Dashboard load error:", e);
       setError(e.message);
@@ -162,11 +165,10 @@ export default function Dashboard() {
     return null;
   }
 
-  const totalProfit = runningStrategies.reduce((sum, r) => sum + (r.totalProfit || 0), 0);
-  const totalTrades = runningStrategies.reduce((sum, r) => sum + (r.totalTrades || 0), 0);
-  const winRate = totalTrades > 0 
-    ? (runningStrategies.reduce((sum, r) => sum + (r.winningTrades || 0), 0) / totalTrades * 100).toFixed(1)
-    : 0;
+  // Use trade stats from all trades (not just running strategies)
+  const totalProfit = tradeStats.totalProfit || 0;
+  const totalTrades = tradeStats.totalTrades || 0;
+  const winRate = tradeStats.winRate?.toFixed(1) || 0;
 
   return (
     <div className="container py-8">
