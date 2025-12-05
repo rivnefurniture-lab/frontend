@@ -67,6 +67,33 @@ export default function StrategyDetailPage() {
           monthly: (yearlyReturn / 12).toFixed(1),
           yearly: yearlyReturn.toFixed(1),
         };
+        
+        // Fetch trades from the backend for preset strategies
+        if (found.isPreset || params.id.startsWith('rsi-ma-bb')) {
+          try {
+            const tradesData = await apiFetch(`/backtest/preset-strategies/${params.id}/trades`);
+            if (tradesData?.trades) {
+              found.recentTrades = tradesData.trades.slice(0, 100).map(t => ({
+                date: t.timestamp?.split(' ')[0] || 'N/A',
+                time: t.timestamp?.split(' ')[1] || '',
+                pair: t.symbol,
+                side: t.action,
+                entry: parseFloat(t.price) || 0,
+                exit: t.action?.includes('Exit') || t.action === 'SELL' ? parseFloat(t.price) : 0,
+                pnl: parseFloat(t.profit_loss) || 0,
+                pnlUsd: (parseFloat(t.profit_loss) * 100) || 0,
+                balance: parseFloat(t.balance) || 0,
+                orderSize: parseFloat(t.order_size) || 0,
+                comment: t.trade_comment,
+                status: t.action === 'BUY' ? 'Entry' : (t.action?.includes('Exit') ? 'Exit' : t.action),
+              }));
+              found.totalBacktestTrades = tradesData.total || found.recentTrades.length;
+            }
+          } catch (e) {
+            console.log('Could not fetch trades:', e);
+          }
+        }
+        
         setStrategy(found);
       }
     } catch (err) {
@@ -313,52 +340,65 @@ export default function StrategyDetailPage() {
 
           {activeTab === "trades" && (
             <Card>
-              <CardHeader>
-                <CardTitle>Recent Trades</CardTitle>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>Backtest Trades</CardTitle>
+                <span className="text-sm text-gray-500">
+                  {strategy.totalBacktestTrades || strategy.recentTrades?.length || 0} total trades
+                </span>
               </CardHeader>
               <CardContent>
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto max-h-[600px] overflow-y-auto">
                   <table className="w-full">
-                    <thead>
+                    <thead className="sticky top-0 bg-white">
                       <tr className="text-left text-sm text-gray-500 border-b">
                         <th className="pb-3 font-medium">Date</th>
+                        <th className="pb-3 font-medium">Time</th>
                         <th className="pb-3 font-medium">Pair</th>
-                        <th className="pb-3 font-medium">Side</th>
-                        <th className="pb-3 font-medium">Entry</th>
-                        <th className="pb-3 font-medium">Exit</th>
+                        <th className="pb-3 font-medium">Action</th>
+                        <th className="pb-3 font-medium">Price</th>
+                        <th className="pb-3 font-medium">Size</th>
                         <th className="pb-3 font-medium">P&L</th>
-                        <th className="pb-3 font-medium">Status</th>
+                        <th className="pb-3 font-medium">Balance</th>
+                        <th className="pb-3 font-medium">Reason</th>
                       </tr>
                     </thead>
                     <tbody>
                       {strategy.recentTrades?.map((trade, i) => (
-                        <tr key={i} className="border-b last:border-0">
-                          <td className="py-3 text-sm">{trade.date}</td>
-                          <td className="py-3 font-medium">{trade.pair}</td>
-                          <td className={`py-3 ${trade.side === "BUY" ? "text-green-600" : "text-red-600"}`}>
+                        <tr key={i} className="border-b last:border-0 hover:bg-gray-50">
+                          <td className="py-2 text-sm">{trade.date}</td>
+                          <td className="py-2 text-sm text-gray-500">{trade.time}</td>
+                          <td className="py-2 font-medium text-sm">{trade.pair}</td>
+                          <td className={`py-2 font-medium text-sm ${
+                            trade.side === "BUY" || trade.side?.includes("Entry") 
+                              ? "text-green-600" 
+                              : trade.side === "SELL" || trade.side?.includes("Exit")
+                              ? "text-red-600"
+                              : "text-gray-600"
+                          }`}>
                             {trade.side}
                           </td>
-                          <td className="py-3">${trade.entry.toLocaleString()}</td>
-                          <td className="py-3">${trade.exit.toLocaleString()}</td>
-                          <td className={`py-3 font-medium ${trade.pnl >= 0 ? "text-green-600" : "text-red-600"}`}>
-                            {trade.pnl >= 0 ? "+" : ""}{trade.pnl}%
+                          <td className="py-2 text-sm">${trade.entry?.toLocaleString(undefined, { maximumFractionDigits: 2 })}</td>
+                          <td className="py-2 text-sm">${trade.orderSize?.toLocaleString()}</td>
+                          <td className={`py-2 font-medium text-sm ${trade.pnl >= 0 ? "text-green-600" : "text-red-600"}`}>
+                            {trade.pnl > 0 ? "+" : ""}{(trade.pnl * 100)?.toFixed(2)}%
                           </td>
-                          <td className="py-3">
-                            <span className={`px-2 py-1 rounded text-xs ${
-                              trade.status === "closed" 
-                                ? "bg-gray-100 text-gray-600"
-                                : "bg-green-100 text-green-600"
-                            }`}>
-                              {trade.status}
-                            </span>
+                          <td className="py-2 text-sm">${trade.balance?.toLocaleString(undefined, { maximumFractionDigits: 0 })}</td>
+                          <td className="py-2 text-xs text-gray-500 max-w-[200px] truncate" title={trade.comment}>
+                            {trade.comment}
                           </td>
                         </tr>
-                      ))}
+                      )) || (
+                        <tr>
+                          <td colSpan={9} className="py-8 text-center text-gray-500">
+                            No trades available. Run a backtest to see trades.
+                          </td>
+                        </tr>
+                      )}
                     </tbody>
                   </table>
                 </div>
-                {(!strategy.recentTrades || strategy.recentTrades.length === 0) && (
-                  <p className="text-center text-gray-500 py-8">No trades yet</p>
+                {!strategy.recentTrades?.length && (
+                  <p className="text-center text-gray-500 py-4">No trades yet</p>
                 )}
               </CardContent>
             </Card>
