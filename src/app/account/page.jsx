@@ -494,34 +494,60 @@ function AccountPageContent() {
                   onChange={async (e) => {
                     const file = e.target.files?.[0];
                     if (!file) return;
-                    // Limit file size to 500KB for base64 storage
-                    if (file.size > 500 * 1024) {
-                      setError(language === "uk" ? "Фото занадто велике (макс 500KB)" : "Photo too large (max 500KB)");
-                      return;
-                    }
-                    // Convert to base64
-                    const reader = new FileReader();
-                    reader.onload = async (ev) => {
-                      const base64 = ev.target?.result;
-                      setProfile(p => ({ ...p, profilePhoto: base64 }));
-                      // Save to backend
-                      try {
-                        const result = await apiFetch("/user/profile", {
-                          method: "POST",
-                          body: { profilePhoto: base64 },
-                        });
-                        if (result?.error) {
-                          console.error("Backend error:", result);
-                          setError(result.error + (result.details ? ": " + result.details : ""));
-                        } else {
-                          setMessage(language === "uk" ? "Фото оновлено!" : "Photo updated!");
-                        }
-                      } catch (err) {
-                        console.error("Photo upload error:", err);
-                        setError((language === "uk" ? "Не вдалося зберегти фото: " : "Failed to save photo: ") + err.message);
-                      }
+                    
+                    // Compress and resize image
+                    const compressImage = (file, maxWidth = 400, quality = 0.7) => {
+                      return new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                          const img = new Image();
+                          img.onload = () => {
+                            const canvas = document.createElement('canvas');
+                            let width = img.width;
+                            let height = img.height;
+                            
+                            // Scale down if too large
+                            if (width > maxWidth) {
+                              height = (height * maxWidth) / width;
+                              width = maxWidth;
+                            }
+                            
+                            canvas.width = width;
+                            canvas.height = height;
+                            
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0, width, height);
+                            
+                            // Convert to compressed JPEG
+                            resolve(canvas.toDataURL('image/jpeg', quality));
+                          };
+                          img.src = e.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                      });
                     };
-                    reader.readAsDataURL(file);
+                    
+                    try {
+                      setMessage(language === "uk" ? "Обробка фото..." : "Processing photo...");
+                      const compressedBase64 = await compressImage(file);
+                      setProfile(p => ({ ...p, profilePhoto: compressedBase64 }));
+                      
+                      // Save to backend
+                      const result = await apiFetch("/user/profile", {
+                        method: "POST",
+                        body: { profilePhoto: compressedBase64 },
+                      });
+                      if (result?.error) {
+                        console.error("Backend error:", result);
+                        setError(result.error + (result.details ? ": " + result.details : ""));
+                      } else {
+                        setMessage(language === "uk" ? "Фото оновлено!" : "Photo updated!");
+                        setError(null);
+                      }
+                    } catch (err) {
+                      console.error("Photo upload error:", err);
+                      setError((language === "uk" ? "Не вдалося зберегти фото: " : "Failed to save photo: ") + err.message);
+                    }
                   }}
                 />
               </label>
