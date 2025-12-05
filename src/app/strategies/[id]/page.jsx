@@ -54,13 +54,8 @@ export default function StrategyDetailPage() {
       const allStrategies = await apiFetch("/backtest/strategies");
       const found = allStrategies?.find(s => s.id === params.id || s.id === parseInt(params.id));
       if (found) {
-        // Generate chart data based on yearly return
+        // Calculate returns
         const yearlyReturn = found.cagr || 0;
-        const monthlyReturn = yearlyReturn / 12 / 100;
-        found.history = Array.from({ length: 24 }, (_, i) => ({
-          month: i + 1,
-          value: 10000 * Math.pow(1 + monthlyReturn, i) * (1 + Math.sin(i / 3) / 20),
-        }));
         found.returns = {
           daily: (yearlyReturn / 365).toFixed(3),
           weekly: (yearlyReturn / 52).toFixed(2),
@@ -68,14 +63,30 @@ export default function StrategyDetailPage() {
           yearly: yearlyReturn.toFixed(1),
         };
         
+        // Default history (will be replaced by real trades if available)
+        found.history = [];
+        
         // Fetch trades from the backend for preset strategies
         if (found.isPreset || params.id.startsWith('rsi-ma-bb')) {
           try {
             const tradesData = await apiFetch(`/backtest/preset-strategies/${params.id}/trades`);
-            if (tradesData?.trades) {
-              found.recentTrades = tradesData.trades.slice(0, 100).map(t => ({
-                date: t.timestamp?.split(' ')[0] || 'N/A',
-                time: t.timestamp?.split(' ')[1] || '',
+            if (tradesData?.trades && tradesData.trades.length > 0) {
+              // Create chart history from real trade data
+              // Sample every Nth trade to keep chart manageable
+              const allTrades = tradesData.trades;
+              const step = Math.max(1, Math.floor(allTrades.length / 100));
+              found.history = allTrades
+                .filter((_, i) => i % step === 0 || i === allTrades.length - 1)
+                .map(t => ({
+                  date: t.timestamp || t.date || 'N/A',
+                  value: parseFloat(t.balance) || 10000,
+                  balance: parseFloat(t.balance) || 10000,
+                }));
+              
+              // Map trades for the table
+              found.recentTrades = allTrades.slice(0, 200).map(t => ({
+                date: t.timestamp?.split(' ')[0] || t.date || 'N/A',
+                time: t.timestamp?.split(' ')[1] || t.time || '',
                 pair: t.symbol,
                 side: t.action,
                 entry: parseFloat(t.price) || 0,
@@ -87,11 +98,25 @@ export default function StrategyDetailPage() {
                 comment: t.trade_comment,
                 status: t.action === 'BUY' ? 'Entry' : (t.action?.includes('Exit') ? 'Exit' : t.action),
               }));
-              found.totalBacktestTrades = tradesData.total || found.recentTrades.length;
+              found.totalBacktestTrades = tradesData.total || allTrades.length;
             }
           } catch (e) {
             console.log('Could not fetch trades:', e);
           }
+        }
+        
+        // Fallback: generate synthetic data if no trades
+        if (!found.history || found.history.length === 0) {
+          const monthlyReturn = yearlyReturn / 12 / 100;
+          const startDate = new Date('2024-01-01');
+          found.history = Array.from({ length: 24 }, (_, i) => {
+            const date = new Date(startDate);
+            date.setMonth(date.getMonth() + i);
+            return {
+              date: date.toISOString().split('T')[0],
+              value: 10000 * Math.pow(1 + monthlyReturn, i) * (1 + Math.sin(i / 3) / 20),
+            };
+          });
         }
         
         setStrategy(found);
@@ -307,9 +332,33 @@ export default function StrategyDetailPage() {
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                      <XAxis dataKey="month" tickFormatter={(v) => `M${v}`} />
+                      <XAxis 
+                        dataKey="date" 
+                        tickFormatter={(v) => {
+                          if (!v) return '';
+                          const date = new Date(v);
+                          if (isNaN(date.getTime())) return v.substring(0, 10);
+                          return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                        }}
+                        tick={{ fontSize: 11 }}
+                        interval="preserveStartEnd"
+                      />
                       <YAxis tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
-                      <Tooltip formatter={(v) => [`$${v.toFixed(0)}`, "Value"]} />
+                      <Tooltip 
+                        formatter={(v) => [`$${v.toLocaleString()}`, "Balance"]}
+                        labelFormatter={(label) => {
+                          if (!label) return '';
+                          const date = new Date(label);
+                          if (isNaN(date.getTime())) return label;
+                          return date.toLocaleDateString('en-US', { 
+                            year: 'numeric', 
+                            month: 'long', 
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          });
+                        }}
+                      />
                       <Area
                         type="monotone"
                         dataKey="value"

@@ -196,23 +196,23 @@ export default function Page() {
             ))}
           </div>
         ) : strategies.length > 0 ? (
-          <div className="grid md:grid-cols-3 gap-6">
-            {strategies.map((s) => (
-              <Link
-                key={s.id}
-                href={`/strategies/${s.id}`}
-                className="block bg-white p-5 rounded-2xl shadow-soft border border-gray-100 hover:-translate-y-0.5 transition"
-              >
+        <div className="grid md:grid-cols-3 gap-6">
+          {strategies.map((s) => (
+            <Link
+              key={s.id}
+              href={`/strategies/${s.id}`}
+              className="block bg-white p-5 rounded-2xl shadow-soft border border-gray-100 hover:-translate-y-0.5 transition"
+            >
                 <div className="flex items-start justify-between">
                   <div>
-                    <h3 className="font-semibold">{s.name}</h3>
-                    <p className="text-sm text-gray-500">{s.category}</p>
+              <h3 className="font-semibold">{s.name}</h3>
+              <p className="text-sm text-gray-500">{s.category}</p>
                   </div>
                   <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full">
                     {t("landing.live")}
                   </span>
                 </div>
-                <div className="mt-3 flex items-center gap-4 text-sm">
+              <div className="mt-3 flex items-center gap-4 text-sm">
                   <span className="text-green-600">⚡ +{s.cagr?.toFixed(1) || 0}%{t("landing.yr")}</span>
                   <span className="text-red-600">📉 -{s.maxDD?.toFixed(1) || 0}%</span>
                   <span>📈 {s.sharpe?.toFixed(2) || 0}</span>

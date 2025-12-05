@@ -233,7 +233,7 @@ function ExchangeCard({ exchange, onConnect, onDisconnect, isConnected, t, langu
                   type={showKey ? "text" : "password"}
                   placeholder={t.enterApiKey}
                   value={form.apiKey || ""}
-                  onChange={(e) => handle("apiKey", e.target.value)}
+              onChange={(e) => handle("apiKey", e.target.value)}
                   required
                   className="pr-10"
                 />
@@ -254,7 +254,7 @@ function ExchangeCard({ exchange, onConnect, onDisconnect, isConnected, t, langu
                   type={showSecret ? "text" : "password"}
                   placeholder={t.enterApiSecret}
                   value={form.secret || ""}
-                  onChange={(e) => handle("secret", e.target.value)}
+              onChange={(e) => handle("secret", e.target.value)}
                   required
                   className="pr-10"
                 />
@@ -276,7 +276,7 @@ function ExchangeCard({ exchange, onConnect, onDisconnect, isConnected, t, langu
                     type={showPassword ? "text" : "password"}
                     placeholder={t.enterPassphrase}
                     value={form.password || ""}
-                    onChange={(e) => handle("password", e.target.value)}
+              onChange={(e) => handle("password", e.target.value)}
                     required
                     className="pr-10"
                   />
@@ -292,14 +292,14 @@ function ExchangeCard({ exchange, onConnect, onDisconnect, isConnected, t, langu
             )}
             
             <label className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                checked={form.testnet}
-                onChange={(e) => handle("testnet", e.target.checked)}
+            <input
+              type="checkbox"
+              checked={form.testnet}
+              onChange={(e) => handle("testnet", e.target.checked)}
                 className="rounded"
               />
               <span>{t.useTestnet}</span>
-            </label>
+          </label>
             
             <div className="flex gap-2">
               <Button type="submit" disabled={loading} className="flex-1">
@@ -312,16 +312,16 @@ function ExchangeCard({ exchange, onConnect, onDisconnect, isConnected, t, langu
                   onClick={() => setShowForm(false)}
                 >
                   {t.cancel}
-                </Button>
+            </Button>
               )}
-            </div>
+          </div>
             
-            {status && (
+          {status && (
               <p className={`text-sm ${status.ok ? "text-green-600" : "text-red-600"}`}>
-                {status.msg}
-              </p>
-            )}
-          </form>
+              {status.msg}
+            </p>
+          )}
+        </form>
         )}
         
         <div className="mt-4 pt-4 border-t flex gap-4 text-xs">
