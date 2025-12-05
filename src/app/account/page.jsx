@@ -270,6 +270,7 @@ function AccountPageContent() {
     country: "",
     telegram: "",
     twitter: "",
+    profilePhoto: "",
   });
   const [message, setMessage] = useState(null);
   const [error, setError] = useState(null);
@@ -284,11 +285,30 @@ function AccountPageContent() {
       country: user.country || "",
       telegram: user.telegram || "",
       twitter: user.twitter || "",
+      profilePhoto: user.profilePhoto || "",
     });
 
+    // Also load profile from backend to get profilePhoto
+    loadUserProfile();
     loadStats();
     setLoading(false);
   }, [user]);
+
+  const loadUserProfile = async () => {
+    try {
+      const userData = await apiFetch("/user/profile");
+      if (userData && !userData.error) {
+        setProfile(p => ({
+          ...p,
+          profilePhoto: userData.profilePhoto || p.profilePhoto,
+          phone: userData.phone || p.phone,
+          country: userData.country || p.country,
+        }));
+      }
+    } catch (e) {
+      console.log("Could not load profile from backend");
+    }
+  };
 
   const loadStats = async () => {
     try {
@@ -453,10 +473,47 @@ function AccountPageContent() {
         
         <div className="relative container py-12 md:py-16">
           <div className="flex flex-col md:flex-row items-center md:items-end gap-6">
-            <div className="relative">
-              <div className="w-28 h-28 md:w-32 md:h-32 rounded-full bg-white/20 backdrop-blur-sm border-4 border-white/30 flex items-center justify-center text-white text-3xl md:text-4xl font-bold shadow-2xl">
-                {initials}
-              </div>
+            <div className="relative group">
+              {profile.profilePhoto ? (
+                <img 
+                  src={profile.profilePhoto} 
+                  alt={profile.name || "Profile"} 
+                  className="w-28 h-28 md:w-32 md:h-32 rounded-full object-cover border-4 border-white/30 shadow-2xl"
+                />
+              ) : (
+                <div className="w-28 h-28 md:w-32 md:h-32 rounded-full bg-white/20 backdrop-blur-sm border-4 border-white/30 flex items-center justify-center text-white text-3xl md:text-4xl font-bold shadow-2xl">
+                  {initials}
+                </div>
+              )}
+              <label className="absolute inset-0 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer flex items-center justify-center">
+                <span className="text-white text-sm">📷</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    // Convert to base64
+                    const reader = new FileReader();
+                    reader.onload = async (ev) => {
+                      const base64 = ev.target?.result;
+                      setProfile(p => ({ ...p, profilePhoto: base64 }));
+                      // Save to backend
+                      try {
+                        await apiFetch("/user/profile", {
+                          method: "POST",
+                          body: { profilePhoto: base64 },
+                        });
+                        setMessage(language === "uk" ? "Фото оновлено!" : "Photo updated!");
+                      } catch (err) {
+                        setError(language === "uk" ? "Не вдалося зберегти фото" : "Failed to save photo");
+                      }
+                    };
+                    reader.readAsDataURL(file);
+                  }}
+                />
+              </label>
               <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center text-white font-bold text-sm border-3 border-white shadow-lg">
                 {level}
               </div>
@@ -816,9 +873,9 @@ function AccountPageContent() {
 
                 <Button onClick={onSave} disabled={saving} className="w-full md:w-auto">
                   {saving ? t.saving : t.saveChanges}
-                </Button>
-              </CardContent>
-            </Card>
+          </Button>
+        </CardContent>
+      </Card>
 
             <Card className="mt-6">
               <CardHeader>

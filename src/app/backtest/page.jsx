@@ -346,7 +346,7 @@ export default function BacktestPage() {
 
       await apiFetch("/strategies/save", {
         method: "POST",
-        body: JSON.stringify({
+        body: {
           name: strategyName,
           description: `Strategy with ${results.metrics?.total_trades} trades, ${results.metrics?.win_rate}% win rate`,
           category: "Custom",
@@ -361,7 +361,7 @@ export default function BacktestPage() {
             sharpe_ratio: results.metrics?.sharpe_ratio || 0,
             win_rate: results.metrics?.win_rate || 0,
           },
-        }),
+        },
       });
       setSaved(true);
       setTimeout(() => setSaved(false), 5000);
