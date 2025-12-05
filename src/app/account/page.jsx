@@ -312,24 +312,33 @@ function AccountPageContent() {
 
   const loadStats = async () => {
     try {
-      const [strategiesRes, runningRes, backtestsRes] = await Promise.allSettled([
+      const [strategiesRes, runningRes, backtestsRes, tradeStatsRes] = await Promise.allSettled([
         apiFetch("/strategies/my"),
         apiFetch("/strategies/running"),
         apiFetch("/backtest/results"),
+        apiFetch("/trades/stats"),
       ]);
 
       const strategies = strategiesRes.status === "fulfilled" ? strategiesRes.value || [] : [];
       const running = runningRes.status === "fulfilled" ? runningRes.value || [] : [];
       const backtests = backtestsRes.status === "fulfilled" ? backtestsRes.value || [] : [];
+      const tradeStats = tradeStatsRes.status === "fulfilled" ? tradeStatsRes.value || {} : {};
 
-      const totalProfit = running.reduce((sum, r) => sum + (r.totalProfit || 0), 0);
-      const totalTrades = running.reduce((sum, r) => sum + (r.totalTrades || 0), 0);
-      const winningTrades = running.reduce((sum, r) => sum + (r.winningTrades || 0), 0);
-      const winRate = totalTrades > 0 ? (winningTrades / totalTrades) * 100 : 0;
+      // Use trade stats from ALL trades (not just running strategies)
+      const totalProfit = tradeStats.totalProfit || 0;
+      const totalTrades = tradeStats.totalTrades || 0;
+      const winningTrades = tradeStats.winningTrades || 0;
+      const winRate = tradeStats.winRate || 0;
       
-      // Count unique pairs traded
+      // Count unique pairs traded from all strategies
       const allPairs = new Set();
       running.forEach(r => r.pairs?.forEach(p => allPairs.add(p)));
+      strategies.forEach(s => {
+        try {
+          const pairs = typeof s.pairs === 'string' ? JSON.parse(s.pairs) : s.pairs;
+          pairs?.forEach(p => allPairs.add(p));
+        } catch {}
+      });
 
       setStats({
         backtestsRun: backtests.length,
