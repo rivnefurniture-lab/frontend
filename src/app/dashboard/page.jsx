@@ -79,22 +79,29 @@ export default function Dashboard() {
     try {
       setLoading(true);
       
-      // Load all data in parallel
-      const [strategiesRes, runningRes, backtestsRes] = await Promise.allSettled([
-        apiFetch("/strategies/my"),
-        apiFetch("/strategies/running"),
-        apiFetch("/backtest/results"),
+      // Helper to add timeout to fetch
+      const fetchWithTimeout = (url, timeout = 10000) => {
+        return Promise.race([
+          apiFetch(url),
+          new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Request timeout')), timeout)
+          )
+        ]).catch(err => {
+          console.log(`${url} error:`, err.message);
+          return [];
+        });
+      };
+      
+      // Load all data in parallel with timeouts
+      const [strategiesRes, runningRes, backtestsRes] = await Promise.all([
+        fetchWithTimeout("/strategies/my"),
+        fetchWithTimeout("/strategies/running"),
+        fetchWithTimeout("/backtest/results"),
       ]);
 
-      if (strategiesRes.status === "fulfilled") {
-        setStrategies(strategiesRes.value || []);
-      }
-      if (runningRes.status === "fulfilled") {
-        setRunningStrategies(runningRes.value || []);
-      }
-      if (backtestsRes.status === "fulfilled") {
-        setBacktestResults(backtestsRes.value || []);
-      }
+      setStrategies(Array.isArray(strategiesRes) ? strategiesRes : []);
+      setRunningStrategies(Array.isArray(runningRes) ? runningRes : []);
+      setBacktestResults(Array.isArray(backtestsRes) ? backtestsRes : []);
     } catch (e) {
       console.error("Dashboard load error:", e);
       setError(e.message);

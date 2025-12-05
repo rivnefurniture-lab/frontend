@@ -31,29 +31,52 @@ function BalanceWidget() {
   const { user } = useAuth();
   const { language } = useLanguage();
   const [balance, setBalance] = useState(null);
-  const [todayPnL, setTodayPnL] = useState(null);
+  const [todayPnL, setTodayPnL] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [lastUpdate, setLastUpdate] = useState(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [hasExchange, setHasExchange] = useState(false);
 
   const fetchData = useCallback(async () => {
     if (!user) return;
     
     try {
-      // Fetch balance from exchange
-      const balanceRes = await apiFetch("/exchange/balance?currency=USDT");
+      // First check if exchange is connected
+      const connections = await Promise.race([
+        apiFetch("/exchange/connections"),
+        new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), 5000))
+      ]).catch(() => []);
+      
+      const activeConn = Array.isArray(connections) && connections.find(c => c.isActive || c.isConnected);
+      setHasExchange(!!activeConn);
+      
+      if (!activeConn) {
+        setLoading(false);
+        setIsRefreshing(false);
+        return;
+      }
+
+      // Fetch balance with timeout
+      const balanceRes = await Promise.race([
+        apiFetch("/exchange/balance"),
+        new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), 8000))
+      ]).catch(() => null);
+      
       if (balanceRes && !balanceRes.error) {
-        const usdtBalance = balanceRes.USDT?.total || balanceRes.total || balanceRes.balance || 0;
+        // CCXT returns { USDT: { free, used, total }, ... }
+        const usdtData = balanceRes.USDT || balanceRes.usdt || {};
+        const usdtBalance = usdtData.total || usdtData.free || balanceRes.total?.USDT || 0;
         setBalance(typeof usdtBalance === 'number' ? usdtBalance : parseFloat(usdtBalance) || 0);
       }
 
-      // Fetch today's trades for PnL calculation
-      const statsRes = await apiFetch("/trades/stats");
+      // Fetch today's PnL with timeout
+      const statsRes = await Promise.race([
+        apiFetch("/trades/stats"),
+        new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), 5000))
+      ]).catch(() => ({}));
+      
       if (statsRes && !statsRes.error) {
         setTodayPnL(statsRes.todayPnLPercent || 0);
       }
-      
-      setLastUpdate(new Date());
     } catch (err) {
       console.log("Balance fetch error:", err);
     } finally {
@@ -64,8 +87,8 @@ function BalanceWidget() {
 
   useEffect(() => {
     fetchData();
-    // Auto-refresh every 30 seconds
-    const interval = setInterval(fetchData, 30000);
+    // Auto-refresh every 60 seconds (reduced from 30 to lower load)
+    const interval = setInterval(fetchData, 60000);
     return () => clearInterval(interval);
   }, [fetchData]);
 
@@ -75,15 +98,25 @@ function BalanceWidget() {
   };
 
   if (!user) return null;
-  if (loading && balance === null) {
+  
+  // Show nothing while loading on first render
+  if (loading) {
     return (
       <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-lg animate-pulse">
-        <div className="w-16 h-4 bg-gray-200 rounded"></div>
+        <div className="w-20 h-4 bg-gray-200 rounded"></div>
       </div>
     );
   }
-
-  if (balance === null) return null;
+  
+  // No exchange connected - show connect prompt
+  if (!hasExchange) {
+    return (
+      <Link href="/connect" className="flex items-center gap-2 px-3 py-1.5 bg-yellow-50 hover:bg-yellow-100 rounded-lg border border-yellow-200 text-yellow-700 text-sm transition-colors">
+        <Wallet className="w-4 h-4" />
+        <span>{language === "uk" ? "Підключити" : "Connect"}</span>
+      </Link>
+    );
+  }
 
   const pnlColor = todayPnL >= 0 ? "text-green-600" : "text-red-600";
   const pnlBg = todayPnL >= 0 ? "bg-green-50" : "bg-red-50";
@@ -99,7 +132,7 @@ function BalanceWidget() {
             {language === "uk" ? "Баланс" : "Balance"}
           </span>
           <span className="text-sm font-semibold text-gray-900">
-            ${balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            ${(balance || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </span>
         </div>
       </div>
