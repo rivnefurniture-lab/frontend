@@ -223,6 +223,7 @@ function LanguageSwitcher() {
 function UserDropdown({ user, onLogout }) {
   const { t, language } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
+  const [profilePhoto, setProfilePhoto] = useState(null);
   const dropdownRef = useRef(null);
   
   useEffect(() => {
@@ -233,6 +234,21 @@ function UserDropdown({ user, onLogout }) {
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Fetch profile photo
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const data = await apiFetch("/user/profile");
+        if (data?.profilePhoto) {
+          setProfilePhoto(data.profilePhoto);
+        }
+      } catch (e) {
+        // Ignore errors
+      }
+    };
+    fetchProfile();
   }, []);
 
   const initials = (user.name || user.email || "U")
@@ -248,9 +264,17 @@ function UserDropdown({ user, onLogout }) {
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-gray-100 transition-colors"
       >
-        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-xs font-semibold">
-          {initials}
-        </div>
+        {profilePhoto ? (
+          <img 
+            src={profilePhoto} 
+            alt="" 
+            className="w-8 h-8 rounded-full object-cover border-2 border-white shadow-sm"
+          />
+        ) : (
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-xs font-semibold">
+            {initials}
+          </div>
+        )}
         <span className="text-sm font-medium text-gray-700 hidden lg:block max-w-[120px] truncate">
           {user.name || user.email?.split("@")[0]}
         </span>
