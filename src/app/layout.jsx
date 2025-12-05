@@ -3,6 +3,7 @@ import { AuthProvider } from "@/context/AuthProvider";
 import { LanguageProvider } from "@/context/LanguageContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import CookieConsent from "@/components/CookieConsent";
 
 export const metadata = {
   title: {
@@ -71,6 +72,7 @@ export default function RootLayout({ children }) {
               <main className="flex-1">{children}</main>
               <Footer />
             </div>
+            <CookieConsent />
           </AuthProvider>
         </LanguageProvider>
       </body>

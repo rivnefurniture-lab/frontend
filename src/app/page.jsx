@@ -69,9 +69,8 @@ export default function Page() {
     {
       id: 1,
       name: "Олег К.",
-      role: language === "uk" ? "Лох вонючий" : "Lox vonyuchiy",
+      role: language === "uk" ? "Активний трейдер" : "Active Trader",
       initials: "ОК",
-      // Photo: guy with beard and sunglasses in front of КРАМАТОРСЬК sign
       photo: "/testimonials/oleg.jpeg",
       gradient: "from-blue-500 to-cyan-500",
       rating: 5,
@@ -80,9 +79,8 @@ export default function Page() {
     {
       id: 2,
       name: "Назар Г.",
-      role: language === "uk" ? "АНАЛітик" : "ANALyst",
+      role: language === "uk" ? "Фінансовий аналітик" : "Financial Analyst",
       initials: "НГ",
-      // Photo: guy in black hoodie
       photo: "/testimonials/nazar.jpeg",
       gradient: "from-purple-500 to-pink-500",
       rating: 5,
@@ -91,7 +89,7 @@ export default function Page() {
     {
       id: 3,
       name: "Дмитро С.",
-      role: language === "uk" ? "Ентузіаст" : "Enthusiast",
+      role: language === "uk" ? "Криптоентузіаст" : "Crypto Enthusiast",
       initials: "ДС",
       gradient: "from-amber-500 to-orange-500",
       rating: 5,
@@ -100,7 +98,7 @@ export default function Page() {
     {
       id: 4,
       name: "Каріна Г.",
-      role: language === "uk" ? "Інвестор" : "Investor",
+      role: language === "uk" ? "Приватний інвестор" : "Private Investor",
       initials: "КГ",
       gradient: "from-green-500 to-emerald-500",
       rating: 5,
@@ -243,35 +241,44 @@ export default function Page() {
           </p>
           
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4">
+            <Link href="/strategies" className="text-center group">
+              <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4 group-hover:bg-blue-200 transition">
                 1️⃣
               </div>
               <h3 className="font-semibold text-lg mb-2">{t("landing.step1Title")}</h3>
               <p className="text-gray-600 text-sm">
                 {t("landing.step1Text")}
               </p>
-            </div>
+              <span className="inline-block mt-3 text-blue-600 text-sm group-hover:underline">
+                {language === "uk" ? "Переглянути стратегії →" : "Browse Strategies →"}
+              </span>
+            </Link>
             
-            <div className="text-center">
-              <div className="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4">
+            <Link href="/connect" className="text-center group">
+              <div className="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4 group-hover:bg-green-200 transition">
                 2️⃣
               </div>
               <h3 className="font-semibold text-lg mb-2">{t("landing.step2Title")}</h3>
               <p className="text-gray-600 text-sm">
                 {t("landing.step2Text")}
               </p>
-            </div>
+              <span className="inline-block mt-3 text-green-600 text-sm group-hover:underline">
+                {language === "uk" ? "Підключити біржу →" : "Connect Exchange →"}
+              </span>
+            </Link>
             
-            <div className="text-center">
-              <div className="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4">
+            <Link href="/dashboard" className="text-center group">
+              <div className="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4 group-hover:bg-purple-200 transition">
                 3️⃣
               </div>
               <h3 className="font-semibold text-lg mb-2">{t("landing.step3Title")}</h3>
               <p className="text-gray-600 text-sm">
                 {t("landing.step3Text")}
               </p>
-            </div>
+              <span className="inline-block mt-3 text-purple-600 text-sm group-hover:underline">
+                {language === "uk" ? "Перейти до панелі →" : "Go to Dashboard →"}
+              </span>
+            </Link>
           </div>
 
           <div className="text-center mt-10">

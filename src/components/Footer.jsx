@@ -1,13 +1,73 @@
 "use client";
 
+import { useState } from "react";
 import Link from 'next/link';
 import { useLanguage } from "@/context/LanguageContext";
 
 export default function Footer() {
   const { t, language } = useLanguage();
+  const [email, setEmail] = useState("");
+  const [subscribed, setSubscribed] = useState(false);
+  const [subscribing, setSubscribing] = useState(false);
+
+  const handleSubscribe = async (e) => {
+    e.preventDefault();
+    if (!email) return;
+    setSubscribing(true);
+    // Simulate subscription (in production, call API)
+    await new Promise(r => setTimeout(r, 800));
+    setSubscribed(true);
+    setEmail("");
+    setSubscribing(false);
+  };
 
   return (
     <footer className='bg-gray-900 text-white mt-16'>
+      {/* Newsletter Section */}
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-700">
+        <div className="container py-10">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="text-center md:text-left">
+              <h3 className="text-xl font-bold mb-1">
+                {language === "uk" ? "Підпишіться на новини" : "Stay Updated"}
+              </h3>
+              <p className="text-blue-100 text-sm">
+                {language === "uk" 
+                  ? "Отримуйте оновлення стратегій та новини ринку на вашу пошту"
+                  : "Get strategy updates and market insights delivered to your inbox"}
+              </p>
+            </div>
+            {subscribed ? (
+              <div className="flex items-center gap-2 text-white bg-green-500 px-6 py-3 rounded-lg">
+                <span>✓</span>
+                <span>{language === "uk" ? "Підписано!" : "Subscribed!"}</span>
+              </div>
+            ) : (
+              <form onSubmit={handleSubscribe} className="flex w-full md:w-auto">
+                <input
+                  type="email"
+                  placeholder={language === "uk" ? "Ваш email" : "Your email"}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="px-4 py-3 rounded-l-lg text-gray-900 w-full md:w-64 focus:outline-none"
+                  aria-label={language === "uk" ? "Email для підписки" : "Email for newsletter"}
+                />
+                <button
+                  type="submit"
+                  disabled={subscribing}
+                  className="bg-gray-900 hover:bg-gray-800 px-6 py-3 rounded-r-lg font-medium transition whitespace-nowrap disabled:opacity-50"
+                >
+                  {subscribing 
+                    ? "..." 
+                    : language === "uk" ? "Підписатись" : "Subscribe"}
+                </button>
+              </form>
+            )}
+          </div>
+        </div>
+      </div>
+
       {/* Main Footer */}
       <div className='container py-12'>
         <div className='grid grid-cols-2 md:grid-cols-4 gap-8'>

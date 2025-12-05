@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useLanguage } from "@/context/LanguageContext";
 
-const sections = [
-  {
-    id: "terms",
-    title: "Terms of Service",
-    content: `
+const sectionsData = {
+  en: [
+    {
+      id: "terms",
+      title: "Terms of Service",
+      content: `
 Last Updated: December 2024
 
 1. ACCEPTANCE OF TERMS
@@ -45,12 +47,12 @@ We may terminate or suspend your account at any time, with or without cause, wit
 
 10. GOVERNING LAW
 These terms shall be governed by the laws of the jurisdiction in which our company is registered.
-    `,
-  },
-  {
-    id: "privacy",
-    title: "Privacy Policy",
-    content: `
+      `,
+    },
+    {
+      id: "privacy",
+      title: "Privacy Policy",
+      content: `
 Last Updated: December 2024
 
 1. INFORMATION WE COLLECT
@@ -79,24 +81,77 @@ We do not sell your personal information. We may share data with:
 5. DATA RETENTION
 We retain your data for as long as your account is active. You may request deletion of your data by contacting support.
 
-6. YOUR RIGHTS
+6. YOUR RIGHTS (GDPR/CCPA)
 You have the right to:
 - Access your personal data.
 - Correct inaccurate data.
 - Delete your data.
 - Export your data.
+- Opt out of marketing communications.
+- Withdraw consent at any time.
 
-7. COOKIES
-We use cookies to maintain session state and improve user experience. You can disable cookies in your browser settings.
+7. INTERNATIONAL DATA TRANSFERS
+Your data may be transferred to and processed in countries outside your residence. We ensure appropriate safeguards are in place.
 
 8. CONTACT
 For privacy-related inquiries, contact us at support@algotcha.com.
-    `,
-  },
-  {
-    id: "risk",
-    title: "Risk Disclosure",
-    content: `
+      `,
+    },
+    {
+      id: "cookies",
+      title: "Cookie Policy",
+      content: `
+Last Updated: December 2024
+
+1. WHAT ARE COOKIES?
+Cookies are small text files stored on your device when you visit a website. They help us provide a better experience by remembering your preferences and analyzing how you use our Service.
+
+2. TYPES OF COOKIES WE USE
+Essential Cookies:
+- Session management and authentication
+- Security features
+- Required for the Service to function
+
+Analytics Cookies:
+- Help us understand how visitors use our site
+- Track page views and user behavior
+- Improve our services based on usage data
+
+Functional Cookies:
+- Remember your language preference
+- Store your settings and preferences
+- Provide personalized features
+
+3. HOW TO MANAGE COOKIES
+You can control cookies through your browser settings:
+- Block all cookies
+- Delete existing cookies
+- Allow only certain cookies
+
+Note: Blocking essential cookies may prevent parts of the Service from functioning properly.
+
+4. THIRD-PARTY COOKIES
+We may use third-party services that set their own cookies:
+- Google Analytics (analytics)
+- Authentication providers
+
+5. COOKIE CONSENT
+When you first visit our site, you'll see a cookie banner. You can:
+- Accept all cookies
+- Accept only essential cookies
+- Learn more about our cookie use
+
+6. UPDATES TO THIS POLICY
+We may update this policy to reflect changes in our practices. Check back periodically for updates.
+
+7. CONTACT
+For questions about our cookie use, contact support@algotcha.com.
+      `,
+    },
+    {
+      id: "risk",
+      title: "Risk Disclosure",
+      content: `
 IMPORTANT RISK DISCLOSURE
 
 Please read this carefully before using Algotcha.
@@ -129,17 +184,213 @@ NOT FINANCIAL ADVICE
 The information provided by Algotcha is for informational purposes only. It should not be considered as financial, investment, legal, or tax advice. Always consult with a qualified professional before making investment decisions.
 
 By using Algotcha, you acknowledge that you have read and understood this risk disclosure and accept full responsibility for your trading activities.
-    `,
-  },
-];
+      `,
+    },
+  ],
+  uk: [
+    {
+      id: "terms",
+      title: "Умови використання",
+      content: `
+Останнє оновлення: Грудень 2024
+
+1. ПРИЙНЯТТЯ УМОВ
+Отримуючи доступ до Algotcha ("Сервіс") або використовуючи його, ви погоджуєтесь дотримуватися цих Умов використання. Якщо ви не згодні з цими умовами, не використовуйте Сервіс.
+
+2. ОПИС СЕРВІСУ
+Algotcha надає інструменти для алгоритмічної торгівлі, можливості бектестингу та автоматизоване виконання угод через сторонні біржі. Сервіс надається "як є" без будь-яких гарантій.
+
+3. ПРАВО НА ВИКОРИСТАННЯ
+Вам має бути не менше 18 років і ви повинні мати право укладати договори для використання цього Сервісу. Ви несете відповідальність за відповідність використання Сервісу всім застосовним законам вашої юрисдикції.
+
+4. ОБЛІКОВІ ЗАПИСИ КОРИСТУВАЧІВ
+- Ви відповідаєте за конфіденційність облікових даних.
+- Ви відповідаєте за всі дії, що відбуваються під вашим обліковим записом.
+- Ви повинні негайно повідомити нас про будь-яке несанкціоноване використання.
+
+5. API КЛЮЧІ ТА ДОСТУП ДО БІРЖІ
+- Ви надаєте нам дозвіл на виконання угод від вашого імені за допомогою наданих вами API ключів.
+- Ви повинні надавати API ключі лише з правами на торгівлю (ніколи на виведення).
+- Ми не несемо відповідальності за втрати від скомпрометованих API ключів.
+
+6. ТОРГОВІ РИЗИКИ
+- Торгівля криптовалютами несе значний ризик втрат.
+- Минулі результати стратегії не гарантують майбутніх результатів.
+- Ви несете повну відповідальність за свої торгові рішення.
+- Ми не надаємо фінансових, інвестиційних або юридичних порад.
+
+7. ОБМЕЖЕННЯ ВІДПОВІДАЛЬНОСТІ
+Algotcha не несе відповідальності за будь-які непрямі, випадкові, особливі, наслідкові або штрафні збитки, включаючи втрату прибутку, даних або інших нематеріальних втрат.
+
+8. ЗМІНИ
+Ми залишаємо за собою право змінювати ці умови в будь-який час. Продовження використання Сервісу після змін означає прийняття нових умов.
+
+9. ПРИПИНЕННЯ
+Ми можемо припинити або призупинити ваш обліковий запис у будь-який час, з причиною або без неї, з повідомленням або без нього.
+
+10. ЗАСТОСОВНЕ ПРАВО
+Ці умови регулюються законодавством юрисдикції, в якій зареєстрована наша компанія.
+      `,
+    },
+    {
+      id: "privacy",
+      title: "Політика конфіденційності",
+      content: `
+Останнє оновлення: Грудень 2024
+
+1. ІНФОРМАЦІЯ, ЯКУ МИ ЗБИРАЄМО
+- Інформація облікового запису: Email, ім'я та додаткові дані профілю.
+- API ключі біржі: Зашифровані та зберігаються безпечно.
+- Дані використання: Як ви взаємодієте з Сервісом.
+- Торгові дані: Стратегії, бектести та історія угод.
+
+2. ЯК МИ ВИКОРИСТОВУЄМО ВАШУ ІНФОРМАЦІЮ
+- Для надання та підтримки Сервісу.
+- Для виконання угод від вашого імені.
+- Для покращення наших продуктів та послуг.
+- Для спілкування з вами щодо Сервісу.
+
+3. БЕЗПЕКА ДАНИХ
+- Всі API ключі зашифровані за допомогою стандартного шифрування.
+- Ми використовуємо безпечні HTTPS з'єднання для всіх передач даних.
+- Ми ніколи не зберігаємо API ключі з правами на виведення.
+- Ми регулярно перевіряємо наші практики безпеки.
+
+4. ПЕРЕДАЧА ДАНИХ
+Ми не продаємо вашу особисту інформацію. Ми можемо передавати дані:
+- Постачальникам послуг, які допомагають в роботі Сервісу.
+- Правоохоронним органам за вимогою закону.
+
+5. ЗБЕРІГАННЯ ДАНИХ
+Ми зберігаємо ваші дані, поки ваш обліковий запис активний. Ви можете запросити видалення даних, звернувшись до підтримки.
+
+6. ВАШІ ПРАВА (GDPR/CCPA)
+Ви маєте право:
+- Отримати доступ до своїх персональних даних.
+- Виправити неточні дані.
+- Видалити свої дані.
+- Експортувати свої дані.
+- Відмовитися від маркетингових комунікацій.
+- Відкликати згоду в будь-який час.
+
+7. МІЖНАРОДНА ПЕРЕДАЧА ДАНИХ
+Ваші дані можуть бути передані та оброблені в країнах за межами вашого проживання. Ми забезпечуємо відповідні гарантії.
+
+8. КОНТАКТИ
+Для запитів щодо конфіденційності зв'яжіться з нами за адресою support@algotcha.com.
+      `,
+    },
+    {
+      id: "cookies",
+      title: "Політика Cookie",
+      content: `
+Останнє оновлення: Грудень 2024
+
+1. ЩО ТАКЕ COOKIES?
+Cookies — це невеликі текстові файли, які зберігаються на вашому пристрої при відвідуванні веб-сайту. Вони допомагають нам забезпечити кращий досвід, запам'ятовуючи ваші налаштування та аналізуючи використання Сервісу.
+
+2. ТИПИ COOKIES, ЯКІ МИ ВИКОРИСТОВУЄМО
+Необхідні Cookies:
+- Управління сесіями та автентифікація
+- Функції безпеки
+- Необхідні для роботи Сервісу
+
+Аналітичні Cookies:
+- Допомагають зрозуміти, як відвідувачі використовують сайт
+- Відстежують перегляди сторінок та поведінку користувачів
+- Покращують наші послуги на основі даних використання
+
+Функціональні Cookies:
+- Запам'ятовують вашу мову
+- Зберігають ваші налаштування
+- Надають персоналізовані функції
+
+3. ЯК КЕРУВАТИ COOKIES
+Ви можете контролювати cookies через налаштування браузера:
+- Блокувати всі cookies
+- Видалити існуючі cookies
+- Дозволити лише певні cookies
+
+Примітка: Блокування необхідних cookies може завадити роботі частин Сервісу.
+
+4. COOKIES ТРЕТІХ СТОРІН
+Ми можемо використовувати сторонні сервіси, які встановлюють власні cookies:
+- Google Analytics (аналітика)
+- Провайдери автентифікації
+
+5. ЗГОДА НА COOKIES
+При першому відвідуванні сайту ви побачите банер cookies. Ви можете:
+- Прийняти всі cookies
+- Прийняти лише необхідні cookies
+- Дізнатися більше про використання cookies
+
+6. ОНОВЛЕННЯ ЦІЄЇ ПОЛІТИКИ
+Ми можемо оновлювати цю політику для відображення змін у наших практиках. Періодично перевіряйте оновлення.
+
+7. КОНТАКТИ
+Для запитань щодо cookies зв'яжіться з support@algotcha.com.
+      `,
+    },
+    {
+      id: "risk",
+      title: "Розкриття ризиків",
+      content: `
+ВАЖЛИВЕ РОЗКРИТТЯ РИЗИКІВ
+
+Будь ласка, уважно прочитайте перед використанням Algotcha.
+
+ТОРГОВИЙ РИЗИК
+Торгівля криптовалютами несе високий рівень ризику і може бути непридатною для всіх інвесторів. Високий ступінь кредитного плеча може працювати як на вас, так і проти вас. Перед прийняттям рішення про торгівлю криптовалютами ви повинні ретельно розглянути свої інвестиційні цілі, рівень досвіду та схильність до ризику.
+
+ВІДСУТНІСТЬ ГАРАНТІЇ ПРИБУТКУ
+Немає гарантії, що ви заробите гроші, використовуючи Algotcha. Історичні результати бектестів не гарантують майбутніх результатів. Ринкові умови змінюються, і стратегії, які працювали в минулому, можуть не працювати в майбутньому.
+
+РИЗИКИ АЛГОРИТМІЧНОЇ ТОРГІВЛІ
+- Можуть виникати технічні збої, що призводять до пропущених угод або помилкових ордерів.
+- Ринкові умови можуть змінюватися швидше, ніж алгоритми можуть адаптуватися.
+- Прослизання та затримки виконання можуть вплинути на результати.
+- Програмні баги можуть спричинити несподівану поведінку.
+
+РИЗИКИ БІРЖІ
+- Біржі можуть зазнавати простоїв, зломів або неплатоспроможності.
+- Ліміти API можуть перешкоджати своєчасному виконанню угод.
+- Регуляторні зміни можуть вплинути на доступ до бірж.
+
+ВАША ВІДПОВІДАЛЬНІСТЬ
+- Торгуйте лише тими грошима, які можете дозволити собі втратити.
+- Ніколи не вмикайте права на виведення в API ключах.
+- Регулярно моніторте свої позиції.
+- Розумійте стратегії, які використовуєте.
+- Тримайте облікові дані в безпеці.
+
+НЕ ФІНАНСОВА ПОРАДА
+Інформація, надана Algotcha, призначена лише для інформаційних цілей. Її не слід розглядати як фінансову, інвестиційну, юридичну або податкову пораду. Завжди консультуйтеся з кваліфікованим фахівцем перед прийняттям інвестиційних рішень.
+
+Використовуючи Algotcha, ви підтверджуєте, що прочитали та зрозуміли це розкриття ризиків і приймаєте повну відповідальність за свою торгову діяльність.
+      `,
+    },
+  ],
+};
 
 export default function LegalPage() {
+  const { language } = useLanguage();
   const [activeSection, setActiveSection] = useState("terms");
+  const sections = sectionsData[language] || sectionsData.en;
+
+  // Handle hash navigation
+  useEffect(() => {
+    const hash = window.location.hash.replace("#", "");
+    if (hash && sections.find((s) => s.id === hash)) {
+      setActiveSection(hash);
+    }
+  }, [sections]);
 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container py-10">
-        <h1 className="text-3xl font-bold mb-8">Legal</h1>
+        <h1 className="text-3xl font-bold mb-8">
+          {language === "uk" ? "Правова інформація" : "Legal"}
+        </h1>
 
         <div className="flex flex-col md:flex-row gap-8">
           {/* Sidebar Navigation */}
@@ -149,12 +400,16 @@ export default function LegalPage() {
                 {sections.map((section) => (
                   <button
                     key={section.id}
-                    onClick={() => setActiveSection(section.id)}
+                    onClick={() => {
+                      setActiveSection(section.id);
+                      window.history.replaceState(null, "", `#${section.id}`);
+                    }}
                     className={`w-full text-left px-4 py-2 rounded-lg transition ${
                       activeSection === section.id
                         ? "bg-blue-50 text-blue-600 font-medium"
                         : "text-gray-600 hover:bg-gray-50"
                     }`}
+                    aria-current={activeSection === section.id ? "page" : undefined}
                   >
                     {section.title}
                   </button>
