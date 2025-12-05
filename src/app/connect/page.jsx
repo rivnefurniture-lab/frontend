@@ -55,6 +55,11 @@ function ExchangeCard({ exchange, onConnect, onDisconnect, isConnected, t, langu
   const [showSecret, setShowSecret] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
+  // Update showForm when isConnected changes
+  useEffect(() => {
+    setShowForm(!isConnected);
+  }, [isConnected]);
+
   const handle = (k, v) => setForm((prev) => ({ ...prev, [k]: v }));
 
   const submit = async (e) => {
@@ -363,9 +368,16 @@ export default function ConnectPage() {
   const fetchConnectedExchanges = async () => {
     try {
       const result = await apiFetch("/exchange/connections");
-      if (result?.connections) {
+      // Result is an array of connections directly
+      if (Array.isArray(result)) {
+        const connected = result
+          .filter(c => c.isConnected || c.isActive)
+          .map(c => c.exchange);
+        setConnectedExchanges(connected);
+      } else if (result?.connections) {
+        // Fallback for wrapped response
         const connected = result.connections
-          .filter(c => c.isActive)
+          .filter(c => c.isConnected || c.isActive)
           .map(c => c.exchange);
         setConnectedExchanges(connected);
       }
