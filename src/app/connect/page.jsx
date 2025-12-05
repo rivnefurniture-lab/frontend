@@ -44,7 +44,7 @@ const EXCHANGES = [
 ];
 
 function ExchangeCard({ exchange, onConnect, onDisconnect, isConnected, t, language }) {
-  const [form, setForm] = useState({ testnet: true });
+  const [form, setForm] = useState({ testnet: false }); // Default: REAL money
   const [loading, setLoading] = useState(false);
   const [testing, setTesting] = useState(false);
   const [disconnecting, setDisconnecting] = useState(false);
@@ -87,7 +87,7 @@ function ExchangeCard({ exchange, onConnect, onDisconnect, isConnected, t, langu
       if (result?.ok) {
         setStatus({ ok: true, msg: t.connectedSuccess });
         setShowForm(false);
-        setForm({ testnet: true }); // Clear sensitive data
+        setForm({ testnet: false }); // Clear sensitive data, keep real mode
         onConnect?.(exchange.id);
       } else {
         throw new Error(result?.message || t.connectionFailed);

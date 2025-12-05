@@ -15,11 +15,119 @@ import {
   ChevronDown,
   Zap,
   CreditCard,
-  Globe
+  Globe,
+  Wallet,
+  TrendingUp,
+  TrendingDown,
+  RefreshCw
 } from "lucide-react";
 import { useAuth } from "@/context/AuthProvider";
 import { useLanguage } from "@/context/LanguageContext";
-import { useState, useRef, useEffect } from "react";
+import { apiFetch } from "@/lib/api";
+import { useState, useRef, useEffect, useCallback } from "react";
+
+// Balance Widget - shows USDT balance and today's PnL
+function BalanceWidget() {
+  const { user } = useAuth();
+  const { language } = useLanguage();
+  const [balance, setBalance] = useState(null);
+  const [todayPnL, setTodayPnL] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [lastUpdate, setLastUpdate] = useState(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const fetchData = useCallback(async () => {
+    if (!user) return;
+    
+    try {
+      // Fetch balance from exchange
+      const balanceRes = await apiFetch("/exchange/balance?currency=USDT");
+      if (balanceRes && !balanceRes.error) {
+        const usdtBalance = balanceRes.USDT?.total || balanceRes.total || balanceRes.balance || 0;
+        setBalance(typeof usdtBalance === 'number' ? usdtBalance : parseFloat(usdtBalance) || 0);
+      }
+
+      // Fetch today's trades for PnL calculation
+      const statsRes = await apiFetch("/trades/stats");
+      if (statsRes && !statsRes.error) {
+        setTodayPnL(statsRes.todayPnLPercent || 0);
+      }
+      
+      setLastUpdate(new Date());
+    } catch (err) {
+      console.log("Balance fetch error:", err);
+    } finally {
+      setLoading(false);
+      setIsRefreshing(false);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    fetchData();
+    // Auto-refresh every 30 seconds
+    const interval = setInterval(fetchData, 30000);
+    return () => clearInterval(interval);
+  }, [fetchData]);
+
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    fetchData();
+  };
+
+  if (!user) return null;
+  if (loading && balance === null) {
+    return (
+      <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-lg animate-pulse">
+        <div className="w-16 h-4 bg-gray-200 rounded"></div>
+      </div>
+    );
+  }
+
+  if (balance === null) return null;
+
+  const pnlColor = todayPnL >= 0 ? "text-green-600" : "text-red-600";
+  const pnlBg = todayPnL >= 0 ? "bg-green-50" : "bg-red-50";
+  const PnLIcon = todayPnL >= 0 ? TrendingUp : TrendingDown;
+
+  return (
+    <div className="flex items-center gap-2">
+      {/* Balance Display */}
+      <div className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-100">
+        <Wallet className="w-4 h-4 text-blue-600" />
+        <div className="flex flex-col">
+          <span className="text-xs text-gray-500 leading-none">
+            {language === "uk" ? "Баланс" : "Balance"}
+          </span>
+          <span className="text-sm font-semibold text-gray-900">
+            ${balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </span>
+        </div>
+      </div>
+
+      {/* Today's PnL */}
+      <div className={`flex items-center gap-1.5 px-2.5 py-1.5 ${pnlBg} rounded-lg`}>
+        <PnLIcon className={`w-3.5 h-3.5 ${pnlColor}`} />
+        <div className="flex flex-col">
+          <span className="text-xs text-gray-500 leading-none">
+            {language === "uk" ? "Сьогодні" : "Today"}
+          </span>
+          <span className={`text-sm font-semibold ${pnlColor}`}>
+            {todayPnL >= 0 ? "+" : ""}{(todayPnL || 0).toFixed(2)}%
+          </span>
+        </div>
+      </div>
+
+      {/* Refresh Button */}
+      <button
+        onClick={handleRefresh}
+        className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
+        title={language === "uk" ? "Оновити" : "Refresh"}
+      >
+        <RefreshCw className={`w-3.5 h-3.5 text-gray-400 ${isRefreshing ? "animate-spin" : ""}`} />
+      </button>
+    </div>
+  );
+}
 
 function LanguageSwitcher() {
   const { language, setLang } = useLanguage();
@@ -256,8 +364,12 @@ export default function Navbar() {
           })}
         </nav>
 
-        {/* Right side: language + profile/auth */}
-        <div className="hidden md:flex items-center gap-2">
+        {/* Right side: balance + language + profile/auth */}
+        <div className="hidden md:flex items-center gap-3">
+          {user && <BalanceWidget />}
+          
+          <div className="h-6 w-px bg-gray-200"></div>
+          
           <LanguageSwitcher />
           
           {!user ? (
