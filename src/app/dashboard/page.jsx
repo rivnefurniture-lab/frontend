@@ -301,18 +301,39 @@ export default function Dashboard() {
                       {run.trades?.length > 0 && (
                         <div className="mt-4 pt-4 border-t">
                           <p className="text-xs text-gray-500 mb-2">Recent Trades</p>
-                          <div className="space-y-1">
-                            {run.trades.slice(0, 3).map((trade, i) => (
-                              <div key={i} className="flex justify-between text-xs">
-                                <span className={trade.side === 'buy' ? 'text-green-600' : 'text-red-600'}>
-                                  {trade.side.toUpperCase()} {trade.symbol}
-                                </span>
-                                <span>${trade.amount?.toFixed(2)}</span>
-                                <span className="text-gray-500">
-                                  {new Date(trade.createdAt).toLocaleTimeString()}
-                                </span>
-                              </div>
-                            ))}
+                          <div className="space-y-2">
+                            {run.trades.slice(0, 3).map((trade, i) => {
+                              const baseAsset = trade.symbol?.split('/')[0] || 'BTC';
+                              return (
+                                <div key={i} className="flex items-center justify-between text-xs bg-gray-50 rounded p-2">
+                                  <div className="flex items-center gap-2">
+                                    <span className={`px-1.5 py-0.5 rounded font-medium ${
+                                      trade.side === 'buy' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                                    }`}>
+                                      {trade.side?.toUpperCase()}
+                                    </span>
+                                    <span className="font-medium">{trade.symbol}</span>
+                                  </div>
+                                  <div className="flex items-center gap-3 text-right">
+                                    <div>
+                                      <div className="text-gray-500">Price</div>
+                                      <div className="font-medium">${trade.price?.toLocaleString(undefined, {maximumFractionDigits: 2})}</div>
+                                    </div>
+                                    <div>
+                                      <div className="text-gray-500">{baseAsset}</div>
+                                      <div className="font-medium">{trade.quantity?.toFixed(6)}</div>
+                                    </div>
+                                    <div>
+                                      <div className="text-gray-500">USDT</div>
+                                      <div className="font-medium">${(trade.price * trade.quantity)?.toFixed(2)}</div>
+                                    </div>
+                                    <div className="text-gray-400 text-[10px]">
+                                      {new Date(trade.createdAt).toLocaleTimeString()}
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })}
                           </div>
                         </div>
                       )}
