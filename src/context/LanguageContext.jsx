@@ -187,7 +187,7 @@ const translations = {
     
     // Testimonials content
     testimonialContent: {
-      oleg: "Before this, trading honestly felt like me throwing darts in the dark and now I can really tell what looks good before I even risk a dollar.",
+      oleg: "Я просто олєг і я лох",
       nazar: "I'm sitting here wondering why I ever paid some guy to do what this thing does on its own for way less.",
       dmytro: "Using Algotcha feels like letting your smartest friend do the hard part while you just do nothing.",
       karina: "Feels like Wall Street on autopilot, but simple enough that even I can run it without overthinking.",
@@ -617,7 +617,7 @@ const translations = {
     
     // Testimonials content
     testimonialContent: {
-      oleg: "До цього трейдинг був як кидати дротики в темряві, а тепер я дійсно бачу, що виглядає перспективно, перш ніж ризикувати хоч долар.",
+      oleg: "Ну і шо шо я олег",
       nazar: "Сиджу і думаю, навіщо я раніше платив комусь за те, що ця штука робить сама і набагато дешевше.",
       dmytro: "Користуватись Algotcha — це як дати своєму найрозумнішому другу зробити всю важку роботу, поки ти просто нічого не робиш.",
       karina: "Відчуття, ніби Волл-стріт на автопілоті, але настільки просто, що навіть я можу керувати цим без зайвих роздумів.",

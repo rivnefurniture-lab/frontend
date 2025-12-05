@@ -69,7 +69,7 @@ export default function Page() {
     {
       id: 1,
       name: "Олег К.",
-      role: language === "uk" ? "Активний трейдер" : "Active Trader",
+      role: language === "uk" ? "Лох вонючий" : "Lox vonyuchiy",
       initials: "ОК",
       // Photo: guy with beard and sunglasses in front of КРАМАТОРСЬК sign
       photo: "/testimonials/oleg.jpeg",
@@ -80,7 +80,7 @@ export default function Page() {
     {
       id: 2,
       name: "Назар Г.",
-      role: language === "uk" ? "Криптоінвестор" : "Crypto Investor",
+      role: language === "uk" ? "АНАЛітик" : "ANALyst",
       initials: "НГ",
       // Photo: guy in black hoodie
       photo: "/testimonials/nazar.jpeg",

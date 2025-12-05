@@ -27,7 +27,8 @@ export default function StrategyDetailPage() {
   const [exchange, setExchange] = useState("binance");
   const [symbol, setSymbol] = useState("BTC/USDT");
   const [timeframe, setTimeframe] = useState("1h");
-  const [amount, setAmount] = useState(100);
+  const [amount, setAmount] = useState(10); // $ per trade
+  const [maxBudget, setMaxBudget] = useState(50); // Max loss before closing all
   const [starting, setStarting] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
   const [connectedExchanges, setConnectedExchanges] = useState([]);
@@ -125,6 +126,7 @@ export default function StrategyDetailPage() {
           symbol,
           timeframe,
           orderSize: Number(amount),
+          maxBudget: Number(maxBudget),
         },
       });
       
@@ -133,7 +135,7 @@ export default function StrategyDetailPage() {
         return;
       }
       
-      alert("✓ Live trading started successfully!\n\nGo to Dashboard to monitor your strategy.");
+      alert(`✓ Live trading started!\n\nOrder size: $${amount}\nMax risk: $${maxBudget}\n\nGo to Dashboard to monitor.`);
       router.push("/dashboard");
     } catch (e) {
       console.error("Start trading error:", e);
@@ -458,21 +460,22 @@ export default function StrategyDetailPage() {
                 </select>
               </div>
 
+              <div>
+                <label className="text-sm text-gray-600 block mb-1">Timeframe</label>
+                <select
+                  className="w-full h-11 px-4 rounded-lg border border-gray-200"
+                  value={timeframe}
+                  onChange={(e) => setTimeframe(e.target.value)}
+                >
+                  <option value="1m">1m</option>
+                  <option value="5m">5m</option>
+                  <option value="15m">15m</option>
+                  <option value="1h">1h</option>
+                  <option value="4h">4h</option>
+                </select>
+              </div>
+
               <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-sm text-gray-600 block mb-1">Timeframe</label>
-                  <select
-                    className="w-full h-11 px-4 rounded-lg border border-gray-200"
-                    value={timeframe}
-                    onChange={(e) => setTimeframe(e.target.value)}
-                  >
-                    <option value="1m">1m</option>
-                    <option value="5m">5m</option>
-                    <option value="15m">15m</option>
-                    <option value="1h">1h</option>
-                    <option value="4h">4h</option>
-                  </select>
-                </div>
                 <div>
                   <label className="text-sm text-gray-600 block mb-1">Order Size ($)</label>
                   <input
@@ -480,9 +483,30 @@ export default function StrategyDetailPage() {
                     className="w-full h-11 px-4 rounded-lg border border-gray-200"
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
-                    min="10"
+                    min="1"
+                    placeholder="$ per trade"
                   />
+                  <span className="text-xs text-gray-400">$ per trade</span>
                 </div>
+                <div>
+                  <label className="text-sm text-gray-600 block mb-1">Max Risk ($)</label>
+                  <input
+                    type="number"
+                    className="w-full h-11 px-4 rounded-lg border border-gray-200"
+                    value={maxBudget}
+                    onChange={(e) => setMaxBudget(e.target.value)}
+                    min="1"
+                    placeholder="Max loss allowed"
+                  />
+                  <span className="text-xs text-gray-400">Closes all if loss exceeds</span>
+                </div>
+              </div>
+
+              <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm">
+                <p className="font-medium text-yellow-800">⚠️ Risk Warning</p>
+                <p className="text-yellow-700 text-xs mt-1">
+                  This trades REAL money. If unrealized loss reaches ${maxBudget || 0}, all positions close automatically.
+                </p>
               </div>
 
               <Button className="w-full" disabled={starting} onClick={startLive}>
