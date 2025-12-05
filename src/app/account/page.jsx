@@ -494,6 +494,11 @@ function AccountPageContent() {
                   onChange={async (e) => {
                     const file = e.target.files?.[0];
                     if (!file) return;
+                    // Limit file size to 500KB for base64 storage
+                    if (file.size > 500 * 1024) {
+                      setError(language === "uk" ? "Фото занадто велике (макс 500KB)" : "Photo too large (max 500KB)");
+                      return;
+                    }
                     // Convert to base64
                     const reader = new FileReader();
                     reader.onload = async (ev) => {
@@ -501,13 +506,19 @@ function AccountPageContent() {
                       setProfile(p => ({ ...p, profilePhoto: base64 }));
                       // Save to backend
                       try {
-                        await apiFetch("/user/profile", {
+                        const result = await apiFetch("/user/profile", {
                           method: "POST",
                           body: { profilePhoto: base64 },
                         });
-                        setMessage(language === "uk" ? "Фото оновлено!" : "Photo updated!");
+                        if (result?.error) {
+                          console.error("Backend error:", result);
+                          setError(result.error + (result.details ? ": " + result.details : ""));
+                        } else {
+                          setMessage(language === "uk" ? "Фото оновлено!" : "Photo updated!");
+                        }
                       } catch (err) {
-                        setError(language === "uk" ? "Не вдалося зберегти фото" : "Failed to save photo");
+                        console.error("Photo upload error:", err);
+                        setError((language === "uk" ? "Не вдалося зберегти фото: " : "Failed to save photo: ") + err.message);
                       }
                     };
                     reader.readAsDataURL(file);
