@@ -62,9 +62,9 @@ function BalanceWidget() {
       ]).catch(() => null);
       
       if (balanceRes && !balanceRes.error) {
-        // CCXT returns { USDT: { free, used, total }, ... }
-        const usdtData = balanceRes.USDT || balanceRes.usdt || {};
-        const usdtBalance = usdtData.total || usdtData.free || balanceRes.total?.USDT || 0;
+        // CCXT returns { total: { USDT: 59.48, ... }, free: {...}, used: {...} }
+        const totalBalances = balanceRes.total || {};
+        const usdtBalance = totalBalances.USDT || totalBalances.usdt || 0;
         setBalance(typeof usdtBalance === 'number' ? usdtBalance : parseFloat(usdtBalance) || 0);
       }
 
