@@ -118,6 +118,23 @@ export default function StrategiesPage() {
     }
   };
 
+  const deleteStrategy = async (strategyId) => {
+    const confirmMsg = language === "uk" 
+      ? "Ви впевнені, що хочете видалити цю стратегію? Всі пов'язані дані будуть видалені." 
+      : "Are you sure you want to delete this strategy? All related data will be deleted.";
+    
+    if (!confirm(confirmMsg)) return;
+    
+    try {
+      await apiFetch(`/strategies/${strategyId}`, { method: "DELETE" });
+      // Remove from local state
+      setUserStrategies(prev => prev.filter(s => s.id !== strategyId));
+      alert(language === "uk" ? "Стратегію видалено" : "Strategy deleted");
+    } catch (err) {
+      alert(language === "uk" ? "Не вдалося видалити стратегію" : "Failed to delete strategy");
+    }
+  };
+
   // Generate realistic chart data based on yearly return
   const generateChartData = (yearlyReturn) => {
     const monthlyReturn = yearlyReturn / 12 / 100;
@@ -229,13 +246,18 @@ export default function StrategiesPage() {
           <h2 className="text-xl font-bold mb-4">{t.yourStrategies}</h2>
           <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
             {userStrategies.map((s) => (
-              <Card key={s.id} className="hover:shadow-lg transition border-blue-200 bg-blue-50/30">
+              <Card key={s.id} className="hover:shadow-lg transition border-blue-200 bg-blue-50/30 relative group">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-lg flex items-center gap-2">
                     {s.name}
                     <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full">
                       {t.yourStrategy}
                     </span>
+                    {s.isActive && (
+                      <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full">
+                        {language === "uk" ? "Активна" : "Active"}
+                      </span>
+                    )}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -255,9 +277,19 @@ export default function StrategiesPage() {
                       <div className="font-semibold">{s.lastBacktestWinRate?.toFixed(0) || 0}%</div>
                     </div>
                   </div>
-                  <Link href={`/strategies/${s.id}`}>
-                    <Button className="w-full" size="sm">{t.useStrategy}</Button>
-                  </Link>
+                  <div className="flex gap-2">
+                    <Link href={`/strategies/${s.id}`} className="flex-1">
+                      <Button className="w-full" size="sm">{t.useStrategy}</Button>
+                    </Link>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      className="text-red-600 hover:bg-red-50 hover:text-red-700"
+                      onClick={() => deleteStrategy(s.id)}
+                    >
+                      {language === "uk" ? "🗑️" : "🗑️"}
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             ))}
