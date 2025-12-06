@@ -94,20 +94,27 @@ export default function StrategyDetailPage() {
                 }));
               
               // Map trades for the table
-              found.recentTrades = allTrades.slice(0, 200).map(t => ({
-                date: t.timestamp?.split(' ')[0] || t.date || 'N/A',
-                time: t.timestamp?.split(' ')[1] || t.time || '',
-                pair: t.symbol,
-                side: t.action,
-                entry: parseFloat(t.price) || 0,
-                exit: t.action?.includes('Exit') || t.action === 'SELL' ? parseFloat(t.price) : 0,
-                pnl: parseFloat(t.profit_loss) || 0,
-                pnlUsd: (parseFloat(t.profit_loss) * 100) || 0,
-                balance: parseFloat(t.balance) || 0,
-                orderSize: parseFloat(t.order_size) || 0,
-                comment: t.trade_comment,
-                status: t.action === 'BUY' ? 'Entry' : (t.action?.includes('Exit') ? 'Exit' : t.action),
-              }));
+              found.recentTrades = allTrades.slice(0, 200).map(t => {
+                const profitLossUsd = parseFloat(t.profit_loss) || 0;
+                const orderSize = parseFloat(t.order_size) || 1;
+                // Calculate P&L percentage: (profit_loss_usd / order_size) * 100
+                const pnlPercent = orderSize > 0 ? (profitLossUsd / orderSize) * 100 : 0;
+                
+                return {
+                  date: t.timestamp?.split(' ')[0] || t.date || 'N/A',
+                  time: t.timestamp?.split(' ')[1] || t.time || '',
+                  pair: t.symbol,
+                  side: t.action,
+                  entry: parseFloat(t.price) || 0,
+                  exit: t.action?.includes('Exit') || t.action === 'SELL' ? parseFloat(t.price) : 0,
+                  pnl: pnlPercent / 100, // Store as decimal for consistency
+                  pnlUsd: profitLossUsd,
+                  balance: parseFloat(t.balance) || 0,
+                  orderSize: orderSize,
+                  comment: t.trade_comment,
+                  status: t.action === 'BUY' ? 'Entry' : (t.action?.includes('Exit') ? 'Exit' : t.action),
+                };
+              });
               found.totalBacktestTrades = tradesData.total || allTrades.length;
             }
           } catch (e) {
@@ -438,8 +445,9 @@ export default function StrategyDetailPage() {
                           </td>
                           <td className="py-2 text-sm">${trade.entry?.toLocaleString(undefined, { maximumFractionDigits: 2 })}</td>
                           <td className="py-2 text-sm">${trade.orderSize?.toLocaleString()}</td>
-                          <td className={`py-2 font-medium text-sm ${trade.pnl >= 0 ? "text-green-600" : "text-red-600"}`}>
-                            {trade.pnl > 0 ? "+" : ""}{(trade.pnl * 100)?.toFixed(2)}%
+                          <td className={`py-2 font-medium text-sm ${trade.pnlUsd >= 0 ? "text-green-600" : "text-red-600"}`}>
+                            <div>{trade.pnlUsd > 0 ? "+" : ""}{(trade.pnl * 100)?.toFixed(2)}%</div>
+                            <div className="text-xs opacity-70">{trade.pnlUsd >= 0 ? "+" : ""}${trade.pnlUsd?.toFixed(2)}</div>
                           </td>
                           <td className="py-2 text-sm">${trade.balance?.toLocaleString(undefined, { maximumFractionDigits: 0 })}</td>
                           <td className="py-2 text-xs text-gray-500 max-w-[200px] truncate" title={trade.comment}>
