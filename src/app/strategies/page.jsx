@@ -135,13 +135,25 @@ export default function StrategiesPage() {
     }
   };
 
-  // Generate realistic chart data based on yearly return
-  const generateChartData = (yearlyReturn) => {
+  // Generate realistic 5-year equity curve with years on X-axis
+  const generateChartData = (yearlyReturn, strategyId) => {
     const monthlyReturn = yearlyReturn / 12 / 100;
-    return Array.from({ length: 24 }, (_, i) => ({
-      month: i + 1,
-      value: 10000 * Math.pow(1 + monthlyReturn, i) * (1 + Math.sin(i / 3) / 20),
-    }));
+    const startYear = 2020;
+    const points = [];
+    
+    // Generate data points for 5 years (60 months) - every 6 months
+    for (let i = 0; i <= 60; i += 6) {
+      const year = startYear + Math.floor(i / 12);
+      const volatility = 0.03 * Math.sin(i / 4) + 0.02 * Math.cos(i / 7);
+      const trend = monthlyReturn * (1 + volatility);
+      
+      points.push({
+        year: year.toString(),
+        value: Math.round(10000 * Math.pow(1 + trend, i)),
+      });
+    }
+    
+    return points;
   };
 
   const filtered = useMemo(() => {
@@ -367,21 +379,28 @@ export default function StrategiesPage() {
                   </div>
                 </div>
 
-                {/* Mini Chart */}
+                {/* Equity Curve */}
                 {s.history && (
-                  <div className="h-24 mb-4">
+                  <div className="h-28 mb-4">
                     <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={s.history}>
-                        <XAxis dataKey="month" hide />
-                        <YAxis hide domain={['auto', 'auto']} />
+                      <LineChart data={s.history} margin={{ bottom: 20, left: 0, right: 0 }}>
+                        <XAxis 
+                          dataKey="year" 
+                          tick={{ fontSize: 10, fill: '#6b7280' }}
+                          tickLine={false}
+                          axisLine={{ stroke: '#e5e7eb' }}
+                          interval={0}
+                        />
+                        <YAxis hide domain={['dataMin', 'dataMax']} />
                         <Tooltip 
-                          formatter={(v) => [`$${v.toFixed(0)}`, "Value"]}
-                          labelFormatter={(l) => `Month ${l}`}
+                          formatter={(v) => [`$${v.toLocaleString()}`, "Balance"]}
+                          labelFormatter={(l) => l}
+                          contentStyle={{ fontSize: 12 }}
                         />
                         <Line
                           type="monotone"
                           dataKey="value"
-                          stroke="#2563eb"
+                          stroke={s.cagr >= 0 ? "#22c55e" : "#ef4444"}
                           strokeWidth={2}
                           dot={false}
                         />
