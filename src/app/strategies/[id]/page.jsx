@@ -32,6 +32,16 @@ export default function StrategyDetailPage() {
   const [starting, setStarting] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
   const [connectedExchanges, setConnectedExchanges] = useState([]);
+  
+  // Backtest rerun state
+  const [backtestConfig, setBacktestConfig] = useState({
+    startDate: "2024-01-01",
+    endDate: "2024-12-31",
+    initialCapital: 10000,
+    pairs: [],
+  });
+  const [runningBacktest, setRunningBacktest] = useState(false);
+  const [backtestResult, setBacktestResult] = useState(null);
 
   useEffect(() => {
     fetchStrategy();
@@ -299,7 +309,7 @@ export default function StrategyDetailPage() {
 
           {/* Tabs */}
           <div className="flex gap-2 border-b">
-            {["overview", "trades", "conditions"].map((tab) => (
+            {["overview", "trades", "conditions", "backtest"].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -309,7 +319,7 @@ export default function StrategyDetailPage() {
                     : "text-gray-500 hover:text-gray-700"
                 }`}
               >
-                {tab}
+                {tab === "backtest" ? "🔄 Rerun Backtest" : tab}
               </button>
             ))}
           </div>
@@ -476,6 +486,221 @@ export default function StrategyDetailPage() {
                 )}
                 {strategy.config?.exit_conditions && (
                   <ConditionGroup title="📉 Exit Conditions" conditions={strategy.config.exit_conditions} />
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {activeTab === "backtest" && (
+            <Card>
+              <CardHeader>
+                <CardTitle>🔄 Rerun Backtest</CardTitle>
+                <p className="text-sm text-gray-500">Test this strategy with different parameters and time periods</p>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Date Range */}
+                <div>
+                  <label className="text-sm font-medium text-gray-700 block mb-2">📅 Backtest Period</label>
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {[
+                      { label: "2024", start: "2024-01-01", end: "2024-12-31" },
+                      { label: "2023", start: "2023-01-01", end: "2023-12-31" },
+                      { label: "2022", start: "2022-01-01", end: "2022-12-31" },
+                      { label: "2021", start: "2021-01-01", end: "2021-12-31" },
+                      { label: "2020", start: "2020-01-01", end: "2020-12-31" },
+                      { label: "All (5 years)", start: "2020-01-01", end: "2024-12-31" },
+                    ].map((preset) => (
+                      <button
+                        key={preset.label}
+                        onClick={() => setBacktestConfig({ ...backtestConfig, startDate: preset.start, endDate: preset.end })}
+                        className={`px-3 py-1.5 rounded-full text-sm transition ${
+                          backtestConfig.startDate === preset.start && backtestConfig.endDate === preset.end
+                            ? "bg-blue-600 text-white"
+                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                        }`}
+                      >
+                        {preset.label}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs text-gray-500">Start Date</label>
+                      <input
+                        type="date"
+                        className="w-full h-10 px-3 rounded-lg border border-gray-200"
+                        value={backtestConfig.startDate}
+                        onChange={(e) => setBacktestConfig({ ...backtestConfig, startDate: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs text-gray-500">End Date</label>
+                      <input
+                        type="date"
+                        className="w-full h-10 px-3 rounded-lg border border-gray-200"
+                        value={backtestConfig.endDate}
+                        onChange={(e) => setBacktestConfig({ ...backtestConfig, endDate: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Initial Capital */}
+                <div>
+                  <label className="text-sm font-medium text-gray-700 block mb-2">💰 Initial Capital</label>
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {[1000, 5000, 10000, 50000, 100000].map((amount) => (
+                      <button
+                        key={amount}
+                        onClick={() => setBacktestConfig({ ...backtestConfig, initialCapital: amount })}
+                        className={`px-3 py-1.5 rounded-full text-sm transition ${
+                          backtestConfig.initialCapital === amount
+                            ? "bg-green-600 text-white"
+                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                        }`}
+                      >
+                        ${amount.toLocaleString()}
+                      </button>
+                    ))}
+                  </div>
+                  <input
+                    type="number"
+                    className="w-full h-10 px-3 rounded-lg border border-gray-200"
+                    value={backtestConfig.initialCapital}
+                    onChange={(e) => setBacktestConfig({ ...backtestConfig, initialCapital: parseInt(e.target.value) || 10000 })}
+                    min="100"
+                    placeholder="Enter custom amount"
+                  />
+                </div>
+
+                {/* Trading Pairs */}
+                <div>
+                  <label className="text-sm font-medium text-gray-700 block mb-2">📊 Trading Pairs</label>
+                  <div className="flex flex-wrap gap-2">
+                    {(strategy.pairs || ['BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'XRP/USDT', 'ADA/USDT']).map((pair) => {
+                      const isSelected = backtestConfig.pairs.length === 0 || backtestConfig.pairs.includes(pair);
+                      return (
+                        <button
+                          key={pair}
+                          onClick={() => {
+                            const currentPairs = backtestConfig.pairs.length === 0 ? (strategy.pairs || []) : backtestConfig.pairs;
+                            if (currentPairs.includes(pair)) {
+                              setBacktestConfig({ ...backtestConfig, pairs: currentPairs.filter(p => p !== pair) });
+                            } else {
+                              setBacktestConfig({ ...backtestConfig, pairs: [...currentPairs, pair] });
+                            }
+                          }}
+                          className={`px-3 py-1.5 rounded-full text-sm transition ${
+                            isSelected
+                              ? "bg-purple-600 text-white"
+                              : "bg-gray-100 text-gray-400 hover:bg-gray-200"
+                          }`}
+                        >
+                          {pair}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <p className="text-xs text-gray-400 mt-2">
+                    {backtestConfig.pairs.length === 0 
+                      ? `Using all ${strategy.pairs?.length || 0} pairs` 
+                      : `${backtestConfig.pairs.length} pair${backtestConfig.pairs.length !== 1 ? 's' : ''} selected`}
+                  </p>
+                </div>
+
+                {/* Run Button */}
+                <Button
+                  className="w-full h-12 text-lg"
+                  onClick={async () => {
+                    setRunningBacktest(true);
+                    setBacktestResult(null);
+                    try {
+                      const result = await apiFetch(`/backtest/preset-strategies/${params.id}/rerun`, {
+                        method: 'POST',
+                        body: {
+                          startDate: backtestConfig.startDate,
+                          endDate: backtestConfig.endDate,
+                          initialCapital: backtestConfig.initialCapital,
+                          pairs: backtestConfig.pairs.length > 0 ? backtestConfig.pairs : undefined,
+                        }
+                      });
+                      setBacktestResult(result);
+                    } catch (e) {
+                      setBacktestResult({ status: 'error', error: e.message });
+                    } finally {
+                      setRunningBacktest(false);
+                    }
+                  }}
+                  disabled={runningBacktest}
+                >
+                  {runningBacktest ? (
+                    <>
+                      <span className="animate-spin mr-2">⏳</span>
+                      Running Backtest...
+                    </>
+                  ) : (
+                    <>🚀 Run Backtest</>
+                  )}
+                </Button>
+
+                {/* Results */}
+                {backtestResult && (
+                  <div className={`p-4 rounded-lg ${
+                    backtestResult.status === 'success' 
+                      ? 'bg-green-50 border border-green-200' 
+                      : backtestResult.status === 'error'
+                      ? 'bg-red-50 border border-red-200'
+                      : 'bg-blue-50 border border-blue-200'
+                  }`}>
+                    <h4 className={`font-bold mb-2 ${
+                      backtestResult.status === 'success' ? 'text-green-800' : 
+                      backtestResult.status === 'error' ? 'text-red-800' : 'text-blue-800'
+                    }`}>
+                      {backtestResult.status === 'success' ? '✅ Backtest Complete' : 
+                       backtestResult.status === 'error' ? '❌ Error' : '📊 Results'}
+                    </h4>
+                    
+                    {backtestResult.error && (
+                      <p className="text-red-700 text-sm">{backtestResult.error}</p>
+                    )}
+                    
+                    {backtestResult.metrics && (
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-3">
+                        <div className="bg-white p-3 rounded-lg">
+                          <div className="text-xs text-gray-500">Net Profit</div>
+                          <div className={`font-bold text-lg ${backtestResult.metrics.net_profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            {backtestResult.metrics.net_profit >= 0 ? '+' : ''}{backtestResult.metrics.net_profit?.toFixed(2)}%
+                          </div>
+                        </div>
+                        <div className="bg-white p-3 rounded-lg">
+                          <div className="text-xs text-gray-500">Total Trades</div>
+                          <div className="font-bold text-lg">{backtestResult.metrics.total_trades}</div>
+                        </div>
+                        <div className="bg-white p-3 rounded-lg">
+                          <div className="text-xs text-gray-500">Win Rate</div>
+                          <div className="font-bold text-lg">{backtestResult.metrics.win_rate?.toFixed(1)}%</div>
+                        </div>
+                        <div className="bg-white p-3 rounded-lg">
+                          <div className="text-xs text-gray-500">Max Drawdown</div>
+                          <div className="font-bold text-lg text-red-600">{backtestResult.metrics.max_drawdown?.toFixed(2)}%</div>
+                        </div>
+                        <div className="bg-white p-3 rounded-lg">
+                          <div className="text-xs text-gray-500">Sharpe Ratio</div>
+                          <div className="font-bold text-lg">{backtestResult.metrics.sharpe_ratio?.toFixed(2)}</div>
+                        </div>
+                        <div className="bg-white p-3 rounded-lg">
+                          <div className="text-xs text-gray-500">Profit Factor</div>
+                          <div className="font-bold text-lg">{backtestResult.metrics.profit_factor}</div>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {backtestResult.runTime && (
+                      <p className="text-xs text-gray-500 mt-3">
+                        Completed in {(backtestResult.runTime / 1000).toFixed(1)}s
+                      </p>
+                    )}
+                  </div>
                 )}
               </CardContent>
             </Card>
