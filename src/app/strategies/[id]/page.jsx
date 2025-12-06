@@ -775,12 +775,16 @@ export default function StrategyDetailPage() {
                     )}
                     
                     {backtestResult.metrics && (
+                      <>
                       <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-3">
                         <div className="bg-white p-3 rounded-lg">
                           <div className="text-xs text-gray-500">Net Profit</div>
                           <div className={`font-bold text-lg ${backtestResult.metrics.net_profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                             {backtestResult.metrics.net_profit >= 0 ? '+' : ''}{backtestResult.metrics.net_profit?.toFixed(2)}%
                           </div>
+                          {backtestResult.metrics.net_profit_usd && (
+                            <div className="text-xs text-gray-400">{backtestResult.metrics.net_profit_usd}</div>
+                          )}
                         </div>
                         <div className="bg-white p-3 rounded-lg">
                           <div className="text-xs text-gray-500">Total Trades</div>
@@ -788,7 +792,7 @@ export default function StrategyDetailPage() {
                         </div>
                         <div className="bg-white p-3 rounded-lg">
                           <div className="text-xs text-gray-500">Win Rate</div>
-                          <div className="font-bold text-lg">{backtestResult.metrics.win_rate?.toFixed(1)}%</div>
+                          <div className="font-bold text-lg">{(backtestResult.metrics.win_rate * 100)?.toFixed(1)}%</div>
                         </div>
                         <div className="bg-white p-3 rounded-lg">
                           <div className="text-xs text-gray-500">Max Drawdown</div>
@@ -800,14 +804,75 @@ export default function StrategyDetailPage() {
                         </div>
                         <div className="bg-white p-3 rounded-lg">
                           <div className="text-xs text-gray-500">Profit Factor</div>
-                          <div className="font-bold text-lg">{backtestResult.metrics.profit_factor}</div>
+                          <div className="font-bold text-lg">{typeof backtestResult.metrics.profit_factor === 'number' ? backtestResult.metrics.profit_factor.toFixed(2) : backtestResult.metrics.profit_factor}</div>
                         </div>
                       </div>
+                      
+                      {/* Equity Curve */}
+                      {backtestResult.chartData?.balanceHistory && backtestResult.chartData.balanceHistory.length > 0 && (
+                        <div className="mt-4 p-4 bg-white rounded-lg">
+                          <h5 className="font-medium mb-3">📈 Equity Curve</h5>
+                          <div className="h-48 relative">
+                            <ResponsiveContainer width="100%" height="100%">
+                              <AreaChart data={backtestResult.chartData.balanceHistory}>
+                                <defs>
+                                  <linearGradient id="rerunGradient" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                                    <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                                  </linearGradient>
+                                </defs>
+                                <XAxis dataKey="date" tick={{fontSize: 10}} />
+                                <YAxis tick={{fontSize: 10}} domain={['auto', 'auto']} />
+                                <Tooltip formatter={(v) => [`$${v?.toLocaleString()}`, 'Balance']} />
+                                <Area type="monotone" dataKey="balance" stroke="#10b981" fill="url(#rerunGradient)" />
+                              </AreaChart>
+                            </ResponsiveContainer>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Recent Trades */}
+                      {backtestResult.trades && backtestResult.trades.length > 0 && (
+                        <div className="mt-4 p-4 bg-white rounded-lg">
+                          <h5 className="font-medium mb-3">📋 Sample Trades ({Math.min(backtestResult.trades.length, 20)} of {backtestResult.totalTrades || backtestResult.trades.length})</h5>
+                          <div className="overflow-x-auto max-h-64 overflow-y-auto">
+                            <table className="w-full text-sm">
+                              <thead className="bg-gray-50 sticky top-0">
+                                <tr>
+                                  <th className="text-left py-2 px-2">Date</th>
+                                  <th className="text-left py-2 px-2">Pair</th>
+                                  <th className="text-left py-2 px-2">Action</th>
+                                  <th className="text-right py-2 px-2">Price</th>
+                                  <th className="text-right py-2 px-2">P&L</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {backtestResult.trades.slice(0, 20).map((trade, idx) => (
+                                  <tr key={idx} className="border-t">
+                                    <td className="py-2 px-2 text-xs">{trade.timestamp?.split(' ')[0] || trade.date}</td>
+                                    <td className="py-2 px-2">{trade.symbol}</td>
+                                    <td className={`py-2 px-2 font-medium ${trade.action === 'BUY' ? 'text-green-600' : 'text-red-600'}`}>
+                                      {trade.action}
+                                    </td>
+                                    <td className="py-2 px-2 text-right">${parseFloat(trade.price)?.toLocaleString()}</td>
+                                    <td className={`py-2 px-2 text-right font-medium ${parseFloat(trade.profit_loss) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                      {parseFloat(trade.profit_loss) > 0 ? '+' : ''}{parseFloat(trade.profit_loss)?.toFixed(2) || '0.00'}
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      )}
+                      </>
                     )}
                     
                     {backtestResult.runTime && (
                       <p className="text-xs text-gray-500 mt-3">
-                        Completed in {(backtestResult.runTime / 1000).toFixed(1)}s
+                        {backtestResult.cached && <span className="text-green-600">⚡ Cached result • </span>}
+                        Completed in {(backtestResult.runTime < 1 ? backtestResult.runTime : backtestResult.runTime / 1000).toFixed(1)}s
+                        {backtestResult.pairsUsed && <span> • {backtestResult.pairsUsed} pairs</span>}
                       </p>
                     )}
                   </div>
