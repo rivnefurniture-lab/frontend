@@ -42,6 +42,7 @@ export default function StrategyDetailPage() {
   });
   const [runningBacktest, setRunningBacktest] = useState(false);
   const [backtestResult, setBacktestResult] = useState(null);
+  const [backtestProgress, setBacktestProgress] = useState(null);
 
   useEffect(() => {
     fetchStrategy();
@@ -504,11 +505,44 @@ export default function StrategyDetailPage() {
               <CardHeader>
                 <CardTitle>🔄 Rerun Backtest</CardTitle>
                 <p className="text-sm text-gray-500">Test this strategy with different parameters and time periods</p>
+                <p className="text-xs text-blue-600 mt-1">📊 Data available: 2020-01-01 to 2025-12-04</p>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* Date Range */}
+                {/* Quick Period Selectors */}
                 <div>
-                  <label className="text-sm font-medium text-gray-700 block mb-2">📅 Backtest Period</label>
+                  <label className="text-sm font-medium text-gray-700 block mb-2">⏱️ Quick Periods</label>
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {(() => {
+                      const today = new Date();
+                      const formatDate = (d) => d.toISOString().split('T')[0];
+                      const subDays = (d, days) => { const r = new Date(d); r.setDate(r.getDate() - days); return r; };
+                      const subMonths = (d, months) => { const r = new Date(d); r.setMonth(r.getMonth() - months); return r; };
+                      return [
+                        { label: "Last Week", start: formatDate(subDays(today, 7)), end: formatDate(today) },
+                        { label: "Last Month", start: formatDate(subMonths(today, 1)), end: formatDate(today) },
+                        { label: "Last 3 Months", start: formatDate(subMonths(today, 3)), end: formatDate(today) },
+                        { label: "Last 6 Months", start: formatDate(subMonths(today, 6)), end: formatDate(today) },
+                        { label: "Last Year", start: formatDate(subMonths(today, 12)), end: formatDate(today) },
+                      ];
+                    })().map((preset) => (
+                      <button
+                        key={preset.label}
+                        onClick={() => setBacktestConfig({ ...backtestConfig, startDate: preset.start, endDate: preset.end })}
+                        className={`px-3 py-1.5 rounded-full text-sm transition ${
+                          backtestConfig.startDate === preset.start && backtestConfig.endDate === preset.end
+                            ? "bg-green-600 text-white"
+                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                        }`}
+                      >
+                        {preset.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Year Presets */}
+                <div>
+                  <label className="text-sm font-medium text-gray-700 block mb-2">📅 By Year</label>
                   <div className="flex flex-wrap gap-2 mb-3">
                     {[
                       { label: "2024", start: "2024-01-01", end: "2024-12-31" },
@@ -516,7 +550,7 @@ export default function StrategyDetailPage() {
                       { label: "2022", start: "2022-01-01", end: "2022-12-31" },
                       { label: "2021", start: "2021-01-01", end: "2021-12-31" },
                       { label: "2020", start: "2020-01-01", end: "2020-12-31" },
-                      { label: "All (5 years)", start: "2020-01-01", end: "2024-12-31" },
+                      { label: "All (5 years)", start: "2020-01-01", end: "2025-12-04" },
                     ].map((preset) => (
                       <button
                         key={preset.label}
@@ -616,12 +650,57 @@ export default function StrategyDetailPage() {
                   </p>
                 </div>
 
+                {/* Validation Warning */}
+                {(() => {
+                  const start = new Date(backtestConfig.startDate);
+                  const end = new Date(backtestConfig.endDate);
+                  const dataStart = new Date('2020-01-01');
+                  const dataEnd = new Date('2025-12-04');
+                  const pairCount = backtestConfig.pairs.length || 14;
+                  
+                  const warnings = [];
+                  if (start < dataStart) warnings.push(`Start date before available data (2020-01-01)`);
+                  if (end > dataEnd) warnings.push(`End date after available data (2025-12-04)`);
+                  if (end <= start) warnings.push(`End date must be after start date`);
+                  if (pairCount > 6) warnings.push(`⚠️ Using ${pairCount} pairs may be slow. Consider using 2-6 pairs for faster results.`);
+                  
+                  return warnings.length > 0 ? (
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-sm">
+                      <div className="font-medium text-yellow-800 mb-1">⚠️ Warnings:</div>
+                      {warnings.map((w, i) => (
+                        <div key={i} className="text-yellow-700">• {w}</div>
+                      ))}
+                    </div>
+                  ) : null;
+                })()}
+
                 {/* Run Button */}
                 <Button
                   className="w-full h-12 text-lg"
                   onClick={async () => {
                     setRunningBacktest(true);
                     setBacktestResult(null);
+                    setBacktestProgress({ stage: 'Starting...', percent: 5 });
+                    
+                    // Progress simulation with messages
+                    const progressMessages = [
+                      { msg: '📡 Connecting to backtest server...', pct: 10 },
+                      { msg: '📥 Loading historical data...', pct: 20 },
+                      { msg: '🔄 Processing price data...', pct: 35 },
+                      { msg: '📊 Calculating indicators (RSI, MA, BB)...', pct: 50 },
+                      { msg: '🎯 Finding entry signals...', pct: 65 },
+                      { msg: '📈 Simulating trades...', pct: 80 },
+                      { msg: '📋 Calculating metrics...', pct: 90 },
+                    ];
+                    
+                    let progressIdx = 0;
+                    const progressInterval = setInterval(() => {
+                      if (progressIdx < progressMessages.length) {
+                        setBacktestProgress(progressMessages[progressIdx]);
+                        progressIdx++;
+                      }
+                    }, 3000);
+                    
                     try {
                       const result = await apiFetch(`/backtest/preset-strategies/${params.id}/rerun`, {
                         method: 'POST',
@@ -632,14 +711,18 @@ export default function StrategyDetailPage() {
                           pairs: backtestConfig.pairs.length > 0 ? backtestConfig.pairs : undefined,
                         }
                       });
+                      clearInterval(progressInterval);
+                      setBacktestProgress({ stage: '✅ Complete!', percent: 100 });
                       setBacktestResult(result);
                     } catch (e) {
+                      clearInterval(progressInterval);
+                      setBacktestProgress(null);
                       setBacktestResult({ status: 'error', error: e.message });
                     } finally {
                       setRunningBacktest(false);
                     }
                   }}
-                  disabled={runningBacktest}
+                  disabled={runningBacktest || new Date(backtestConfig.endDate) <= new Date(backtestConfig.startDate)}
                 >
                   {runningBacktest ? (
                     <>
@@ -650,6 +733,25 @@ export default function StrategyDetailPage() {
                     <>🚀 Run Backtest</>
                   )}
                 </Button>
+
+                {/* Progress Indicator */}
+                {runningBacktest && backtestProgress && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-blue-800">{backtestProgress.stage || backtestProgress.msg}</span>
+                      <span className="text-sm text-blue-600">{backtestProgress.percent || backtestProgress.pct}%</span>
+                    </div>
+                    <div className="w-full bg-blue-200 rounded-full h-2">
+                      <div 
+                        className="bg-blue-600 h-2 rounded-full transition-all duration-500"
+                        style={{ width: `${backtestProgress.percent || backtestProgress.pct}%` }}
+                      />
+                    </div>
+                    <p className="text-xs text-blue-600 mt-2">
+                      ⏱️ Backtests typically take 30-120 seconds depending on date range and pairs selected
+                    </p>
+                  </div>
+                )}
 
                 {/* Results */}
                 {backtestResult && (
