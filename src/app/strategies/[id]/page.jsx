@@ -38,7 +38,7 @@ export default function StrategyDetailPage() {
     startDate: "2024-01-01",
     endDate: "2024-12-31",
     initialCapital: 10000,
-    pairs: [],
+    pairs: ["BTC/USDT", "ETH/USDT"], // Default to 2 most liquid pairs
   });
   const [runningBacktest, setRunningBacktest] = useState(false);
   const [backtestResult, setBacktestResult] = useState(null);
@@ -616,39 +616,60 @@ export default function StrategyDetailPage() {
                   />
                 </div>
 
-                {/* Trading Pairs */}
+                {/* Trading Pairs - Max 5 pairs, 2 for long periods */}
                 <div>
-                  <label className="text-sm font-medium text-gray-700 block mb-2">📊 Trading Pairs</label>
-                  <div className="flex flex-wrap gap-2">
-                    {(strategy.pairs || ['BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'XRP/USDT', 'ADA/USDT']).map((pair) => {
-                      const isSelected = backtestConfig.pairs.length === 0 || backtestConfig.pairs.includes(pair);
-                      return (
-                        <button
-                          key={pair}
-                          onClick={() => {
-                            const currentPairs = backtestConfig.pairs.length === 0 ? (strategy.pairs || []) : backtestConfig.pairs;
-                            if (currentPairs.includes(pair)) {
-                              setBacktestConfig({ ...backtestConfig, pairs: currentPairs.filter(p => p !== pair) });
-                            } else {
-                              setBacktestConfig({ ...backtestConfig, pairs: [...currentPairs, pair] });
-                            }
-                          }}
-                          className={`px-3 py-1.5 rounded-full text-sm transition ${
-                            isSelected
-                              ? "bg-purple-600 text-white"
-                              : "bg-gray-100 text-gray-400 hover:bg-gray-200"
-                          }`}
-                        >
-                          {pair}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  <p className="text-xs text-gray-400 mt-2">
-                    {backtestConfig.pairs.length === 0 
-                      ? `Using all ${strategy.pairs?.length || 0} pairs` 
-                      : `${backtestConfig.pairs.length} pair${backtestConfig.pairs.length !== 1 ? 's' : ''} selected`}
-                  </p>
+                  <label className="text-sm font-medium text-gray-700 block mb-2">📊 Trading Pairs (Max 5)</label>
+                  {(() => {
+                    // Calculate period to determine max pairs
+                    const start = new Date(backtestConfig.startDate);
+                    const end = new Date(backtestConfig.endDate);
+                    const periodYears = (end - start) / (365 * 24 * 60 * 60 * 1000);
+                    const maxPairs = periodYears > 3 ? 2 : 5;
+                    const availablePairs = ['BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'ADA/USDT', 'DOGE/USDT', 'AVAX/USDT', 'DOT/USDT', 'LINK/USDT', 'LTC/USDT', 'NEAR/USDT', 'HBAR/USDT', 'TRX/USDT'];
+                    
+                    return (
+                      <>
+                        {periodYears > 3 && (
+                          <div className="bg-blue-50 border border-blue-200 rounded-lg p-2 text-xs text-blue-700 mb-2">
+                            ℹ️ Long period ({periodYears.toFixed(1)} years): Max 2 pairs allowed for memory efficiency
+                          </div>
+                        )}
+                        <div className="flex flex-wrap gap-2">
+                          {availablePairs.map((pair) => {
+                            const isSelected = backtestConfig.pairs.includes(pair);
+                            const atLimit = backtestConfig.pairs.length >= maxPairs && !isSelected;
+                            return (
+                              <button
+                                key={pair}
+                                disabled={atLimit}
+                                onClick={() => {
+                                  if (isSelected) {
+                                    setBacktestConfig({ ...backtestConfig, pairs: backtestConfig.pairs.filter(p => p !== pair) });
+                                  } else if (backtestConfig.pairs.length < maxPairs) {
+                                    setBacktestConfig({ ...backtestConfig, pairs: [...backtestConfig.pairs, pair] });
+                                  }
+                                }}
+                                className={`px-3 py-1.5 rounded-full text-sm transition ${
+                                  isSelected
+                                    ? "bg-purple-600 text-white"
+                                    : atLimit
+                                    ? "bg-gray-100 text-gray-300 cursor-not-allowed"
+                                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                }`}
+                              >
+                                {pair}
+                              </button>
+                            );
+                          })}
+                        </div>
+                        <p className="text-xs text-gray-400 mt-2">
+                          {backtestConfig.pairs.length === 0 
+                            ? `Select up to ${maxPairs} pairs (max active deals will match pairs count)` 
+                            : `${backtestConfig.pairs.length}/${maxPairs} pairs selected • Max active deals: ${backtestConfig.pairs.length}`}
+                        </p>
+                      </>
+                    );
+                  })()}
                 </div>
 
                 {/* Validation Warning */}
@@ -657,13 +678,16 @@ export default function StrategyDetailPage() {
                   const end = new Date(backtestConfig.endDate);
                   const dataStart = new Date('2020-01-01');
                   const dataEnd = new Date('2025-12-04');
-                  const pairCount = backtestConfig.pairs.length || 14;
+                  const pairCount = backtestConfig.pairs.length;
+                  const periodYears = (end - start) / (365 * 24 * 60 * 60 * 1000);
+                  const maxPairs = periodYears > 3 ? 2 : 5;
                   
                   const warnings = [];
                   if (start < dataStart) warnings.push(`Start date before available data (2020-01-01)`);
                   if (end > dataEnd) warnings.push(`End date after available data (2025-12-04)`);
                   if (end <= start) warnings.push(`End date must be after start date`);
-                  if (pairCount > 6) warnings.push(`⚠️ Using ${pairCount} pairs may be slow. Consider using 2-6 pairs for faster results.`);
+                  if (pairCount === 0) warnings.push(`Please select at least 1 pair`);
+                  if (periodYears > 3 && pairCount > 2) warnings.push(`Long period: Max 2 pairs for ${periodYears.toFixed(1)} year backtest`);
                   
                   return warnings.length > 0 ? (
                     <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-sm">
