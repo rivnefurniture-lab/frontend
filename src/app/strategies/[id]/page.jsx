@@ -43,6 +43,7 @@ export default function StrategyDetailPage() {
   const [runningBacktest, setRunningBacktest] = useState(false);
   const [backtestResult, setBacktestResult] = useState(null);
   const [backtestProgress, setBacktestProgress] = useState(null);
+  const [showAllTrades, setShowAllTrades] = useState(false);
 
   useEffect(() => {
     fetchStrategy();
@@ -834,8 +835,18 @@ export default function StrategyDetailPage() {
                       {/* Recent Trades */}
                       {backtestResult.trades && backtestResult.trades.length > 0 && (
                         <div className="mt-4 p-4 bg-white rounded-lg">
-                          <h5 className="font-medium mb-3">📋 Sample Trades ({Math.min(backtestResult.trades.length, 20)} of {backtestResult.totalTrades || backtestResult.trades.length})</h5>
-                          <div className="overflow-x-auto max-h-64 overflow-y-auto">
+                          <div className="flex justify-between items-center mb-3">
+                            <h5 className="font-medium">📋 Latest Trades ({Math.min(showAllTrades ? backtestResult.trades.length : 20, backtestResult.trades.length)} of {backtestResult.totalTrades || backtestResult.trades.length})</h5>
+                            {backtestResult.trades.length > 20 && (
+                              <button
+                                onClick={() => setShowAllTrades(!showAllTrades)}
+                                className="text-sm text-blue-600 hover:underline"
+                              >
+                                {showAllTrades ? 'Show Less' : 'Show All'}
+                              </button>
+                            )}
+                          </div>
+                          <div className={`overflow-x-auto ${showAllTrades ? 'max-h-96' : 'max-h-64'} overflow-y-auto`}>
                             <table className="w-full text-sm">
                               <thead className="bg-gray-50 sticky top-0">
                                 <tr>
@@ -847,7 +858,10 @@ export default function StrategyDetailPage() {
                                 </tr>
                               </thead>
                               <tbody>
-                                {backtestResult.trades.slice(0, 20).map((trade, idx) => (
+                                {backtestResult.trades
+                                  .slice(-(showAllTrades ? backtestResult.trades.length : 20))
+                                  .reverse()
+                                  .map((trade, idx) => (
                                   <tr key={idx} className="border-t">
                                     <td className="py-2 px-2 text-xs">{trade.timestamp?.split(' ')[0] || trade.date}</td>
                                     <td className="py-2 px-2">{trade.symbol}</td>
