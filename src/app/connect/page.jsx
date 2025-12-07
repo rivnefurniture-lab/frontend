@@ -40,6 +40,36 @@ const EXCHANGES = [
     fields: ["apiKey", "secret", "password"],
     testnetUrl: "https://www.okx.com/docs-v5/en/",
     docsUrl: "https://www.okx.com/support/hc/en-us/articles/360048917891"
+  },
+  {
+    id: "kraken",
+    name: "Kraken",
+    logo: "🟣",
+    color: "from-purple-500 to-indigo-600",
+    description: { en: "Trusted US-based exchange", uk: "Надійна біржа зі США" },
+    fields: ["apiKey", "secret"],
+    testnetUrl: "https://docs.kraken.com/rest/",
+    docsUrl: "https://support.kraken.com/hc/en-us/articles/360000919966"
+  },
+  {
+    id: "kucoin",
+    name: "KuCoin",
+    logo: "🟢",
+    color: "from-green-400 to-emerald-600",
+    description: { en: "People's exchange with low fees", uk: "Народна біржа з низькими комісіями" },
+    fields: ["apiKey", "secret", "password"],
+    testnetUrl: "https://www.kucoin.com/docs/",
+    docsUrl: "https://www.kucoin.com/support/360015102174"
+  },
+  {
+    id: "coinbase",
+    name: "Coinbase Pro",
+    logo: "🔵",
+    color: "from-blue-500 to-indigo-600",
+    description: { en: "Leading US exchange", uk: "Провідна біржа США" },
+    fields: ["apiKey", "secret"],
+    testnetUrl: "https://docs.cloud.coinbase.com/",
+    docsUrl: "https://help.coinbase.com/en/exchange/managing-my-account/how-to-create-an-api-key"
   }
 ];
 
@@ -512,27 +542,55 @@ export default function ConnectPage() {
           </ul>
         </div>
 
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-8">
-          <h3 className="font-medium text-amber-800 flex items-center gap-2">{t.ipTitle}</h3>
-          <p className="mt-2 text-sm text-amber-700">{t.ipText}</p>
-          <div className="mt-3 flex items-center gap-3">
-            <code className="bg-white px-4 py-2 rounded border border-amber-300 font-mono text-lg">
-              46.224.99.27
-            </code>
-            <button 
-              onClick={() => {
-                navigator.clipboard.writeText("46.224.99.27");
-                alert(t.copied);
-              }}
-              className="text-sm text-amber-700 hover:text-amber-800 underline"
-            >
-              {t.copy}
-            </button>
-          </div>
-          <p className="mt-3 text-xs text-amber-600">{t.ipNote}</p>
-        </div>
+        <Card className="bg-gradient-to-br from-indigo-50 to-blue-50 border-2 border-indigo-200 mb-8">
+          <CardHeader>
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center flex-shrink-0">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <CardTitle className="text-indigo-900 text-lg">{t.ipTitle}</CardTitle>
+                <p className="mt-2 text-sm text-indigo-700 leading-relaxed">{t.ipText}</p>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="bg-white rounded-xl p-4 border-2 border-indigo-200 shadow-inner">
+              <div className="flex items-center justify-between gap-4 flex-wrap">
+                <div className="flex-1 min-w-[200px]">
+                  <div className="text-xs text-indigo-600 font-semibold uppercase tracking-wider mb-2">
+                    {language === "uk" ? "IP-адреса сервера" : "Server IP Address"}
+                  </div>
+                  <code className="text-2xl font-mono font-bold text-indigo-900 tracking-wide">
+                    46.224.99.27
+                  </code>
+                </div>
+                <button 
+                  onClick={() => {
+                    navigator.clipboard.writeText("46.224.99.27");
+                    alert(t.copied);
+                  }}
+                  className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl flex items-center gap-2"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
+                  {t.copy}
+                </button>
+              </div>
+            </div>
+            <div className="mt-4 flex items-start gap-2 text-sm text-indigo-700 bg-indigo-100/50 rounded-lg p-3">
+              <svg className="w-5 h-5 text-indigo-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span>{t.ipNote}</span>
+            </div>
+          </CardContent>
+        </Card>
 
-        <div className="grid md:grid-cols-2 gap-6 mb-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           {loadingConnections ? (
             <div className="col-span-2 text-center py-8">
               <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto"></div>
