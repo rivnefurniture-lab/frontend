@@ -14,14 +14,14 @@ function AuthForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   
-  const [mode, setMode] = useState<"login" | "register" | "forgot">("login");
+  const [mode, setMode] = useState("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [country, setCountry] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState(null);
+  const [message, setMessage] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
   const isSignup = mode === "register";
@@ -34,7 +34,7 @@ function AuthForm() {
     }
   }, [searchParams]);
 
-  const onSubmit = async (e: React.FormEvent) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
     setError(null);
     setMessage(null);
@@ -72,7 +72,7 @@ function AuthForm() {
       setName("");
       setPhone("");
       setCountry("");
-    } catch (e: any) {
+    } catch (e) {
       setError(e.message || "An error occurred. Please try again.");
     } finally {
       setSubmitting(false);
@@ -83,7 +83,7 @@ function AuthForm() {
     try {
       setError(null);
       await loginWithGoogle();
-    } catch (e: any) {
+    } catch (e) {
       setError(e.message);
     }
   };
