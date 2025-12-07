@@ -2,17 +2,9 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import Hero from "@/app/hero";
+import HeroSection from "@/components/HeroSection";
 import { apiFetch } from "@/lib/api";
 import { useLanguage } from "@/context/LanguageContext";
-import {
-  ResponsiveContainer,
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  Tooltip,
-} from "recharts";
 import { Star, Quote } from "lucide-react";
 
 // Testimonial avatar with photo
@@ -41,28 +33,11 @@ function TestimonialAvatar({ testimonial }) {
 }
 
 // Generate sample equity curve data
-const generateEquityCurve = () => {
-  const data = [];
-  let value = 10000;
-  for (let i = 0; i < 365; i++) {
-    const dailyReturn = 0.002 + Math.random() * 0.008 - 0.003;
-    value = value * (1 + dailyReturn);
-    if (i % 7 === 0) {
-      data.push({
-        week: Math.floor(i / 7),
-        value: Math.round(value),
-        label: `Week ${Math.floor(i / 7)}`,
-      });
-    }
-  }
-  return data;
-};
 
 export default function Page() {
   const { t, language } = useLanguage();
   const [strategies, setStrategies] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [chartData] = useState(generateEquityCurve);
 
   // Testimonials data with photos
   const testimonials = [
@@ -123,63 +98,7 @@ export default function Page() {
 
   return (
     <div>
-      <section className="container pt-16 pb-12 grid lg:grid-cols-2 gap-10 items-center">
-        <Hero />
-        <div className="bg-white p-6 rounded-2xl shadow-soft border border-gray-100">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-gray-700">{t("landing.sampleGrowth")}</h3>
-            <span className="text-green-600 text-sm font-medium">+127% {t("landing.yearly")}</span>
-          </div>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData}>
-                <defs>
-                  <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#2563eb" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#2563eb" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <XAxis dataKey="week" hide />
-                <YAxis 
-                  hide 
-                  domain={['dataMin - 1000', 'dataMax + 1000']} 
-                />
-                <Tooltip 
-                  formatter={(value) => [`$${value.toLocaleString()}`, 'Portfolio']}
-                  labelFormatter={(label) => `Week ${label}`}
-                  contentStyle={{ 
-                    borderRadius: '8px', 
-                    border: '1px solid #e5e7eb',
-                    boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
-                  }}
-                />
-                <Area
-                  type="monotone"
-                  dataKey="value"
-                  stroke="#2563eb"
-                  strokeWidth={2}
-                  fillOpacity={1}
-                  fill="url(#colorValue)"
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="mt-4 grid grid-cols-3 gap-4 text-center text-sm">
-            <div className="p-2 bg-gray-50 rounded-lg">
-              <div className="text-gray-500">{t("landing.starting")}</div>
-              <div className="font-semibold">$10,000</div>
-            </div>
-            <div className="p-2 bg-gray-50 rounded-lg">
-              <div className="text-gray-500">{t("landing.final")}</div>
-              <div className="font-semibold text-green-600">$22,700</div>
-            </div>
-            <div className="p-2 bg-gray-50 rounded-lg">
-              <div className="text-gray-500">{t("landing.maxDD")}</div>
-              <div className="font-semibold text-red-600">-12%</div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <HeroSection language={language} />
 
       <section className="container py-12">
         <div className="flex items-center justify-between mb-6">
