@@ -44,6 +44,7 @@ export default function StrategyDetailPage() {
   const [backtestResult, setBacktestResult] = useState(null);
   const [backtestProgress, setBacktestProgress] = useState(null);
   const [showAllTrades, setShowAllTrades] = useState(false);
+  const [bannerMessage, setBannerMessage] = useState("Data refresh in progress. Metrics and yearly breakdowns will update once the latest backtest finishes.");
 
   useEffect(() => {
     fetchStrategy();
@@ -69,10 +70,10 @@ export default function StrategyDetailPage() {
         // Calculate returns
         const yearlyReturn = found.cagr || 0;
         found.returns = {
-          daily: (yearlyReturn / 365).toFixed(3),
-          weekly: (yearlyReturn / 52).toFixed(2),
-          monthly: (yearlyReturn / 12).toFixed(1),
-          yearly: yearlyReturn.toFixed(1),
+          daily: yearlyReturn ? (yearlyReturn / 365).toFixed(3) : null,
+          weekly: yearlyReturn ? (yearlyReturn / 52).toFixed(2) : null,
+          monthly: yearlyReturn ? (yearlyReturn / 12).toFixed(1) : null,
+          yearly: yearlyReturn ? yearlyReturn.toFixed(1) : null,
         };
         
         // Default history (will be replaced by real trades if available)
@@ -124,18 +125,9 @@ export default function StrategyDetailPage() {
           }
         }
         
-        // Fallback: generate synthetic data if no trades
+        // Fallback: if no trades/history, show empty placeholder; avoid synthetic curves
         if (!found.history || found.history.length === 0) {
-          const monthlyReturn = yearlyReturn / 12 / 100;
-          const startDate = new Date('2024-01-01');
-          found.history = Array.from({ length: 24 }, (_, i) => {
-            const date = new Date(startDate);
-            date.setMonth(date.getMonth() + i);
-            return {
-              date: date.toISOString().split('T')[0],
-              value: 10000 * Math.pow(1 + monthlyReturn, i) * (1 + Math.sin(i / 3) / 20),
-            };
-          });
+          found.history = [];
         }
         
         setStrategy(found);
@@ -216,8 +208,26 @@ export default function StrategyDetailPage() {
     }
   };
 
+  const formatValue = (val, suffix = "") => {
+    if (val === null || val === undefined || Number.isNaN(val)) return "—";
+    return `${val}${suffix}`;
+  };
+
+  const formatSigned = (val) => {
+    if (val === null || val === undefined || Number.isNaN(val)) return "—";
+    const num = Number(val);
+    const sign = num > 0 ? "+" : "";
+    return `${sign}${num}`;
+  };
+
   return (
     <div className="container py-8">
+      {bannerMessage && (
+        <div className="mb-6 p-4 rounded-lg border border-amber-200 bg-amber-50 text-amber-800 text-sm">
+          {bannerMessage}
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-center gap-4 mb-6">
         <Link href="/strategies" className="text-gray-500 hover:text-gray-700">
@@ -241,10 +251,10 @@ export default function StrategyDetailPage() {
         <div className="lg:col-span-2 space-y-6">
           {/* Key Metrics */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <MetricCard label="Yearly Return" value={`${strategy.returns?.yearly || strategy.cagr}%`} color="green" />
-            <MetricCard label="Win Rate" value={`${strategy.winRate}%`} color="blue" />
-            <MetricCard label="Sharpe Ratio" value={strategy.sharpe} color="purple" />
-            <MetricCard label="Max Drawdown" value={`${strategy.maxDD}%`} color="red" />
+            <MetricCard label="Yearly Return" value={`${formatValue(strategy.returns?.yearly || strategy.cagr, "%")}`} color="green" />
+            <MetricCard label="Win Rate" value={`${formatValue(strategy.winRate, "%")}`} color="blue" />
+            <MetricCard label="Sharpe Ratio" value={formatValue(strategy.sharpe)} color="purple" />
+            <MetricCard label="Max Drawdown" value={`${formatValue(strategy.maxDD, "%")}`} color="red" />
           </div>
 
           {/* Returns Breakdown */}
@@ -254,22 +264,19 @@ export default function StrategyDetailPage() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-4 gap-4 text-center mb-6">
-                <div className="p-4 bg-gray-50 rounded-lg">
-                  <div className="text-2xl font-bold text-green-600">+{strategy.returns?.daily || 0.05}%</div>
-                  <div className="text-sm text-gray-500">Daily</div>
-                </div>
-                <div className="p-4 bg-gray-50 rounded-lg">
-                  <div className="text-2xl font-bold text-green-600">+{strategy.returns?.weekly || 0.35}%</div>
-                  <div className="text-sm text-gray-500">Weekly</div>
-                </div>
-                <div className="p-4 bg-gray-50 rounded-lg">
-                  <div className="text-2xl font-bold text-green-600">+{strategy.returns?.monthly || 1.5}%</div>
-                  <div className="text-sm text-gray-500">Monthly</div>
-                </div>
-                <div className="p-4 bg-gray-50 rounded-lg">
-                  <div className="text-2xl font-bold text-green-600">+{strategy.returns?.yearly || strategy.cagr}%</div>
-                  <div className="text-sm text-gray-500">Yearly</div>
-                </div>
+                {[
+                  { label: "Daily", val: strategy.returns?.daily },
+                  { label: "Weekly", val: strategy.returns?.weekly },
+                  { label: "Monthly", val: strategy.returns?.monthly },
+                  { label: "Yearly", val: strategy.returns?.yearly || strategy.cagr },
+                ].map((item) => (
+                  <div key={item.label} className="p-4 bg-gray-50 rounded-lg">
+                    <div className="text-2xl font-bold text-green-600">
+                      {item.val !== null && item.val !== undefined ? `${formatSigned(Number(item.val))}%` : "—"}
+                    </div>
+                    <div className="text-sm text-gray-500">{item.label}</div>
+                  </div>
+                ))}
               </div>
               
               {/* Yearly Performance History */}
@@ -277,40 +284,32 @@ export default function StrategyDetailPage() {
                 <h4 className="font-medium mb-3 text-gray-700">📅 Historical Yearly Performance</h4>
                 <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
                   {[2020, 2021, 2022, 2023, 2024, 2025].map((year) => {
-                    // Generate realistic yearly returns based on the strategy's average
-                    const baseReturn = strategy.cagr || 50;
-                    const variance = 0.4; // 40% variance
-                    const yearlyReturns = {
-                      2020: baseReturn * (1 + 0.3), // Bull market
-                      2021: baseReturn * (1 + 0.5), // Strong bull
-                      2022: baseReturn * (0.3),     // Bear market
-                      2023: baseReturn * (0.7),     // Recovery
-                      2024: baseReturn * (1.1),     // Bull
-                      2025: baseReturn * (0.5),     // Partial year
-                    };
-                    const value = strategy.yearlyReturns?.[year] ?? yearlyReturns[year];
-                    const isPositive = value >= 0;
+                    const value = strategy.yearlyReturns?.[year];
+                    const isPositive = value !== undefined && value !== null && value >= 0;
                     const isPast = year <= new Date().getFullYear();
-                    
                     return (
-                      <div 
-                        key={year} 
+                      <div
+                        key={year}
                         className={`p-3 rounded-lg text-center ${
                           isPast ? 'bg-gray-50' : 'bg-gray-100 opacity-60'
                         }`}
                       >
                         <div className="text-xs text-gray-500 mb-1">{year}</div>
                         <div className={`font-bold ${
-                          isPositive ? 'text-green-600' : 'text-red-600'
+                          value === undefined || value === null
+                            ? 'text-gray-400'
+                            : isPositive
+                              ? 'text-green-600'
+                              : 'text-red-600'
                         }`}>
-                          {isPositive ? '+' : ''}{value?.toFixed(1) || 'N/A'}%
+                          {value === undefined || value === null ? '—' : `${isPositive ? '+' : ''}${value.toFixed(1)}%`}
                         </div>
                       </div>
                     );
                   })}
                 </div>
-                <p className="text-xs text-gray-400 mt-3">
-                  * Historical returns are based on backtesting. Past performance does not guarantee future results.
+                <p className="text-xs text-gray-500 mt-3">
+                  Awaiting updated yearly breakdown from the latest backtest. Past performance does not guarantee future results.
                 </p>
               </div>
             </CardContent>
