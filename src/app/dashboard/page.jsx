@@ -18,6 +18,7 @@ import {
   Line,
 } from "recharts";
 import Link from "next/link";
+import { Zap, BarChart3, Link2, BookOpen, Sparkles, Folder } from "lucide-react";
 
 export default function Dashboard() {
   const { user, loading: authLoading } = useAuth();
@@ -369,7 +370,10 @@ export default function Dashboard() {
           {/* Saved Strategies */}
           <Card>
             <CardHeader>
-              <CardTitle>📁 Saved Strategies</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Folder className="h-5 w-5 text-blue-600" />
+                Saved Strategies
+              </CardTitle>
             </CardHeader>
             <CardContent>
               {strategies.length === 0 ? (
@@ -425,7 +429,10 @@ export default function Dashboard() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
-                <span>📊 Recent Backtests</span>
+                <span className="flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5 text-blue-600" />
+                  Recent Backtests
+                </span>
                 <Link href="/backtest" className="text-sm text-blue-600 hover:underline">
                   Run New
                 </Link>
@@ -481,27 +488,34 @@ export default function Dashboard() {
           {/* Quick Actions */}
           <Card>
             <CardHeader>
-              <CardTitle>⚡ Quick Actions</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Zap className="h-5 w-5 text-blue-600" />
+                Quick Actions
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <Link href="/backtest" className="block">
-                <Button className="w-full" variant="outline">
-                  📊 Create New Strategy
+                <Button className="w-full justify-start" variant="outline">
+                  <BarChart3 className="h-4 w-4 mr-2" />
+                  Create New Strategy
                 </Button>
               </Link>
               <Link href="/connect" className="block">
-                <Button className="w-full" variant="outline">
-                  🔗 Connect Exchange
+                <Button className="w-full justify-start" variant="outline">
+                  <Link2 className="h-4 w-4 mr-2" />
+                  Connect Exchange
                 </Button>
               </Link>
               <Link href="/strategies" className="block">
-                <Button className="w-full" variant="outline">
-                  📚 Browse Strategies
+                <Button className="w-full justify-start" variant="outline">
+                  <BookOpen className="h-4 w-4 mr-2" />
+                  Browse Strategies
                 </Button>
               </Link>
               <Link href="/pricing" className="block">
-                <Button className="w-full" variant="outline">
-                  💎 Upgrade Plan
+                <Button className="w-full justify-start" variant="outline">
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  Upgrade Plan
                 </Button>
               </Link>
             </CardContent>
