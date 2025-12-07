@@ -212,10 +212,25 @@ export default function Page() {
                     {t("landing.live")}
                   </span>
                 </div>
-              <div className="mt-3 flex items-center gap-4 text-sm">
-                  <span className="text-green-600">⚡ +{s.cagr?.toFixed(1) || 0}%{t("landing.yr")}</span>
-                  <span className="text-red-600">📉 -{s.maxDD?.toFixed(1) || 0}%</span>
-                  <span>📈 {s.sharpe?.toFixed(2) || 0}</span>
+              <div className="mt-3 flex items-center gap-3 text-sm">
+                  <div className="flex items-center gap-1 text-green-600">
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                    </svg>
+                    <span>+{s.cagr?.toFixed(1) || 0}%</span>
+                  </div>
+                  <div className="flex items-center gap-1 text-red-600">
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
+                    </svg>
+                    <span>{s.maxDD?.toFixed(1) || 0}%</span>
+                  </div>
+                  <div className="flex items-center gap-1 text-gray-600">
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                    <span>{s.sharpe?.toFixed(2) || 0}</span>
+                  </div>
                 </div>
               </Link>
             ))}
@@ -227,8 +242,11 @@ export default function Page() {
           </div>
         )}
 
-        <div className="mt-6 p-4 bg-blue-50 border border-blue-100 rounded-lg text-sm text-blue-800">
-          {t("landing.metricsNote")}
+        <div className="mt-6 p-4 bg-blue-50 border border-blue-100 rounded-lg text-sm text-blue-800 flex items-start gap-3">
+          <svg className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>{t("landing.metricsNote")}</span>
         </div>
       </section>
 
@@ -242,8 +260,8 @@ export default function Page() {
           
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             <Link href="/strategies" className="text-center group">
-              <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4 group-hover:bg-blue-200 transition">
-                1️⃣
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-105 transition shadow-lg">
+                <span className="text-white text-2xl font-bold">1</span>
               </div>
               <h3 className="font-semibold text-lg mb-2">{t("landing.step1Title")}</h3>
               <p className="text-gray-600 text-sm">
@@ -255,8 +273,8 @@ export default function Page() {
             </Link>
             
             <Link href="/connect" className="text-center group">
-              <div className="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4 group-hover:bg-green-200 transition">
-                2️⃣
+              <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-105 transition shadow-lg">
+                <span className="text-white text-2xl font-bold">2</span>
               </div>
               <h3 className="font-semibold text-lg mb-2">{t("landing.step2Title")}</h3>
               <p className="text-gray-600 text-sm">
@@ -268,8 +286,8 @@ export default function Page() {
             </Link>
             
             <Link href="/dashboard" className="text-center group">
-              <div className="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4 group-hover:bg-purple-200 transition">
-                3️⃣
+              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-105 transition shadow-lg">
+                <span className="text-white text-2xl font-bold">3</span>
               </div>
               <h3 className="font-semibold text-lg mb-2">{t("landing.step3Title")}</h3>
               <p className="text-gray-600 text-sm">
@@ -296,32 +314,49 @@ export default function Page() {
         <h2 className="text-3xl font-bold text-center mb-12">{t("landing.whyAlgotcha")}</h2>
         
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="p-6 bg-white rounded-2xl border border-gray-100 shadow-soft">
-            <div className="text-3xl mb-3">📊</div>
+          <div className="p-6 bg-white rounded-2xl border border-gray-100 shadow-soft hover:shadow-md transition">
+            <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-3">
+              <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+            </div>
             <h3 className="font-semibold mb-2">{t("landing.realData")}</h3>
             <p className="text-sm text-gray-600">
               {t("landing.realDataText")}
             </p>
           </div>
           
-          <div className="p-6 bg-white rounded-2xl border border-gray-100 shadow-soft">
-            <div className="text-3xl mb-3">🔒</div>
+          <div className="p-6 bg-white rounded-2xl border border-gray-100 shadow-soft hover:shadow-md transition">
+            <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-3">
+              <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            </div>
             <h3 className="font-semibold mb-2">{t("landing.secure")}</h3>
             <p className="text-sm text-gray-600">
               {t("landing.secureText")}
             </p>
           </div>
           
-          <div className="p-6 bg-white rounded-2xl border border-gray-100 shadow-soft">
-            <div className="text-3xl mb-3">⚡</div>
+          <div className="p-6 bg-white rounded-2xl border border-gray-100 shadow-soft hover:shadow-md transition">
+            <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-3">
+              <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+            </div>
             <h3 className="font-semibold mb-2">{t("landing.fastExecution")}</h3>
             <p className="text-sm text-gray-600">
               {t("landing.fastExecutionText")}
             </p>
           </div>
           
-          <div className="p-6 bg-white rounded-2xl border border-gray-100 shadow-soft">
-            <div className="text-3xl mb-3">🎯</div>
+          <div className="p-6 bg-white rounded-2xl border border-gray-100 shadow-soft hover:shadow-md transition">
+            <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center mb-3">
+              <svg className="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+            </div>
             <h3 className="font-semibold mb-2">{t("landing.transparent")}</h3>
             <p className="text-sm text-gray-600">
               {t("landing.transparentText")}
@@ -367,15 +402,19 @@ export default function Page() {
 
           <div className="mt-12 flex flex-wrap items-center justify-center gap-8 text-gray-400">
             <div className="flex items-center gap-2">
-              <span className="text-2xl">🔐</span>
+              <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              </svg>
               <span className="text-sm">{t("landing.ssl")}</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-2xl">✅</span>
+              <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
               <span className="text-sm">{t("landing.verifiedReviews")}</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-2xl">🇺🇦</span>
+              <div className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-semibold">UA</div>
               <span className="text-sm">{t("landing.ukrainianPlatform")}</span>
             </div>
           </div>

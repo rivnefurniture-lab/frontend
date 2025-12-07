@@ -195,24 +195,24 @@ function LanguageSwitcher() {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-full mt-1 bg-white rounded-lg shadow-xl border border-gray-100 py-1 z-50 min-w-[120px]">
+        <div className="absolute right-0 top-full mt-1 bg-white rounded-lg shadow-xl border border-gray-100 py-1 z-50 min-w-[140px]">
           <button
             onClick={() => { setLang("uk"); setIsOpen(false); }}
-            className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 ${
-              language === "uk" ? "text-blue-600 font-medium" : "text-gray-700"
+            className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-3 ${
+              language === "uk" ? "text-blue-600 font-medium bg-blue-50" : "text-gray-700"
             }`}
           >
-            <span className="text-base">🇺🇦</span>
-            Українська
+            <span className="w-6 h-6 rounded flex items-center justify-center bg-blue-500 text-white text-xs font-bold">UA</span>
+            <span>Українська</span>
           </button>
           <button
             onClick={() => { setLang("en"); setIsOpen(false); }}
-            className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 ${
-              language === "en" ? "text-blue-600 font-medium" : "text-gray-700"
+            className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-3 ${
+              language === "en" ? "text-blue-600 font-medium bg-blue-50" : "text-gray-700"
             }`}
           >
-            <span className="text-base">🇬🇧</span>
-            English
+            <span className="w-6 h-6 rounded flex items-center justify-center bg-gray-700 text-white text-xs font-bold">EN</span>
+            <span>English</span>
           </button>
         </div>
       )}

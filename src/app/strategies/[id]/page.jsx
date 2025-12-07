@@ -281,7 +281,12 @@ export default function StrategyDetailPage() {
               
               {/* Yearly Performance History */}
               <div className="border-t pt-4">
-                <h4 className="font-medium mb-3 text-gray-700">📅 Historical Yearly Performance</h4>
+                <div className="flex items-center gap-2 mb-3">
+                  <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <h4 className="font-medium text-gray-700">Historical Yearly Performance</h4>
+                </div>
                 <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
                   {[2020, 2021, 2022, 2023, 2024, 2025].map((year) => {
                     const value = strategy.yearlyReturns?.[year];
@@ -327,7 +332,14 @@ export default function StrategyDetailPage() {
                     : "text-gray-500 hover:text-gray-700"
                 }`}
               >
-                {tab === "backtest" ? "🔄 Rerun Backtest" : tab}
+                {tab === "backtest" ? (
+                  <span className="flex items-center gap-1.5">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    Rerun Backtest
+                  </span>
+                ) : tab}
               </button>
             ))}
           </div>
@@ -414,51 +426,58 @@ export default function StrategyDetailPage() {
                 </span>
               </CardHeader>
               <CardContent>
-                <div className="overflow-x-auto max-h-[600px] overflow-y-auto">
-                  <table className="w-full">
-                    <thead className="sticky top-0 bg-white">
-                      <tr className="text-left text-sm text-gray-500 border-b">
-                        <th className="pb-3 font-medium">Date</th>
-                        <th className="pb-3 font-medium">Time</th>
-                        <th className="pb-3 font-medium">Pair</th>
-                        <th className="pb-3 font-medium">Action</th>
-                        <th className="pb-3 font-medium">Price</th>
-                        <th className="pb-3 font-medium">Size</th>
-                        <th className="pb-3 font-medium">P&L</th>
-                        <th className="pb-3 font-medium">Balance</th>
-                        <th className="pb-3 font-medium">Reason</th>
+                <div className="overflow-x-auto max-h-[600px] overflow-y-auto rounded-lg border border-gray-200">
+                  <table className="w-full text-sm">
+                    <thead className="sticky top-0 bg-gray-50 border-b border-gray-200">
+                      <tr className="text-left text-xs text-gray-600 uppercase tracking-wider">
+                        <th className="px-4 py-3 font-semibold">Date</th>
+                        <th className="px-4 py-3 font-semibold">Time</th>
+                        <th className="px-4 py-3 font-semibold">Pair</th>
+                        <th className="px-4 py-3 font-semibold">Action</th>
+                        <th className="px-4 py-3 font-semibold">Price</th>
+                        <th className="px-4 py-3 font-semibold">Size</th>
+                        <th className="px-4 py-3 font-semibold">P&L</th>
+                        <th className="px-4 py-3 font-semibold">Balance</th>
+                        <th className="px-4 py-3 font-semibold">Reason</th>
                       </tr>
                     </thead>
                     <tbody>
                       {strategy.recentTrades?.map((trade, i) => (
-                        <tr key={i} className="border-b last:border-0 hover:bg-gray-50">
-                          <td className="py-2 text-sm">{trade.date}</td>
-                          <td className="py-2 text-sm text-gray-500">{trade.time}</td>
-                          <td className="py-2 font-medium text-sm">{trade.pair}</td>
-                          <td className={`py-2 font-medium text-sm ${
-                            trade.side === "BUY" || trade.side?.includes("Entry") 
-                              ? "text-green-600" 
-                              : trade.side === "SELL" || trade.side?.includes("Exit")
-                              ? "text-red-600"
-                              : "text-gray-600"
-                          }`}>
-                            {trade.side}
+                        <tr key={i} className="border-b last:border-0 hover:bg-blue-50/50 transition">
+                          <td className="px-4 py-3">{trade.date}</td>
+                          <td className="px-4 py-3 text-gray-500">{trade.time}</td>
+                          <td className="px-4 py-3 font-medium">{trade.pair}</td>
+                          <td className="px-4 py-3">
+                            <span className={`px-2 py-1 rounded-md text-xs font-medium ${
+                              trade.side === "BUY" || trade.side?.includes("Entry") 
+                                ? "bg-green-100 text-green-700" 
+                                : trade.side === "SELL" || trade.side?.includes("Exit")
+                                ? "bg-red-100 text-red-700"
+                                : "bg-gray-100 text-gray-700"
+                            }`}>
+                              {trade.side}
+                            </span>
                           </td>
-                          <td className="py-2 text-sm">${trade.entry?.toLocaleString(undefined, { maximumFractionDigits: 2 })}</td>
-                          <td className="py-2 text-sm">${trade.orderSize?.toLocaleString()}</td>
-                          <td className={`py-2 font-medium text-sm ${trade.pnlUsd >= 0 ? "text-green-600" : "text-red-600"}`}>
+                          <td className="px-4 py-3">${trade.entry?.toLocaleString(undefined, { maximumFractionDigits: 2 })}</td>
+                          <td className="px-4 py-3">${trade.orderSize?.toLocaleString()}</td>
+                          <td className={`px-4 py-3 font-medium ${trade.pnlUsd >= 0 ? "text-green-600" : "text-red-600"}`}>
                             <div>{trade.pnlUsd > 0 ? "+" : ""}{(trade.pnl * 100)?.toFixed(2)}%</div>
                             <div className="text-xs opacity-70">{trade.pnlUsd >= 0 ? "+" : ""}${trade.pnlUsd?.toFixed(2)}</div>
                           </td>
-                          <td className="py-2 text-sm">${trade.balance?.toLocaleString(undefined, { maximumFractionDigits: 0 })}</td>
-                          <td className="py-2 text-xs text-gray-500 max-w-[200px] truncate" title={trade.comment}>
+                          <td className="px-4 py-3 font-medium">${trade.balance?.toLocaleString(undefined, { maximumFractionDigits: 0 })}</td>
+                          <td className="px-4 py-3 text-xs text-gray-500 max-w-[200px] truncate" title={trade.comment}>
                             {trade.comment}
                           </td>
                         </tr>
                       )) || (
                         <tr>
-                          <td colSpan={9} className="py-8 text-center text-gray-500">
-                            No trades available. Run a backtest to see trades.
+                          <td colSpan={9} className="px-4 py-12 text-center">
+                            <div className="flex flex-col items-center gap-3">
+                              <svg className="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                              </svg>
+                              <p className="text-gray-500">No trades available. Run a backtest to see trades.</p>
+                            </div>
                           </td>
                         </tr>
                       )}
@@ -505,12 +524,22 @@ export default function StrategyDetailPage() {
               <CardHeader>
                 <CardTitle>🔄 Rerun Backtest</CardTitle>
                 <p className="text-sm text-gray-500">Test this strategy with different parameters and time periods</p>
-                <p className="text-xs text-blue-600 mt-1">📊 Data available: 2020-01-01 to 2025-12-04</p>
+                <div className="flex items-center gap-1.5 text-xs text-blue-600 mt-1 bg-blue-50 px-2 py-1 rounded inline-flex">
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Data available: 2020-01-01 to 2025-12-04
+                </div>
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Quick Period Selectors */}
                 <div>
-                  <label className="text-sm font-medium text-gray-700 block mb-2">⏱️ Quick Periods</label>
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <label className="text-sm font-medium text-gray-700">Quick Periods</label>
+                  </div>
                   <div className="flex flex-wrap gap-2 mb-3">
                     {(() => {
                       const today = new Date();
