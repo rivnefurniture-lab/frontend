@@ -240,7 +240,12 @@ export default function Dashboard() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
-                <span>🚀 {t.runningStrategies}</span>
+                <span className="flex items-center gap-2">
+                  <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                  {t.runningStrategies}
+                </span>
                 <span className="text-sm font-normal text-gray-500">
                   {runningStrategies.length} active
                 </span>
@@ -269,12 +274,15 @@ export default function Dashboard() {
                           </p>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          <span className={`px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1.5 ${
                             run.status === 'running' ? 'bg-green-100 text-green-700' :
                             run.status === 'error' ? 'bg-red-100 text-red-700' :
                             'bg-gray-100 text-gray-700'
                           }`}>
-                            {run.isLive ? '🟢 Live' : run.status}
+                            {run.isLive && (
+                              <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                            )}
+                            {run.isLive ? 'Live' : run.status}
                           </span>
                           <Button 
                             size="sm" 
