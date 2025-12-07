@@ -14,7 +14,7 @@ const EXCHANGES = [
   {
     id: "binance",
     name: "Binance",
-    logo: "🟡",
+    icon: <svg className="w-6 h-6 text-yellow-500" viewBox="0 0 126 126" fill="currentColor"><path d="M63 0L78.75 25.2H47.25L63 0Z"/><path d="M63 126L47.25 100.8H78.75L63 126Z"/><path d="M31.5 37.8L0 63L31.5 88.2V63V37.8Z"/><path d="M94.5 37.8V63V88.2L126 63L94.5 37.8Z"/><path d="M31.5 63L63 37.8L94.5 63L63 88.2L31.5 63Z"/></svg>,
     color: "from-yellow-400 to-yellow-600",
     description: { en: "World's largest crypto exchange", uk: "Найбільша криптобіржа у світі" },
     fields: ["apiKey", "secret"],
@@ -24,7 +24,7 @@ const EXCHANGES = [
   {
     id: "bybit",
     name: "Bybit",
-    logo: "🔶",
+    icon: <svg className="w-6 h-6 text-orange-500" viewBox="0 0 32 32" fill="currentColor"><path d="M16 2L2 9v7l14 7 14-7V9L16 2zm0 4l9 4.5-9 4.5-9-4.5L16 6z"/></svg>,
     color: "from-orange-400 to-orange-600",
     description: { en: "Fast derivatives exchange", uk: "Швидка біржа деривативів" },
     fields: ["apiKey", "secret"],
@@ -34,7 +34,7 @@ const EXCHANGES = [
   {
     id: "okx",
     name: "OKX",
-    logo: "⚫",
+    icon: <div className="text-xl font-black text-gray-700">OKX</div>,
     color: "from-gray-700 to-gray-900",
     description: { en: "Advanced trading platform", uk: "Просунута торгова платформа" },
     fields: ["apiKey", "secret", "password"],
@@ -44,7 +44,7 @@ const EXCHANGES = [
   {
     id: "kraken",
     name: "Kraken",
-    logo: "🟣",
+    icon: <svg className="w-6 h-6 text-purple-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/><path d="M12 6c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6z"/></svg>,
     color: "from-purple-500 to-indigo-600",
     description: { en: "Trusted US-based exchange", uk: "Надійна біржа зі США" },
     fields: ["apiKey", "secret"],
@@ -54,7 +54,7 @@ const EXCHANGES = [
   {
     id: "kucoin",
     name: "KuCoin",
-    logo: "🟢",
+    icon: <svg className="w-6 h-6 text-green-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>,
     color: "from-green-400 to-emerald-600",
     description: { en: "People's exchange with low fees", uk: "Народна біржа з низькими комісіями" },
     fields: ["apiKey", "secret", "password"],
@@ -64,7 +64,7 @@ const EXCHANGES = [
   {
     id: "coinbase",
     name: "Coinbase Pro",
-    logo: "🔵",
+    icon: <svg className="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path fill="white" d="M12 7a5 5 0 100 10 5 5 0 000-10z"/></svg>,
     color: "from-blue-500 to-indigo-600",
     description: { en: "Leading US exchange", uk: "Провідна біржа США" },
     fields: ["apiKey", "secret"],
@@ -183,17 +183,22 @@ function ExchangeCard({ exchange, onConnect, onDisconnect, isConnected, t, langu
       <div className={`h-2 bg-gradient-to-r ${exchange.color}`}></div>
       <CardHeader>
         <CardTitle className="flex items-center gap-3">
-          <span className="text-3xl">{exchange.logo}</span>
-          <div className="flex-1">
-            <div className="flex items-center gap-2">
-              {exchange.name}
+          <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${exchange.color} flex items-center justify-center flex-shrink-0`}>
+            {exchange.icon}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-semibold">{exchange.name}</span>
               {isConnected && (
-                <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full font-medium">
-                  ✓ {t.connected}
+                <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full font-medium flex items-center gap-1">
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  {t.connected}
                 </span>
               )}
             </div>
-            <p className="text-sm font-normal text-gray-500">{exchange.description[language]}</p>
+            <p className="text-sm font-normal text-gray-500 truncate">{exchange.description[language]}</p>
           </div>
         </CardTitle>
       </CardHeader>
@@ -201,11 +206,16 @@ function ExchangeCard({ exchange, onConnect, onDisconnect, isConnected, t, langu
         {/* Connected state - no form, just actions */}
         {isConnected && !showForm ? (
           <div className="space-y-4">
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-              <p className="text-green-700 text-sm font-medium">
-                ✓ {t.exchangeConnectedInfo}
-              </p>
-              <p className="text-green-600 text-xs mt-1">{t.keysSecure}</p>
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-start gap-3">
+              <svg className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <div>
+                <p className="text-green-700 text-sm font-medium">
+                  {t.exchangeConnectedInfo}
+                </p>
+                <p className="text-green-600 text-xs mt-1">{t.keysSecure}</p>
+              </div>
             </div>
             
             {balance && (
@@ -459,14 +469,14 @@ export default function ConnectPage() {
     balance: language === "uk" ? "Баланс" : "Balance",
     howToCreate: language === "uk" ? "Як створити API ключі" : "How to create API keys",
     getTestnet: language === "uk" ? "Отримати testnet акаунт" : "Get testnet account",
-    connectedSuccess: language === "uk" ? "✓ Підключено успішно!" : "✓ Connected successfully!",
+    connectedSuccess: language === "uk" ? "Підключено успішно!" : "Connected successfully!",
     connectionFailed: language === "uk" ? "Помилка підключення" : "Connection failed",
     loginFirst: language === "uk" ? "Спочатку увійдіть, щоб підключити біржу" : "Please login first to connect your exchange",
     invalidCredentials: language === "uk" ? "Невірний API ключ або секрет. Перевірте дані." : "Invalid API key or secret. Please check your credentials.",
     networkError: language === "uk" ? "Помилка мережі. Перевірте з'єднання і спробуйте ще раз." : "Network error. Please check your connection and try again.",
     noAssets: language === "uk" ? "Немає активів (баланс 0)" : "No assets (balance is 0)",
     balanceFetched: language === "uk" ? "Баланс отримано успішно" : "Balance fetched successfully",
-    exchangeConnected: language === "uk" ? "🎉 Біржу підключено!" : "🎉 Exchange Connected!",
+    exchangeConnected: language === "uk" ? "Біржу підключено!" : "Exchange Connected!",
     whatNext: language === "uk" 
       ? "Ви готові почати торгувати. Ось що можна зробити далі:" 
       : "You're ready to start trading. Here's what you can do next:",
@@ -502,7 +512,11 @@ export default function ConnectPage() {
         <div className="max-w-md mx-auto text-center">
           <Card>
             <CardContent className="pt-6">
-              <div className="text-6xl mb-4">🔐</div>
+              <div className="w-20 h-20 mx-auto mb-4 bg-indigo-100 rounded-2xl flex items-center justify-center">
+                <svg className="w-10 h-10 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </div>
               <h2 className="text-2xl font-bold mb-2">{t.loginRequired}</h2>
               <p className="text-gray-600 mb-6">{t.loginText}</p>
               <Link href="/auth">
@@ -612,9 +626,16 @@ export default function ConnectPage() {
         </div>
 
         {connectedExchanges.length > 0 && (
-          <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
+          <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200">
             <CardContent className="pt-6">
-              <h3 className="font-bold text-lg text-green-800 mb-2">{t.exchangeConnected}</h3>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <h3 className="font-bold text-xl text-green-800">{t.exchangeConnected}</h3>
+              </div>
               <p className="text-green-700 mb-4">{t.whatNext}</p>
               <div className="flex flex-wrap gap-3">
                 <Link href="/backtest">

@@ -46,23 +46,23 @@ export default function StrategiesPage() {
     sortBySharpe: language === "uk" ? "Сортувати: Коеф. Шарпа" : "Sort by: Sharpe Ratio",
     sortByWinRate: language === "uk" ? "Сортувати: Відсоток виграшу" : "Sort by: Win Rate",
     sortByDD: language === "uk" ? "Сортувати: Мін. просадка" : "Sort by: Lowest Drawdown",
-    refresh: language === "uk" ? "🔄 Оновити" : "🔄 Refresh",
+    refresh: language === "uk" ? "Оновити" : "Refresh",
     activeStrategies: language === "uk" ? "Активних стратегій" : "Active Strategies",
     bestYearlyReturn: language === "uk" ? "Найкраща річна дохідність" : "Best Yearly Return",
     bestSharpe: language === "uk" ? "Найкращий коеф. Шарпа" : "Best Sharpe Ratio",
     avgWinRate: language === "uk" ? "Сер. відсоток виграшу" : "Avg Win Rate",
-    yourStrategies: language === "uk" ? "📁 Ваші збережені стратегії" : "📁 Your Saved Strategies",
+    yourStrategies: language === "uk" ? "Ваші збережені стратегії" : "Your Saved Strategies",
     yourStrategy: language === "uk" ? "Ваша стратегія" : "Your Strategy",
     profit: language === "uk" ? "Прибуток" : "Profit",
     sharpe: language === "uk" ? "Шарп" : "Sharpe",
     winRate: language === "uk" ? "Виграш" : "Win Rate",
     useStrategy: language === "uk" ? "Використати" : "Use Strategy",
-    featured: language === "uk" ? "🌟 Популярні стратегії" : "🌟 Featured Strategies",
+    featured: language === "uk" ? "Популярні стратегії" : "Featured Strategies",
     noStrategies: language === "uk" ? "Стратегії ще недоступні." : "No strategies available yet.",
     noStrategiesDesc: language === "uk" 
       ? "Стратегії розраховуються на основі реальних ринкових даних. Перевірте пізніше." 
       : "Strategies are being calculated from real market data. Please check back soon.",
-    realData: language === "uk" ? "✓ Реальні дані" : "✓ Real Data",
+    realData: language === "uk" ? "Реальні дані" : "Real Data",
     daily: language === "uk" ? "День" : "Daily",
     weekly: language === "uk" ? "Тиждень" : "Weekly",
     monthly: language === "uk" ? "Місяць" : "Monthly",
@@ -72,8 +72,8 @@ export default function StrategiesPage() {
     viewDetails: language === "uk" ? "Детальніше" : "View Details",
     noResults: language === "uk" ? "Стратегій за вашим запитом не знайдено." : "No strategies found matching your search.",
     realDataBanner: language === "uk" 
-      ? "📊 Реальні дані: Всі метрики розраховані на основі історичних цін з Binance і оновлюються автоматично щогодини. Минулі результати не гарантують майбутніх." 
-      : "📊 Real Performance Data: All metrics are calculated from actual historical price data from Binance and updated automatically every hour. Past performance does not guarantee future results.",
+      ? "Реальні дані: Всі метрики розраховані на основі історичних цін з Binance і оновлюються автоматично щогодини. Минулі результати не гарантують майбутніх." 
+      : "Real Performance Data: All metrics are calculated from actual historical price data from Binance and updated automatically every hour. Past performance does not guarantee future results.",
     loading: language === "uk" ? "Завантаження стратегій з реальними даними..." : "Loading strategies with real performance data...",
     retry: language === "uk" ? "Повторити" : "Retry",
   };
