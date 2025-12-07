@@ -251,57 +251,91 @@ export default function Page() {
       </section>
 
       {/* How it Works */}
-      <section className="bg-gray-50 py-16">
+      <section className="bg-gradient-to-b from-white via-gray-50 to-white py-20">
         <div className="container">
-          <h2 className="text-3xl font-bold text-center mb-4">{t("landing.howItWorks")}</h2>
-          <p className="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
-            {t("landing.howItWorksSubtitle")}
-          </p>
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent">
+              {t("landing.howItWorks")}
+            </h2>
+            <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+              {t("landing.howItWorksSubtitle")}
+            </p>
+          </div>
           
-          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            <Link href="/strategies" className="text-center group">
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-105 transition shadow-lg">
-                <span className="text-white text-2xl font-bold">1</span>
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto mb-12">
+            <Link href="/strategies" className="relative group">
+              <div className="bg-white rounded-2xl p-8 shadow-lg border-2 border-transparent hover:border-indigo-500 hover:shadow-2xl transition-all duration-300">
+                <div className="absolute -top-4 -left-4 w-12 h-12 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-xl flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
+                  <span className="text-white text-xl font-bold">1</span>
+                </div>
+                <div className="mb-4 w-16 h-16 bg-indigo-50 rounded-xl flex items-center justify-center mx-auto mt-4">
+                  <svg className="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                </div>
+                <h3 className="font-bold text-xl mb-3 text-gray-900">{t("landing.step1Title")}</h3>
+                <p className="text-gray-600 leading-relaxed mb-4">
+                  {t("landing.step1Text")}
+                </p>
+                <span className="inline-flex items-center gap-2 text-indigo-600 font-medium group-hover:gap-3 transition-all">
+                  {language === "uk" ? "Переглянути" : "Browse"}
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </span>
               </div>
-              <h3 className="font-semibold text-lg mb-2">{t("landing.step1Title")}</h3>
-              <p className="text-gray-600 text-sm">
-                {t("landing.step1Text")}
-              </p>
-              <span className="inline-block mt-3 text-blue-600 text-sm group-hover:underline">
-                {language === "uk" ? "Переглянути стратегії →" : "Browse Strategies →"}
-              </span>
             </Link>
             
-            <Link href="/connect" className="text-center group">
-              <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-105 transition shadow-lg">
-                <span className="text-white text-2xl font-bold">2</span>
+            <Link href="/connect" className="relative group">
+              <div className="bg-white rounded-2xl p-8 shadow-lg border-2 border-transparent hover:border-emerald-500 hover:shadow-2xl transition-all duration-300">
+                <div className="absolute -top-4 -left-4 w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
+                  <span className="text-white text-xl font-bold">2</span>
+                </div>
+                <div className="mb-4 w-16 h-16 bg-emerald-50 rounded-xl flex items-center justify-center mx-auto mt-4">
+                  <svg className="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                </div>
+                <h3 className="font-bold text-xl mb-3 text-gray-900">{t("landing.step2Title")}</h3>
+                <p className="text-gray-600 leading-relaxed mb-4">
+                  {t("landing.step2Text")}
+                </p>
+                <span className="inline-flex items-center gap-2 text-emerald-600 font-medium group-hover:gap-3 transition-all">
+                  {language === "uk" ? "Підключити" : "Connect"}
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </span>
               </div>
-              <h3 className="font-semibold text-lg mb-2">{t("landing.step2Title")}</h3>
-              <p className="text-gray-600 text-sm">
-                {t("landing.step2Text")}
-              </p>
-              <span className="inline-block mt-3 text-green-600 text-sm group-hover:underline">
-                {language === "uk" ? "Підключити біржу →" : "Connect Exchange →"}
-              </span>
             </Link>
             
-            <Link href="/dashboard" className="text-center group">
-              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-105 transition shadow-lg">
-                <span className="text-white text-2xl font-bold">3</span>
+            <Link href="/dashboard" className="relative group">
+              <div className="bg-white rounded-2xl p-8 shadow-lg border-2 border-transparent hover:border-violet-500 hover:shadow-2xl transition-all duration-300">
+                <div className="absolute -top-4 -left-4 w-12 h-12 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
+                  <span className="text-white text-xl font-bold">3</span>
+                </div>
+                <div className="mb-4 w-16 h-16 bg-violet-50 rounded-xl flex items-center justify-center mx-auto mt-4">
+                  <svg className="w-8 h-8 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                  </svg>
+                </div>
+                <h3 className="font-bold text-xl mb-3 text-gray-900">{t("landing.step3Title")}</h3>
+                <p className="text-gray-600 leading-relaxed mb-4">
+                  {t("landing.step3Text")}
+                </p>
+                <span className="inline-flex items-center gap-2 text-violet-600 font-medium group-hover:gap-3 transition-all">
+                  {language === "uk" ? "Почати" : "Start"}
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </span>
               </div>
-              <h3 className="font-semibold text-lg mb-2">{t("landing.step3Title")}</h3>
-              <p className="text-gray-600 text-sm">
-                {t("landing.step3Text")}
-              </p>
-              <span className="inline-block mt-3 text-purple-600 text-sm group-hover:underline">
-                {language === "uk" ? "Перейти до панелі →" : "Go to Dashboard →"}
-              </span>
             </Link>
           </div>
 
-          <div className="text-center mt-10">
+          <div className="text-center">
             <Link href="/auth?mode=signup">
-              <button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium transition">
+              <button className="bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white px-10 py-4 rounded-xl font-semibold text-lg shadow-xl hover:shadow-2xl transition-all transform hover:scale-105">
                 {t("landing.getStartedFree")}
               </button>
             </Link>
@@ -430,86 +464,120 @@ export default function Page() {
               : "Integrated with leading platforms and data providers"}
           </p>
           
-          <div className="flex flex-wrap items-center justify-center gap-8 md:gap-12 opacity-70 grayscale hover:grayscale-0 transition-all duration-500">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 max-w-6xl mx-auto">
             {/* Exchanges */}
-            <div className="flex items-center gap-2 text-2xl font-bold text-yellow-500">
-              <svg className="w-8 h-8" viewBox="0 0 126 126" fill="currentColor">
+            <a 
+              href="https://www.binance.com" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex flex-col items-center justify-center p-4 bg-white rounded-lg border border-gray-200 hover:border-yellow-400 hover:shadow-md transition-all group"
+            >
+              <svg className="w-8 h-8 text-yellow-500 mb-2 group-hover:scale-110 transition-transform" viewBox="0 0 126 126" fill="currentColor">
                 <path d="M63 0L78.75 25.2H47.25L63 0Z"/>
                 <path d="M63 126L47.25 100.8H78.75L63 126Z"/>
                 <path d="M31.5 37.8L0 63L31.5 88.2V63V37.8Z"/>
                 <path d="M94.5 37.8V63V88.2L126 63L94.5 37.8Z"/>
                 <path d="M31.5 63L63 37.8L94.5 63L63 88.2L31.5 63Z"/>
               </svg>
-              <span>Binance</span>
-            </div>
+              <span className="text-xs font-medium text-gray-700">Binance</span>
+            </a>
             
-            <div className="flex items-center gap-2 text-2xl font-bold text-gray-800">
-              <svg className="w-7 h-7" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+            <a 
+              href="https://www.bybit.com" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex flex-col items-center justify-center p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-400 hover:shadow-md transition-all group"
+            >
+              <svg className="w-8 h-8 text-gray-800 mb-2 group-hover:scale-110 transition-transform" viewBox="0 0 32 32" fill="currentColor">
+                <path d="M16 2L2 9v7l14 7 14-7V9L16 2zm0 4l9 4.5-9 4.5-9-4.5L16 6z"/>
               </svg>
-              <span>Bybit</span>
-            </div>
+              <span className="text-xs font-medium text-gray-700">Bybit</span>
+            </a>
             
-            <div className="flex items-center gap-2 text-2xl font-bold text-gray-800">
-              <span className="text-blue-500">OKX</span>
-            </div>
-
-            <div className="h-8 w-px bg-gray-300 hidden md:block"></div>
+            <a 
+              href="https://www.okx.com" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex flex-col items-center justify-center p-4 bg-white rounded-lg border border-gray-200 hover:border-blue-400 hover:shadow-md transition-all group"
+            >
+              <div className="w-8 h-8 flex items-center justify-center mb-2">
+                <span className="text-lg font-black text-blue-600 group-hover:scale-110 transition-transform">OKX</span>
+              </div>
+              <span className="text-xs font-medium text-gray-700">OKX</span>
+            </a>
             
             {/* Data Providers */}
-            <div className="flex items-center gap-2">
-              <svg className="w-7 h-7 text-purple-600" viewBox="0 0 24 24" fill="currentColor">
-                <polygon points="12,2 22,8.5 22,15.5 12,22 2,15.5 2,8.5"/>
+            <a 
+              href="https://www.coingecko.com" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex flex-col items-center justify-center p-4 bg-white rounded-lg border border-gray-200 hover:border-green-400 hover:shadow-md transition-all group"
+            >
+              <svg className="w-8 h-8 text-green-500 mb-2 group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="currentColor">
+                <circle cx="12" cy="12" r="10"/>
+                <circle cx="9" cy="10" r="2" fill="white"/>
               </svg>
-              <span className="text-xl font-semibold text-purple-600">Polygon</span>
-            </div>
+              <span className="text-xs font-medium text-gray-700">CoinGecko</span>
+            </a>
             
-            <div className="flex items-center gap-1">
-              <span className="text-2xl font-bold text-purple-700">Y!</span>
-              <span className="text-xl font-semibold text-gray-700">Finance</span>
-            </div>
-
-            <div className="h-8 w-px bg-gray-300 hidden md:block"></div>
-            
-            {/* Tech Partners */}
-            <div className="flex items-center gap-2">
-              <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-                <path d="M2 17l10 5 10-5"/>
-                <path d="M2 12l10 5 10-5"/>
+            <a 
+              href="https://www.tradingview.com" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex flex-col items-center justify-center p-4 bg-white rounded-lg border border-gray-200 hover:border-indigo-400 hover:shadow-md transition-all group"
+            >
+              <svg className="w-8 h-8 text-indigo-600 mb-2 group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M3 13h4l3 7 4-14 3 7h4"/>
               </svg>
-              <span className="text-lg font-semibold text-gray-700">TradingView</span>
-            </div>
+              <span className="text-xs font-medium text-gray-700 text-center leading-tight">Trading<br/>View</span>
+            </a>
             
-            <div className="flex items-center gap-1">
-              <svg className="w-6 h-6 text-green-600" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+            <a 
+              href="https://polygon.io" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex flex-col items-center justify-center p-4 bg-white rounded-lg border border-gray-200 hover:border-purple-400 hover:shadow-md transition-all group"
+            >
+              <svg className="w-8 h-8 text-purple-600 mb-2 group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="12,2 22,8 22,16 12,22 2,16 2,8"/>
               </svg>
-              <span className="text-lg font-semibold text-gray-700">CoinGecko</span>
-            </div>
-
-            <div className="flex items-center gap-1">
-              <span className="text-lg font-semibold text-orange-500">CoinMarketCap</span>
-            </div>
+              <span className="text-xs font-medium text-gray-700">Polygon</span>
+            </a>
+            
+            <a 
+              href="https://coinmarketcap.com" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex flex-col items-center justify-center p-4 bg-white rounded-lg border border-gray-200 hover:border-blue-500 hover:shadow-md transition-all group"
+            >
+              <svg className="w-8 h-8 text-blue-500 mb-2 group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2L2 7v10l10 5 10-5V7L12 2zm0 18l-8-4V8l8 4v8z"/>
+              </svg>
+              <span className="text-xs font-medium text-gray-700 text-center leading-tight">CoinMarket<br/>Cap</span>
+            </a>
           </div>
         </div>
       </section>
 
       {/* CTA */}
-      <section className="bg-gradient-to-r from-blue-600 to-blue-700 py-16">
-        <div className="container text-center text-white">
-          <h2 className="text-3xl font-bold mb-4">{t("landing.readyToAutomate")}</h2>
-          <p className="text-blue-100 mb-8 max-w-xl mx-auto">
+      <section className="relative bg-gradient-to-r from-indigo-600 via-blue-600 to-indigo-700 py-20 overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-10 left-10 w-72 h-72 bg-white rounded-full filter blur-3xl"></div>
+          <div className="absolute bottom-10 right-10 w-96 h-96 bg-white rounded-full filter blur-3xl"></div>
+        </div>
+        <div className="container text-center text-white relative">
+          <h2 className="text-4xl md:text-5xl font-bold mb-6">{t("landing.readyToAutomate")}</h2>
+          <p className="text-indigo-100 text-lg mb-10 max-w-2xl mx-auto">
             {t("landing.ctaSubtitle")}
           </p>
           <div className="flex gap-4 justify-center flex-wrap">
             <Link href="/auth?mode=signup">
-              <button className="bg-white text-blue-600 px-8 py-3 rounded-lg font-medium hover:bg-blue-50 transition">
+              <button className="bg-white text-indigo-600 px-10 py-4 rounded-xl font-semibold text-lg hover:bg-indigo-50 transition-all shadow-2xl hover:shadow-xl hover:scale-105">
                 {t("landing.createFreeAccount")}
               </button>
             </Link>
             <Link href="/strategies">
-              <button className="border-2 border-white text-white px-8 py-3 rounded-lg font-medium hover:bg-white/10 transition">
+              <button className="border-2 border-white text-white px-10 py-4 rounded-xl font-semibold text-lg hover:bg-white/20 backdrop-blur transition-all">
                 {t("landing.viewStrategies")}
               </button>
             </Link>

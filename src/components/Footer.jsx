@@ -24,41 +24,42 @@ export default function Footer() {
   return (
     <footer className='bg-gray-900 text-white mt-16'>
       {/* Newsletter Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-700">
-        <div className="container py-10">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="text-center md:text-left">
-              <h3 className="text-xl font-bold mb-1">
+      <div className="bg-gradient-to-r from-indigo-600 via-blue-600 to-indigo-700 relative overflow-hidden">
+        <div className="absolute inset-0 bg-grid-white/10"></div>
+        <div className="container py-12 relative">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-8 max-w-4xl mx-auto">
+            <div className="text-center md:text-left flex-1">
+              <h3 className="text-2xl font-bold mb-2 text-white">
                 {language === "uk" ? "Підпишіться на новини" : "Stay Updated"}
               </h3>
-              <p className="text-blue-100 text-sm">
+              <p className="text-indigo-100">
                 {language === "uk" 
-                  ? "Отримуйте оновлення стратегій та новини ринку на вашу пошту"
-                  : "Get strategy updates and market insights delivered to your inbox"}
+                  ? "Отримуйте оновлення стратегій та новини ринку"
+                  : "Get strategy updates and market insights"}
               </p>
             </div>
             {subscribed ? (
-              <div className="flex items-center gap-2 text-white bg-green-500 px-6 py-3 rounded-lg">
+              <div className="flex items-center gap-3 text-white bg-green-500 px-6 py-3.5 rounded-xl shadow-lg">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
-                <span>{language === "uk" ? "Підписано!" : "Subscribed!"}</span>
+                <span className="font-medium">{language === "uk" ? "Підписано!" : "Subscribed!"}</span>
               </div>
             ) : (
-              <form onSubmit={handleSubscribe} className="flex w-full md:w-auto">
+              <form onSubmit={handleSubscribe} className="flex w-full md:w-auto shadow-2xl rounded-xl overflow-hidden">
                 <input
                   type="email"
-                  placeholder={language === "uk" ? "Ваш email" : "Your email"}
+                  placeholder={language === "uk" ? "example@mail.com" : "your@email.com"}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="px-4 py-3 rounded-l-lg text-gray-900 w-full md:w-64 focus:outline-none"
+                  className="px-5 py-3.5 text-gray-900 w-full md:w-72 focus:outline-none focus:ring-2 focus:ring-white/50 bg-white placeholder-gray-400"
                   aria-label={language === "uk" ? "Email для підписки" : "Email for newsletter"}
                 />
                 <button
                   type="submit"
                   disabled={subscribing}
-                  className="bg-gray-900 hover:bg-gray-800 px-6 py-3 rounded-r-lg font-medium transition whitespace-nowrap disabled:opacity-50"
+                  className="bg-gray-900 hover:bg-black px-8 py-3.5 font-semibold transition whitespace-nowrap disabled:opacity-50 text-white"
                 >
                   {subscribing 
                     ? "..." 

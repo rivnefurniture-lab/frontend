@@ -210,7 +210,7 @@ export default function StrategiesPage() {
         <select
           value={sort}
           onChange={(e) => setSort(e.target.value)}
-          className="h-11 px-4 rounded-lg border border-gray-200 bg-white"
+          className="h-11"
         >
           <option value="cagr">{t.sortByYearly}</option>
           <option value="sharpe">{t.sortBySharpe}</option>
@@ -228,29 +228,29 @@ export default function StrategiesPage() {
       {/* Summary Stats */}
       {strategies.length > 0 && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-gradient-to-br from-blue-500 to-blue-600 text-white p-4 rounded-xl">
-            <div className="text-3xl font-bold">{strategies.length}</div>
-            <div className="text-blue-100">{t.activeStrategies}</div>
+          <div className="bg-gradient-to-br from-indigo-500 via-indigo-600 to-blue-600 text-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all">
+            <div className="text-4xl font-bold mb-1">{strategies.length}</div>
+            <div className="text-sm text-indigo-100 font-medium">{t.activeStrategies}</div>
           </div>
-          <div className="bg-gradient-to-br from-green-500 to-green-600 text-white p-4 rounded-xl">
-            <div className="text-3xl font-bold">
+          <div className="bg-gradient-to-br from-emerald-500 via-green-500 to-teal-600 text-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all">
+            <div className="text-4xl font-bold mb-1">
               {Math.max(...strategies.map(s => s.cagr || 0)).toFixed(1)}%
             </div>
-            <div className="text-green-100">{t.bestYearlyReturn}</div>
+            <div className="text-sm text-emerald-100 font-medium">{t.bestYearlyReturn}</div>
           </div>
-          <div className="bg-gradient-to-br from-purple-500 to-purple-600 text-white p-4 rounded-xl">
-            <div className="text-3xl font-bold">
+          <div className="bg-gradient-to-br from-violet-500 via-purple-500 to-indigo-600 text-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all">
+            <div className="text-4xl font-bold mb-1">
               {Math.max(...strategies.map(s => s.sharpe || 0)).toFixed(2)}
             </div>
-            <div className="text-purple-100">{t.bestSharpe}</div>
+            <div className="text-sm text-violet-100 font-medium">{t.bestSharpe}</div>
           </div>
-          <div className="bg-gradient-to-br from-orange-500 to-orange-600 text-white p-4 rounded-xl">
-            <div className="text-3xl font-bold">
+          <div className="bg-gradient-to-br from-amber-500 via-orange-500 to-red-500 text-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all">
+            <div className="text-4xl font-bold mb-1">
               {strategies.length > 0 
                 ? Math.round(strategies.reduce((a, s) => a + (s.winRate || 0), 0) / strategies.length)
                 : 0}%
             </div>
-            <div className="text-orange-100">{t.avgWinRate}</div>
+            <div className="text-sm text-amber-100 font-medium">{t.avgWinRate}</div>
           </div>
         </div>
       )}
