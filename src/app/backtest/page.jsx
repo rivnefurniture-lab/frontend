@@ -1362,7 +1362,7 @@ export default function BacktestPage() {
           ) : (
             <Card>
               <CardContent className="py-12 text-center">
-                <div className="text-6xl mb-4">📊</div>
+                <div className="text-6xl mb-4">📋</div>
                 <h3 className="font-medium text-lg mb-2">{t("backtest.noResultsYet")}</h3>
                 <p className="text-gray-500 text-sm">
                   {t("backtest.configureToSee")}
