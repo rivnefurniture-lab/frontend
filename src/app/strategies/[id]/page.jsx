@@ -44,7 +44,7 @@ export default function StrategyDetailPage() {
   const [backtestResult, setBacktestResult] = useState(null);
   const [backtestProgress, setBacktestProgress] = useState(null);
   const [showAllTrades, setShowAllTrades] = useState(false);
-  const [bannerMessage, setBannerMessage] = useState("Data refresh in progress. Metrics and yearly breakdowns will update once the latest backtest finishes.");
+  const [bannerMessage, setBannerMessage] = useState(null);
 
   useEffect(() => {
     fetchStrategy();
