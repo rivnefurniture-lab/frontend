@@ -345,47 +345,76 @@ export default function StrategiesPage() {
           </div>
           <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
             {backtestResults.map((result) => (
-              <Link key={result.id} href={`/strategies/backtest-${result.id}`}>
-                <Card className="hover:shadow-lg transition border-purple-200 bg-purple-50/30 h-full cursor-pointer group hover:border-purple-400">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-lg flex items-center justify-between">
-                      <span className="truncate">{result.name || result.strategy_name || 'Backtest'}</span>
-                      <span className={`text-sm font-semibold ml-2 ${
-                        (result.netProfit || result.net_profit) >= 0 ? 'text-green-600' : 'text-red-600'
-                      }`}>
-                        {((result.netProfit || result.net_profit) >= 0 ? '+' : '')}
-                        {((result.netProfit || result.net_profit) * 100).toFixed(1)}%
-                      </span>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-3 gap-2 text-sm mb-3">
-                      <div>
-                        <div className="text-gray-500">{t.sharpe}</div>
-                        <div className="font-semibold">
-                          {(result.sharpeRatio || result.sharpe_ratio)?.toFixed(2) || 'N/A'}
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-gray-500">{t.maxDD}</div>
-                        <div className="font-semibold">
-                          {((result.maxDrawdown || result.max_drawdown) * 100)?.toFixed(1)}%
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-gray-500">{t.winRate}</div>
-                        <div className="font-semibold">
-                          {((result.winRate || result.win_rate) * 100)?.toFixed(0)}%
-                        </div>
+              <Card key={result.id} className="hover:shadow-lg transition border-purple-200 bg-purple-50/30 h-full group hover:border-purple-400 relative">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg flex items-center justify-between">
+                    <span className="truncate">{result.name || result.strategy_name || 'Backtest'}</span>
+                    <span className={`text-sm font-semibold ml-2 ${
+                      (result.netProfit || result.net_profit) >= 0 ? 'text-green-600' : 'text-red-600'
+                    }`}>
+                      {((result.netProfit || result.net_profit) >= 0 ? '+' : '')}
+                      {((result.netProfit || result.net_profit) * 100).toFixed(1)}%
+                    </span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-3 gap-2 text-sm mb-3">
+                    <div>
+                      <div className="text-gray-500">{t.sharpe}</div>
+                      <div className="font-semibold">
+                        {(result.sharpeRatio || result.sharpe_ratio)?.toFixed(2) || 'N/A'}
                       </div>
                     </div>
-                    <div className="text-xs text-gray-400 flex items-center justify-between">
-                      <span>{(result.totalTrades || result.total_trades || 0)} trades</span>
-                      <span>{new Date(result.createdAt || result.timestamp_run).toLocaleDateString()}</span>
+                    <div>
+                      <div className="text-gray-500">{t.maxDD}</div>
+                      <div className="font-semibold">
+                        {((result.maxDrawdown || result.max_drawdown) * 100)?.toFixed(1)}%
+                      </div>
                     </div>
-                  </CardContent>
-                </Card>
-              </Link>
+                    <div>
+                      <div className="text-gray-500">{t.winRate}</div>
+                      <div className="font-semibold">
+                        {((result.winRate || result.win_rate) * 100)?.toFixed(0)}%
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-xs text-gray-400 flex items-center justify-between mb-3">
+                    <span>{(result.totalTrades || result.total_trades || 0)} trades</span>
+                    <span>{new Date(result.createdAt || result.timestamp_run).toLocaleDateString()}</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <Link href={`/strategies/backtest-${result.id}`} className="flex-1">
+                      <Button className="w-full" size="sm" variant="outline">
+                        {language === "uk" ? "Переглянути" : "View Details"}
+                      </Button>
+                    </Link>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      className="text-red-600 hover:bg-red-50 hover:text-red-700 border-red-200 hover:border-red-300 px-3"
+                      onClick={async (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const confirmMsg = language === "uk" 
+                          ? "Видалити цей результат бектесту?" 
+                          : "Delete this backtest result?";
+                        if (confirm(confirmMsg)) {
+                          try {
+                            await apiFetch(`/backtest/results/${result.id}`, { method: 'DELETE' });
+                            setBacktestResults(prev => prev.filter(r => r.id !== result.id));
+                          } catch (e) {
+                            alert(language === "uk" ? "Помилка видалення" : "Failed to delete");
+                          }
+                        }
+                      }}
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </div>

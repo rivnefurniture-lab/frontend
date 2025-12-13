@@ -391,11 +391,9 @@ export default function Page() {
               rel="noopener noreferrer"
               className="flex flex-col items-center justify-center p-4 bg-white rounded-lg border border-gray-200 hover:border-yellow-400 hover:shadow-md transition-all group"
             >
-              <img 
-                src="https://cryptologos.cc/logos/binance-coin-bnb-logo.svg" 
-                alt="Binance" 
-                className="w-8 h-8 mb-2 group-hover:scale-110 transition-transform"
-              />
+              <svg className="w-8 h-8 mb-2 group-hover:scale-110 transition-transform" viewBox="0 0 126 126" fill="#F3BA2F">
+                <path d="M38.73 53.2L63 28.93l24.27 24.27 14.14-14.14L63 .79 24.59 39.06l14.14 14.14zM.79 63l14.14-14.14L29.07 63l-14.14 14.14zm37.94 9.8L63 97.07l24.27-24.27 14.14 14.14L63 125.21 24.59 86.94l-.07-.07 14.21-14.07zM96.93 63l14.14-14.14L125.21 63l-14.14 14.14zm-18.47-.06h.06L63 47.43 50.6 59.76l-1.42 1.42-.42.42L63 75.99l15.52-15.52.07-.07-.13-.06z"/>
+              </svg>
               <span className="text-xs font-medium text-gray-700">Binance</span>
             </a>
             
@@ -404,11 +402,10 @@ export default function Page() {
               href="https://www.bybit.com" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="flex flex-col items-center justify-center p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-400 hover:shadow-md transition-all group"
+              className="flex flex-col items-center justify-center p-4 bg-white rounded-lg border border-gray-200 hover:border-orange-400 hover:shadow-md transition-all group"
             >
-              <svg className="w-8 h-8 mb-2 group-hover:scale-110 transition-transform" viewBox="0 0 80 80" fill="none">
-                <rect width="80" height="80" rx="8" fill="#1a1a1a"/>
-                <path d="M20 28h12v6h-6v18h-6V28zm18 0h6v24h-6V28zm12 0h12v6h-6v6h6v6h-6v6h6v6H50V28zm24 0h6v24h-6V28z" fill="white"/>
+              <svg className="w-8 h-8 mb-2 group-hover:scale-110 transition-transform" viewBox="0 0 40 40" fill="none">
+                <path d="M8 8h6v6H8V8zm0 18h6v6H8v-6zm18-18h6v6h-6V8zm0 18h6v6h-6v-6zM14 14h12v12H14V14z" fill="#F7A600"/>
               </svg>
               <span className="text-xs font-medium text-gray-700">Bybit</span>
             </a>
@@ -418,10 +415,10 @@ export default function Page() {
               href="https://www.okx.com" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="flex flex-col items-center justify-center p-4 bg-white rounded-lg border border-gray-200 hover:border-blue-400 hover:shadow-md transition-all group"
+              className="flex flex-col items-center justify-center p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-800 hover:shadow-md transition-all group"
             >
               <div className="w-8 h-8 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                <span className="text-xl font-black text-blue-600">OKX</span>
+                <span className="text-xl font-black text-black">OKX</span>
               </div>
               <span className="text-xs font-medium text-gray-700">OKX</span>
             </a>
@@ -433,11 +430,12 @@ export default function Page() {
               rel="noopener noreferrer"
               className="flex flex-col items-center justify-center p-4 bg-white rounded-lg border border-gray-200 hover:border-green-400 hover:shadow-md transition-all group"
             >
-              <img 
-                src="https://static.coingecko.com/s/coingecko-logo-8903d34ce19ca4be1c81f0db30e924154750d208683fad7ae6f2ce06c76d0a56.png" 
-                alt="CoinGecko" 
-                className="w-8 h-8 mb-2 group-hover:scale-110 transition-transform object-contain"
-              />
+              <svg className="w-8 h-8 mb-2 group-hover:scale-110 transition-transform" viewBox="0 0 40 40" fill="none">
+                <circle cx="20" cy="20" r="18" fill="#8DC63F"/>
+                <circle cx="14" cy="16" r="4" fill="white"/>
+                <circle cx="14" cy="16" r="2" fill="#1E1E1E"/>
+                <ellipse cx="24" cy="24" rx="8" ry="6" fill="#F9E988"/>
+              </svg>
               <span className="text-xs font-medium text-gray-700">CoinGecko</span>
             </a>
             
@@ -446,7 +444,7 @@ export default function Page() {
               href="https://www.tradingview.com" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="flex flex-col items-center justify-center p-4 bg-white rounded-lg border border-gray-200 hover:border-indigo-400 hover:shadow-md transition-all group"
+              className="flex flex-col items-center justify-center p-4 bg-white rounded-lg border border-gray-200 hover:border-blue-500 hover:shadow-md transition-all group"
             >
               <svg className="w-8 h-8 mb-2 group-hover:scale-110 transition-transform" viewBox="0 0 36 28" fill="none">
                 <path d="M14 22V6h8v16h-8zM0 22V10h8v12H0z" fill="#2962FF"/>
@@ -475,10 +473,10 @@ export default function Page() {
               rel="noopener noreferrer"
               className="flex flex-col items-center justify-center p-4 bg-white rounded-lg border border-gray-200 hover:border-blue-500 hover:shadow-md transition-all group"
             >
-              <svg className="w-8 h-8 mb-2 group-hover:scale-110 transition-transform" viewBox="0 0 76 77" fill="none">
-                <path d="M37.93 0c20.89 0 37.93 17.23 37.93 38.33S58.82 76.67 37.93 76.67 0 59.44 0 38.33 17.04 0 37.93 0z" fill="#17181B"/>
-                <path d="M58.19 43.28c-.91.54-2 .5-2.91-.11l-.26-.17c-1.45-.99-2.41-2.6-2.63-4.41l-.02-.17c-.28-2.28.47-4.58 2.03-6.29l.16-.17a5.7 5.7 0 012.98-1.72l.2-.04c1.81-.35 3.68.2 5.09 1.51l.15.14c.82.77 1.41 1.74 1.72 2.8l.05.18c.33 1.15.33 2.37-.01 3.52l-.06.19c-.4 1.3-1.23 2.43-2.33 3.22l-.16.11c-.91.63-1.94.97-3 1.02l-.19.01c-.61.02-1.22-.08-1.8-.28l-.19-.07c-.55-.2-1.06-.5-1.51-.87l-.14-.11c-.41-.35-.76-.75-1.05-1.2l-.09-.14c-.56-.89-.83-1.93-.77-2.98l.01-.18c.07-1.09.47-2.13 1.14-2.99l.11-.14c.4-.5.88-.92 1.41-1.26" stroke="#3861FB" strokeWidth="3.66" strokeLinecap="round"/>
-                <path d="M19.37 47.56V29.11h7.31l.02 12.47c0 1.55.58 2.42 1.67 2.42 1.23 0 1.89-1.06 1.89-2.67V29.11h7.31v13.04c0 3.93-2.88 6.38-7.46 6.38-2.06 0-3.74-.47-5.05-1.39-.74.92-2.06 1.39-3.98 1.39l-1.71.03z" fill="white"/>
+              <svg className="w-8 h-8 mb-2 group-hover:scale-110 transition-transform" viewBox="0 0 40 40" fill="none">
+                <circle cx="20" cy="20" r="18" fill="#17181B"/>
+                <path d="M12 26V14h4v8c0 1.5.8 2 1.5 2s1.5-.5 1.5-2v-8h4v8c0 3-2 5-5.5 5-1.5 0-2.8-.4-3.8-1.2-.5.8-1.5 1.2-2.7 1.2H12z" fill="white"/>
+                <path d="M24 14h4l3 6 3-6h4v12h-4v-7l-3 5-3-5v7h-4V14z" fill="#3861FB"/>
               </svg>
               <span className="text-xs font-medium text-gray-700 text-center leading-tight">CoinMarket<br/>Cap</span>
             </a>
