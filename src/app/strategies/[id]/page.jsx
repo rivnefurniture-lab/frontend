@@ -366,31 +366,13 @@ export default function StrategyDetailPage() {
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                       <XAxis 
-                        dataKey="date" 
-                        tickFormatter={(v) => {
-                          if (!v) return '';
-                          const date = new Date(v);
-                          if (isNaN(date.getTime())) return v.substring(0, 10);
-                          return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                        }}
+                        dataKey="year" 
                         tick={{ fontSize: 11 }}
-                        interval="preserveStartEnd"
                       />
                       <YAxis tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
                       <Tooltip 
-                        formatter={(v) => [`$${v.toLocaleString()}`, "Balance"]}
-                        labelFormatter={(label) => {
-                          if (!label) return '';
-                          const date = new Date(label);
-                          if (isNaN(date.getTime())) return label;
-                          return date.toLocaleDateString('en-US', { 
-                            year: 'numeric', 
-                            month: 'long', 
-                            day: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          });
-                        }}
+                        formatter={(v) => [`$${v?.toLocaleString()}`, "Balance"]}
+                        labelFormatter={(label) => label ? `Year ${label}` : ''}
                       />
                       <Area
                         type="monotone"

@@ -101,10 +101,10 @@ export default function StrategiesPage() {
         }
       }
 
-      // Generate chart data for each strategy
+      // Use real history data if available, otherwise generate from CAGR
       const withChartData = (publicStrategies || []).map(s => ({
         ...s,
-        history: generateChartData(s.cagr || 0),
+        history: s.history && s.history.length > 0 ? s.history : generateChartData(s.cagr || 0),
         tags: s.pairs?.slice(0, 3) || ["Crypto"],
       }));
 
