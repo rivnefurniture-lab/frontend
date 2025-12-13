@@ -355,9 +355,10 @@ export default function StrategyDetailPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600 mb-4">{strategy.description}</p>
-                <div className="h-72">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={strategy.history}>
+                {strategy.history && strategy.history.length > 0 ? (
+                  <div className="h-72">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={strategy.history}>
                       <defs>
                         <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="5%" stopColor="#2563eb" stopOpacity={0.3} />
@@ -384,6 +385,15 @@ export default function StrategyDetailPage() {
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
+                ) : (
+                  <div className="h-72 flex items-center justify-center bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
+                    <div className="text-center">
+                      <div className="text-4xl mb-2">📈</div>
+                      <p className="text-gray-500">Loading performance chart...</p>
+                      <p className="text-xs text-gray-400 mt-1">Chart will appear once data loads</p>
+                    </div>
+                  </div>
+                )}
                 <div className="grid grid-cols-3 gap-4 mt-6 text-center">
                   <div>
                     <div className="text-lg font-semibold">{strategy.totalTrades}</div>

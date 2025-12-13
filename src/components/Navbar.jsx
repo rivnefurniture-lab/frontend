@@ -400,11 +400,8 @@ export default function Navbar() {
   return (
     <header className="bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-b border-gray-100 sticky top-0 z-40">
       <div className="container h-16 flex items-center justify-between">
-        <Link href="/" className="text-xl font-bold capitalize flex items-center gap-2">
-          <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
-            <span className="text-white text-sm font-bold">A</span>
-          </div>
-          Algotcha
+        <Link href="/" className="flex items-center gap-2">
+          <img src="/logo.svg" alt="Algotcha" className="h-8" />
         </Link>
 
         {/* Desktop nav */}

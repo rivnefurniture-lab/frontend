@@ -76,11 +76,8 @@ export default function Footer() {
         <div className='grid grid-cols-2 md:grid-cols-4 gap-8'>
           {/* Brand */}
           <div className='col-span-2 md:col-span-1'>
-            <Link href="/" className="text-xl font-bold flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
-                <span className="text-white text-sm font-bold">A</span>
-              </div>
-              Algotcha
+            <Link href="/" className="flex items-center gap-2">
+              <img src="/logo-white.svg" alt="Algotcha" className="h-8" />
             </Link>
             <p className='text-gray-400 text-sm mt-3 leading-relaxed'>
               {t("footer.description")}
