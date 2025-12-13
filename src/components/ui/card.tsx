@@ -34,3 +34,9 @@ export function CardFooter({ className, ...props }: CardProps) {
     <div className={cn("p-6 border-t border-gray-100", className)} {...props} />
   );
 }
+
+export function CardDescription({ className, ...props }: CardProps) {
+  return (
+    <p className={cn("text-sm text-gray-500", className)} {...props} />
+  );
+}

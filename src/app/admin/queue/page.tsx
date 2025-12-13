@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { apiFetch } from '@/lib/api';
 
 interface QueueItem {
   id: number;
@@ -35,24 +36,17 @@ export default function QueueAdminPage() {
 
   const fetchData = async () => {
     try {
-      // Fetch stats
-      const statsRes = await fetch('/api/backtest/queue/stats', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
-      const statsData = await statsRes.json();
+      // Fetch stats using the proper API client
+      const statsData = await apiFetch<QueueStats>('/backtest/queue/stats');
       setStats(statsData);
 
-      // Fetch all queue items (you'll need to add this endpoint)
-      const queueRes = await fetch('/api/admin/queue/all', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
-      if (queueRes.ok) {
-        const queueData = await queueRes.json();
+      // Fetch all queue items
+      try {
+        const queueData = await apiFetch<QueueItem[]>('/backtest/queue/all');
         setQueueItems(queueData);
+      } catch (e) {
+        // Admin endpoint might fail if not admin - that's ok
+        console.log('Could not fetch all queue items (may need admin privileges)');
       }
     } catch (error) {
       console.error('Failed to fetch queue data:', error);
