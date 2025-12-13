@@ -33,9 +33,11 @@ export default function QueueAdminPage() {
   const [stats, setStats] = useState<QueueStats | null>(null);
   const [queueItems, setQueueItems] = useState<QueueItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchData = async () => {
     try {
+      setError(null);
       // Fetch stats using the proper API client
       const statsData = await apiFetch<QueueStats>('/backtest/queue/stats');
       setStats(statsData);
@@ -48,8 +50,9 @@ export default function QueueAdminPage() {
         // Admin endpoint might fail if not admin - that's ok
         console.log('Could not fetch all queue items (may need admin privileges)');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to fetch queue data:', error);
+      setError(error?.message || 'Failed to fetch queue data');
     } finally {
       setLoading(false);
     }
@@ -81,6 +84,32 @@ export default function QueueAdminPage() {
       <div className="container mx-auto p-6">
         <h1 className="text-3xl font-bold mb-6">Backtest Queue Admin</h1>
         <div className="text-center py-12">Loading...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto p-6">
+        <h1 className="text-3xl font-bold mb-6">Backtest Queue Admin</h1>
+        <Card className="bg-yellow-50 border-yellow-200">
+          <CardContent className="pt-6">
+            <div className="text-center py-8">
+              <div className="text-4xl mb-4">🔐</div>
+              <h2 className="text-xl font-semibold text-yellow-800 mb-2">Authentication Required</h2>
+              <p className="text-yellow-700 mb-4">{error}</p>
+              <p className="text-sm text-yellow-600 mb-6">Please sign in to access the admin dashboard.</p>
+              <div className="flex justify-center gap-4">
+                <Button onClick={() => window.location.href = '/auth'} variant="default">
+                  Sign In
+                </Button>
+                <Button onClick={fetchData} variant="outline">
+                  Retry
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
