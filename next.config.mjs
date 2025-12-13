@@ -14,7 +14,11 @@ const nextConfig = {
   
   // Image optimization
   images: {
-    domains: ['dummyimage.com'],
+    domains: [
+      'dummyimage.com',
+      'cryptologos.cc',
+      'static.coingecko.com',
+    ],
     unoptimized: process.env.NODE_ENV === 'development',
   },
   
