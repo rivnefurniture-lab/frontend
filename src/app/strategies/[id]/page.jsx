@@ -45,6 +45,8 @@ export default function StrategyDetailPage() {
   const [backtestProgress, setBacktestProgress] = useState(null);
   const [showAllTrades, setShowAllTrades] = useState(false);
   const [bannerMessage, setBannerMessage] = useState(null);
+  const [loadingAllTrades, setLoadingAllTrades] = useState(false);
+  const [showAllStrategyTrades, setShowAllStrategyTrades] = useState(false);
 
   useEffect(() => {
     fetchStrategy();
@@ -422,9 +424,43 @@ export default function StrategyDetailPage() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Backtest Trades</CardTitle>
-                <span className="text-sm text-gray-500">
-                  {strategy.totalBacktestTrades || strategy.recentTrades?.length || 0} total trades
-                </span>
+                <div className="flex items-center gap-3">
+                  <span className="text-sm text-gray-500">
+                    {strategy.recentTrades?.length || 0} of {strategy.totalBacktestTrades || 0} trades
+                  </span>
+                  {strategy.totalBacktestTrades > (strategy.recentTrades?.length || 0) && (
+                    <button
+                      onClick={async () => {
+                        if (showAllStrategyTrades) {
+                          // Reload strategy to get back to sample trades
+                          fetchStrategy();
+                          setShowAllStrategyTrades(false);
+                        } else {
+                          // Fetch all trades
+                          setLoadingAllTrades(true);
+                          try {
+                            const allTradesData = await apiFetch(`/backtest/strategies/${params.id}/all-trades`);
+                            if (allTradesData.trades) {
+                              setStrategy({
+                                ...strategy,
+                                recentTrades: allTradesData.trades,
+                              });
+                              setShowAllStrategyTrades(true);
+                            }
+                          } catch (e) {
+                            console.error('Failed to load all trades:', e);
+                          } finally {
+                            setLoadingAllTrades(false);
+                          }
+                        }
+                      }}
+                      className="text-sm text-blue-600 hover:underline font-medium"
+                      disabled={loadingAllTrades}
+                    >
+                      {loadingAllTrades ? 'Loading...' : showAllStrategyTrades ? 'Show Less' : 'Show All Trades'}
+                    </button>
+                  )}
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="overflow-x-auto max-h-[600px] overflow-y-auto rounded-lg border border-gray-200">
