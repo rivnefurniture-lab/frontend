@@ -255,8 +255,15 @@ export default function BacktestPage() {
   const [maxActiveDeals, setMaxActiveDeals] = useState(5);
   const [initialBalance, setInitialBalance] = useState(5000);
   const [baseOrderSize, setBaseOrderSize] = useState(1000);
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  // Default to last 6 months
+  const [startDate, setStartDate] = useState(() => {
+    const date = new Date();
+    date.setMonth(date.getMonth() - 6);
+    return date.toISOString().split('T')[0];
+  });
+  const [endDate, setEndDate] = useState(() => {
+    return new Date().toISOString().split('T')[0];
+  });
 
   // Risk Management
   const [takeProfit, setTakeProfit] = useState(5); // 5%
