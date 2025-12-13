@@ -13,7 +13,7 @@ import {
   YAxis,
 } from "recharts";
 import Link from "next/link";
-import { apiFetch } from "@/lib/api";
+import { apiFetch, publicFetch } from "@/lib/api";
 import { useAuth } from "@/context/AuthProvider";
 import { useLanguage } from "@/context/LanguageContext";
 
@@ -89,8 +89,8 @@ export default function StrategiesPage() {
       setLoading(true);
       setError(null);
 
-      // Fetch public strategies from API (real data)
-      const publicStrategies = await apiFetch("/backtest/strategies");
+      // Fetch public strategies from API (real data) - use publicFetch (no auth required)
+      const publicStrategies = await publicFetch("/backtest/strategies");
       
       // If user is logged in, also fetch their saved strategies and backtest results
       let myStrategies = [];
