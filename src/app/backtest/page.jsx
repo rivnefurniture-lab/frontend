@@ -31,8 +31,8 @@ const INDICATORS = [
   { id: "HeikenAshi", name: "Heiken Ashi" },
 ];
 
-// Only 1m timeframe works reliably with current data
-const TIMEFRAMES = ["1m", "5m"];
+// All timeframes available (data has all indicators for each)
+const TIMEFRAMES = ["1m", "5m", "15m", "1h", "4h", "1d"];
 const RSI_LENGTHS = [7, 14, 21, 28]; // Only these are pre-calculated in parquet
 const CONDITIONS = ["Less Than", "Greater Than", "Crossing Up", "Crossing Down"];
 const MACD_PRESETS = [
