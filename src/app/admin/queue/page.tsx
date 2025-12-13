@@ -18,6 +18,9 @@ interface QueueItem {
   startedAt: string | null;
   completedAt: string | null;
   errorMessage: string | null;
+  estimatedSeconds?: number;
+  estimatedCompletion?: string;
+  user?: { email: string; name: string };
 }
 
 interface QueueStats {
@@ -26,6 +29,7 @@ interface QueueStats {
   completed: number;
   totalInQueue: number;
   estimatedWaitMinutes: number;
+  estimatedWaitSeconds?: number;
 }
 
 interface Analytics {

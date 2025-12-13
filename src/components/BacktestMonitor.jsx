@@ -16,25 +16,22 @@ export function BacktestMonitor({ user }) {
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const monitorRef = useRef(null);
 
-  // Fetch user's queue items
+  // Fetch user's active backtests with time estimates
   useEffect(() => {
     if (!user) return;
 
     const fetchBacktests = async () => {
       try {
-        const myQueue = await apiFetch('/backtest/queue/my');
-        // Only show active (queued or processing) backtests
-        const active = myQueue.filter(
-          (b) => b.status === 'queued' || b.status === 'processing'
-        );
-        setBacktests(active);
+        // Use the new endpoint with time estimates
+        const active = await apiFetch('/backtest/queue/my-active');
+        setBacktests(active || []);
       } catch (e) {
         console.log('Could not fetch backtests');
       }
     };
 
     fetchBacktests();
-    const interval = setInterval(fetchBacktests, 5000); // Update every 5 seconds
+    const interval = setInterval(fetchBacktests, 3000); // Update every 3 seconds for smoother progress
     return () => clearInterval(interval);
   }, [user]);
 
@@ -95,11 +92,20 @@ export function BacktestMonitor({ user }) {
     return 'bg-gray-500';
   };
 
-  const getEstimatedTime = (queuePosition) => {
-    if (queuePosition === null || queuePosition <= 0) return 'Processing now...';
-    const minutes = queuePosition * 10; // Estimate 10 min per backtest
-    if (minutes < 60) return `~${minutes} min`;
-    return `~${Math.floor(minutes / 60)}h ${minutes % 60}m`;
+  const formatTime = (seconds) => {
+    if (!seconds || seconds <= 0) return 'calculating...';
+    if (seconds < 60) return `${Math.ceil(seconds)}s`;
+    const minutes = Math.ceil(seconds / 60);
+    if (minutes < 60) return `${minutes} min`;
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    return `${hours}h ${mins}m`;
+  };
+
+  const formatCompletionTime = (isoString) => {
+    if (!isoString) return 'calculating...';
+    const date = new Date(isoString);
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
   return (
@@ -180,26 +186,31 @@ export function BacktestMonitor({ user }) {
                     <div className="w-full bg-gray-200 rounded-full h-2">
                       <div
                         className="bg-blue-600 h-2 rounded-full transition-all duration-500"
-                        style={{ width: `${backtest.progress || 0}%` }}
+                        style={{ width: `${Math.min(95, backtest.progress || 0)}%` }}
                       ></div>
                     </div>
-                    <p className="text-xs text-gray-600 mt-1">
-                      {backtest.progress || 0}% complete
-                    </p>
+                    <div className="flex justify-between text-xs text-gray-600 mt-1">
+                      <span>{Math.round(backtest.progress || 0)}% complete</span>
+                      <span>ETA: {formatCompletionTime(backtest.estimatedCompletion)}</span>
+                    </div>
                   </div>
                 )}
 
                 {/* Queue Info (if queued) */}
-                {backtest.status === 'queued' && backtest.queuePosition !== null && (
-                  <div className="text-xs text-gray-600">
+                {backtest.status === 'queued' && (
+                  <div className="text-xs text-gray-600 space-y-1">
                     <div className="flex justify-between">
                       <span>Position in queue:</span>
-                      <span className="font-medium">#{backtest.queuePosition}</span>
+                      <span className="font-medium">#{backtest.queuePosition || 1}</span>
                     </div>
-                    <div className="flex justify-between mt-1">
-                      <span>Estimated wait:</span>
-                      <span className="font-medium">
-                        {getEstimatedTime(backtest.queuePosition)}
+                    <div className="flex justify-between">
+                      <span>Estimated duration:</span>
+                      <span className="font-medium">{formatTime(backtest.estimatedSeconds)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Expected completion:</span>
+                      <span className="font-medium text-blue-600">
+                        {formatCompletionTime(backtest.estimatedCompletion)}
                       </span>
                     </div>
                   </div>
