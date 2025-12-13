@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
+import { InfoTooltip } from "@/components/ui/tooltip";
 import { apiFetch } from "@/lib/api";
 import { useLanguage } from "@/context/LanguageContext";
 import {
@@ -697,7 +698,10 @@ export default function BacktestPage() {
             <CardContent>
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium block mb-1">{t("backtest.strategyName")}</label>
+                  <label className="text-sm font-medium block mb-1">
+                    {t("backtest.strategyName")}
+                    <InfoTooltip text="Give your strategy a unique name to identify it later in your dashboard and strategy list." />
+                  </label>
                   <Input
                     value={strategyName}
                     onChange={(e) => setStrategyName(e.target.value)}
@@ -911,7 +915,10 @@ export default function BacktestPage() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
-                <span>{t("backtest.safetyOrders")} (DCA)</span>
+                <span>
+                  {t("backtest.safetyOrders")} (DCA)
+                  <InfoTooltip text="Safety Orders (Dollar Cost Averaging) automatically buy more when price drops, lowering your average entry price. This helps turn losing positions into winners when price recovers." />
+                </span>
                 <button
                   onClick={() => setSafetyOrderToggle(!safetyOrderToggle)}
                   className={`w-12 h-6 rounded-full transition ${
@@ -930,7 +937,10 @@ export default function BacktestPage() {
               <CardContent className="space-y-4">
                 <div className="grid md:grid-cols-3 gap-4">
                   <div>
-                    <label className="text-sm font-medium block mb-1">Safety Order Size ($)</label>
+                    <label className="text-sm font-medium block mb-1">
+                      Safety Order Size ($)
+                      <InfoTooltip text="Amount in USD for each safety order. Larger orders = faster recovery but more capital needed." />
+                    </label>
                     <Input
                       type="number"
                       value={safetyOrderSize}
@@ -939,7 +949,10 @@ export default function BacktestPage() {
                     />
                   </div>
                   <div>
-                    <label className="text-sm font-medium block mb-1">Max Safety Orders</label>
+                    <label className="text-sm font-medium block mb-1">
+                      Max Safety Orders
+                      <InfoTooltip text="Maximum number of safety orders per deal. More orders = can handle deeper dips but requires more capital. Common range: 1-7." />
+                    </label>
                     <Input
                       type="number"
                       value={maxSafetyOrdersCount}
@@ -949,7 +962,10 @@ export default function BacktestPage() {
                     />
                   </div>
                   <div>
-                    <label className="text-sm font-medium block mb-1">Price Deviation (%)</label>
+                    <label className="text-sm font-medium block mb-1">
+                      Price Deviation (%)
+                      <InfoTooltip text="Price drop percentage to trigger the first safety order. Smaller = more frequent orders. Typical: 1-3%." />
+                    </label>
                     <Input
                       type="number"
                       value={priceDeviation}
