@@ -287,9 +287,10 @@ export default function StrategyDetailPage() {
                   </svg>
                   <h4 className="font-medium text-gray-700">Historical Yearly Performance</h4>
                 </div>
-                <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
-                  {[2020, 2021, 2022, 2023, 2024, 2025].map((year) => {
-                    const value = strategy.yearlyReturns?.[year];
+                <div className="grid grid-cols-3 gap-3">
+                  {[2023, 2024, 2025].map((year) => {
+                    const yearData = strategy.yearlyBreakdown?.[year];
+                    const value = yearData?.return || strategy.yearlyReturns?.[year];
                     const isPositive = value !== undefined && value !== null && value >= 0;
                     const isPast = year <= new Date().getFullYear();
                     return (
@@ -528,7 +529,7 @@ export default function StrategyDetailPage() {
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  Data available: 2020-01-01 to 2025-12-04
+                  Data available: 2023-01-01 to 2025-12-10
                 </div>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -576,10 +577,7 @@ export default function StrategyDetailPage() {
                     {[
                       { label: "2024", start: "2024-01-01", end: "2024-12-31" },
                       { label: "2023", start: "2023-01-01", end: "2023-12-31" },
-                      { label: "2022", start: "2022-01-01", end: "2022-12-31" },
-                      { label: "2021", start: "2021-01-01", end: "2021-12-31" },
-                      { label: "2020", start: "2020-01-01", end: "2020-12-31" },
-                      { label: "All (5 years)", start: "2020-01-01", end: "2025-12-04" },
+                      { label: "All (3 years)", start: "2023-01-01", end: "2025-12-10" },
                     ].map((preset) => (
                       <button
                         key={preset.label}
@@ -704,14 +702,14 @@ export default function StrategyDetailPage() {
                 {(() => {
                   const start = new Date(backtestConfig.startDate);
                   const end = new Date(backtestConfig.endDate);
-                  const dataStart = new Date('2020-01-01');
-                  const dataEnd = new Date('2025-12-04');
+                  const dataStart = new Date('2023-01-01');
+                  const dataEnd = new Date('2025-12-10');
                   const pairCount = backtestConfig.pairs.length;
                   const periodYears = (end - start) / (365 * 24 * 60 * 60 * 1000);
                   const maxPairs = periodYears > 3 ? 2 : 5;
                   
                   const warnings = [];
-                  if (start < dataStart) warnings.push(`Start date before available data (2020-01-01)`);
+                  if (start < dataStart) warnings.push(`Start date before available data (2023-01-01)`);
                   if (end > dataEnd) warnings.push(`End date after available data (2025-12-04)`);
                   if (end <= start) warnings.push(`End date must be after start date`);
                   if (pairCount === 0) warnings.push(`Please select at least 1 pair`);
