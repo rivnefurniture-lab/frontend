@@ -449,36 +449,39 @@ export default function Dashboard() {
               ) : (
                 <div className="space-y-3">
                   {backtestResults.slice(0, 5).map((result) => (
-                    <div
-                      key={result.id}
-                      className="p-3 border rounded-lg hover:bg-gray-50 transition cursor-pointer"
+                    <Link 
+                      key={result.id} 
+                      href={`/strategies/backtest-${result.id}`}
+                      className="block"
                     >
-                      <div className="flex justify-between items-start mb-2">
-                        <h4 className="font-medium text-sm">{result.strategy_name}</h4>
-                        <span className={`text-sm font-medium ${
-                          result.net_profit >= 0 ? 'text-green-600' : 'text-red-600'
-                        }`}>
-                          {result.net_profit >= 0 ? '+' : ''}{result.net_profit?.toFixed(1)}%
-                        </span>
+                      <div className="p-3 border rounded-lg hover:bg-gray-50 hover:border-blue-300 transition cursor-pointer">
+                        <div className="flex justify-between items-start mb-2">
+                          <h4 className="font-medium text-sm">{result.strategy_name || result.name}</h4>
+                          <span className={`text-sm font-medium ${
+                            result.net_profit >= 0 ? 'text-green-600' : 'text-red-600'
+                          }`}>
+                            {result.net_profit >= 0 ? '+' : ''}{(result.net_profit * 100)?.toFixed(1)}%
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-3 gap-2 text-xs text-gray-500">
+                          <div>
+                            <span className="block">Sharpe</span>
+                            <span className="text-gray-900">{result.sharpe_ratio?.toFixed(2)}</span>
+                          </div>
+                          <div>
+                            <span className="block">Max DD</span>
+                            <span className="text-gray-900">{(result.max_drawdown * 100)?.toFixed(1)}%</span>
+                          </div>
+                          <div>
+                            <span className="block">Win Rate</span>
+                            <span className="text-gray-900">{(result.win_rate * 100)?.toFixed(0)}%</span>
+                          </div>
+                        </div>
+                        <p className="text-xs text-gray-400 mt-2">
+                          {new Date(result.createdAt || result.timestamp_run).toLocaleDateString()}
+                        </p>
                       </div>
-                      <div className="grid grid-cols-3 gap-2 text-xs text-gray-500">
-                        <div>
-                          <span className="block">Sharpe</span>
-                          <span className="text-gray-900">{result.sharpe_ratio?.toFixed(2)}</span>
-                        </div>
-                        <div>
-                          <span className="block">Max DD</span>
-                          <span className="text-gray-900">{result.max_drawdown?.toFixed(1)}%</span>
-                        </div>
-                        <div>
-                          <span className="block">Win Rate</span>
-                          <span className="text-gray-900">{result.win_rate?.toFixed(0)}%</span>
-                        </div>
-                      </div>
-                      <p className="text-xs text-gray-400 mt-2">
-                        {new Date(result.timestamp_run).toLocaleDateString()}
-                      </p>
-                    </div>
+                    </Link>
                   ))}
                 </div>
               )}

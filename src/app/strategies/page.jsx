@@ -31,6 +31,7 @@ export default function StrategiesPage() {
   const [sort, setSort] = useState("cagr");
   const [strategies, setStrategies] = useState([]);
   const [userStrategies, setUserStrategies] = useState([]);
+  const [backtestResults, setBacktestResults] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -91,13 +92,19 @@ export default function StrategiesPage() {
       // Fetch public strategies from API (real data)
       const publicStrategies = await apiFetch("/backtest/strategies");
       
-      // If user is logged in, also fetch their saved strategies
+      // If user is logged in, also fetch their saved strategies and backtest results
       let myStrategies = [];
+      let myBacktests = [];
       if (user) {
         try {
           myStrategies = await apiFetch("/strategies/my");
         } catch (e) {
           console.log("No user strategies found");
+        }
+        try {
+          myBacktests = await apiFetch("/backtest/results");
+        } catch (e) {
+          console.log("No backtest results found");
         }
       }
 
@@ -110,6 +117,7 @@ export default function StrategiesPage() {
 
       setStrategies(withChartData);
       setUserStrategies(myStrategies || []);
+      setBacktestResults(myBacktests || []);
     } catch (err) {
       console.error("Failed to fetch strategies:", err);
       setError(language === "uk" ? "Не вдалося завантажити стратегії. Спробуйте ще раз." : "Failed to load strategies. Please try again.");
@@ -312,6 +320,65 @@ export default function StrategiesPage() {
                   </div>
                 </CardContent>
               </Card>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* User's Backtest Results */}
+      {backtestResults.length > 0 && (
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-4">
+            <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            <h2 className="text-xl font-bold">
+              {language === "uk" ? "Ваші результати бектестів" : "Your Backtest Results"}
+            </h2>
+          </div>
+          <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {backtestResults.map((result) => (
+              <Link key={result.id} href={`/strategies/backtest-${result.id}`}>
+                <Card className="hover:shadow-lg transition border-purple-200 bg-purple-50/30 h-full cursor-pointer group hover:border-purple-400">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg flex items-center justify-between">
+                      <span className="truncate">{result.name || result.strategy_name || 'Backtest'}</span>
+                      <span className={`text-sm font-semibold ml-2 ${
+                        (result.netProfit || result.net_profit) >= 0 ? 'text-green-600' : 'text-red-600'
+                      }`}>
+                        {((result.netProfit || result.net_profit) >= 0 ? '+' : '')}
+                        {((result.netProfit || result.net_profit) * 100).toFixed(1)}%
+                      </span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-3 gap-2 text-sm mb-3">
+                      <div>
+                        <div className="text-gray-500">{t.sharpe}</div>
+                        <div className="font-semibold">
+                          {(result.sharpeRatio || result.sharpe_ratio)?.toFixed(2) || 'N/A'}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-gray-500">{t.maxDD}</div>
+                        <div className="font-semibold">
+                          {((result.maxDrawdown || result.max_drawdown) * 100)?.toFixed(1)}%
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-gray-500">{t.winRate}</div>
+                        <div className="font-semibold">
+                          {((result.winRate || result.win_rate) * 100)?.toFixed(0)}%
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-xs text-gray-400 flex items-center justify-between">
+                      <span>{(result.totalTrades || result.total_trades || 0)} trades</span>
+                      <span>{new Date(result.createdAt || result.timestamp_run).toLocaleDateString()}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
             ))}
           </div>
         </div>
