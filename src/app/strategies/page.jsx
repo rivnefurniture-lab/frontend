@@ -458,20 +458,21 @@ export default function StrategiesPage() {
                 </div>
 
                 {/* Equity Curve */}
-                {s.history && (
+                {s.history && s.history.length > 0 && (
                   <div className="h-28 mb-4">
                     <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={s.history} margin={{ bottom: 20, left: 0, right: 0 }}>
+                      <LineChart data={s.history} margin={{ bottom: 15, left: 0, right: 0 }}>
                         <XAxis 
                           dataKey="year" 
-                          tick={{ fontSize: 10, fill: '#6b7280' }}
+                          tick={{ fontSize: 9, fill: '#6b7280' }}
                           tickLine={false}
                           axisLine={{ stroke: '#e5e7eb' }}
-                          interval={0}
+                          interval={'preserveStartEnd'}
+                          minTickGap={30}
                         />
                         <YAxis hide domain={['dataMin', 'dataMax']} />
                         <Tooltip 
-                          formatter={(v) => [`$${v.toLocaleString()}`, "Balance"]}
+                          formatter={(v) => [`$${v?.toLocaleString()}`, "Balance"]}
                           labelFormatter={(l) => l}
                           contentStyle={{ fontSize: 12 }}
                         />

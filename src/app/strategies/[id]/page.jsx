@@ -71,38 +71,27 @@ export default function StrategyDetailPage() {
       if (found) {
         // Calculate returns
         const yearlyReturn = found.cagr || 0;
-        found.returns = {
+        found.returns = found.returns || {
           daily: yearlyReturn ? (yearlyReturn / 365).toFixed(3) : null,
           weekly: yearlyReturn ? (yearlyReturn / 52).toFixed(2) : null,
           monthly: yearlyReturn ? (yearlyReturn / 12).toFixed(1) : null,
           yearly: yearlyReturn ? yearlyReturn.toFixed(1) : null,
         };
         
-        // Default history (will be replaced by real trades if available)
-        found.history = [];
+        // Use history from API if available (already has proper format)
+        // history comes from getAllStrategies with { year: 'Jan 23', value: 5000 } format
         
         // Fetch trades from the backend for preset strategies
-        if (found.isPreset || params.id.startsWith('rsi-ma-bb')) {
+        if (found.isPreset || params.id.startsWith('real-')) {
           try {
             const tradesData = await apiFetch(`/backtest/preset-strategies/${params.id}/trades`);
             if (tradesData?.trades && tradesData.trades.length > 0) {
-              // Create chart history from real trade data
-              // Sample every Nth trade to keep chart manageable
               const allTrades = tradesData.trades;
-              const step = Math.max(1, Math.floor(allTrades.length / 100));
-              found.history = allTrades
-                .filter((_, i) => i % step === 0 || i === allTrades.length - 1)
-                .map(t => ({
-                  date: t.timestamp || t.date || 'N/A',
-                  value: parseFloat(t.balance) || 10000,
-                  balance: parseFloat(t.balance) || 10000,
-                }));
               
               // Map trades for the table
               found.recentTrades = allTrades.slice(0, 200).map(t => {
                 const profitLossUsd = parseFloat(t.profit_loss) || 0;
                 const orderSize = parseFloat(t.order_size) || 1;
-                // Calculate P&L percentage: (profit_loss_usd / order_size) * 100
                 const pnlPercent = orderSize > 0 ? (profitLossUsd / orderSize) * 100 : 0;
                 
                 return {
@@ -112,7 +101,7 @@ export default function StrategyDetailPage() {
                   side: t.action,
                   entry: parseFloat(t.price) || 0,
                   exit: t.action?.includes('Exit') || t.action === 'SELL' ? parseFloat(t.price) : 0,
-                  pnl: pnlPercent / 100, // Store as decimal for consistency
+                  pnl: pnlPercent / 100,
                   pnlUsd: profitLossUsd,
                   balance: parseFloat(t.balance) || 0,
                   orderSize: orderSize,
@@ -125,11 +114,6 @@ export default function StrategyDetailPage() {
           } catch (e) {
             console.log('Could not fetch trades:', e);
           }
-        }
-        
-        // Fallback: if no trades/history, show empty placeholder; avoid synthetic curves
-        if (!found.history || found.history.length === 0) {
-          found.history = [];
         }
         
         setStrategy(found);
