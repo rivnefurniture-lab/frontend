@@ -781,23 +781,46 @@ export default function StrategyDetailPage() {
                     }, 3000);
                     
                     try {
-                      const result = await apiFetch(`/backtest/preset-strategies/${params.id}/rerun`, {
+                      // Build payload with strategy's RSI/EMA/BB configuration
+                      const payload = {
+                        strategy_name: strategy.name || 'RSI MA BB Rerun',
+                        entry_conditions: strategy.config?.entry_conditions || [],
+                        exit_conditions: strategy.config?.exit_conditions || [],
+                        max_active_deals: 5,
+                        trading_fee: 0.1,
+                        base_order_size: 1000,
+                        initial_balance: backtestConfig.initialCapital,
+                        start_date: backtestConfig.startDate,
+                        end_date: backtestConfig.endDate,
+                        pairs: backtestConfig.pairs,
+                        conditions_active: true,
+                        price_change_active: false,
+                        safety_order_toggle: false,
+                        reinvest_profit: 100,
+                      };
+
+                      // Add to queue for proper execution on Contabo
+                      const queueResponse = await apiFetch('/backtest/queue', {
                         method: 'POST',
                         body: {
-                          startDate: backtestConfig.startDate,
-                          endDate: backtestConfig.endDate,
-                          initialCapital: backtestConfig.initialCapital,
-                          pairs: backtestConfig.pairs.length > 0 ? backtestConfig.pairs : undefined,
-                        }
+                          payload,
+                          notifyVia: 'email',
+                        },
                       });
+
                       clearInterval(progressInterval);
-                      setBacktestProgress({ stage: '✅ Complete!', percent: 100 });
-                      setBacktestResult(result);
+                      setBacktestProgress(null);
+                      setRunningBacktest(false);
+
+                      // Show queue confirmation
+                      alert(`✅ Backtest queued!\n\nPosition: #${queueResponse.queuePosition || 1}\nEstimated wait: ${queueResponse.estimatedWaitMinutes || 10} minutes\n\nWatch the floating monitor for live progress!\nYou'll receive an email when complete.`);
+
+                      // Clear the result to prevent showing old data
+                      setBacktestResult(null);
                     } catch (e) {
                       clearInterval(progressInterval);
                       setBacktestProgress(null);
                       setBacktestResult({ status: 'error', error: e.message });
-                    } finally {
                       setRunningBacktest(false);
                     }
                   }}

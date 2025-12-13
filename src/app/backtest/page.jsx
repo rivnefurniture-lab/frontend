@@ -633,12 +633,27 @@ export default function BacktestPage() {
         safety_order_volume_scale: safetyOrderVolumeScale,
       };
 
-      const result = await apiFetch("/backtest/demo", {
+      // Add to queue for proper backtest execution with backtest2.py on Contabo
+      const queueResponse = await apiFetch("/backtest/queue", {
         method: "POST",
-        body: JSON.stringify(payload),
+        body: {
+          payload,
+          notifyVia: 'email',
+          notifyEmail: '', // Will use user's email from auth
+        },
       });
 
-      setResults(result);
+      // Show success message and queue info
+      setResults({
+        status: 'queued',
+        message: `Backtest added to queue! Position: #${queueResponse.queuePosition || 1}`,
+        queueId: queueResponse.queueId,
+        estimatedWait: queueResponse.estimatedWaitMinutes,
+      });
+      
+      // The floating monitor will now show this backtest!
+      alert(`✅ Backtest queued!\n\nPosition: #${queueResponse.queuePosition || 1}\nEstimated wait: ${queueResponse.estimatedWaitMinutes || 10} minutes\n\nYou'll receive an email when it's complete. Watch the floating monitor for live progress!`);
+      
     } catch (e) {
       setError(e.message);
     } finally {
