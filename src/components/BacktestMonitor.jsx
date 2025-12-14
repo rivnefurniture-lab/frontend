@@ -2,19 +2,23 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { apiFetch } from '@/lib/api';
-import { X, Minimize2, Maximize2, XCircle } from 'lucide-react';
+import { X, Minimize2, Maximize2, XCircle, CheckCircle, Rocket, Eye } from 'lucide-react';
+import Link from 'next/link';
 
 /**
  * Floating draggable backtest monitor
  * Shows running backtests, queue position, progress, and allows cancellation
+ * Also shows completion notifications
  */
 export function BacktestMonitor({ user }) {
   const [backtests, setBacktests] = useState([]);
+  const [completedBacktest, setCompletedBacktest] = useState(null); // For the completion popup
   const [isMinimized, setIsMinimized] = useState(false);
   const [position, setPosition] = useState({ x: 100, y: 100 }); // Safe initial values
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [mounted, setMounted] = useState(false);
+  const [previousBacktestIds, setPreviousBacktestIds] = useState(new Set());
   const monitorRef = useRef(null);
 
   // Set proper position after mount (window is available)
@@ -33,7 +37,30 @@ export function BacktestMonitor({ user }) {
       try {
         // Use the new endpoint with time estimates
         const active = await apiFetch('/backtest/queue/my-active');
-        setBacktests(active || []);
+        const currentActive = active || [];
+        
+        // Check for newly completed backtests (was in previous list, not in current)
+        const currentIds = new Set(currentActive.map(b => b.id));
+        for (const prevId of previousBacktestIds) {
+          if (!currentIds.has(prevId)) {
+            // A backtest was removed (likely completed) - fetch its result
+            try {
+              const results = await apiFetch('/backtest/results');
+              // Find the most recently completed one
+              if (results && results.length > 0) {
+                const latest = results[0]; // Most recent
+                setCompletedBacktest(latest);
+                // Auto-hide after 15 seconds
+                setTimeout(() => setCompletedBacktest(null), 15000);
+              }
+            } catch (e) {
+              console.log('Could not fetch completed backtest');
+            }
+          }
+        }
+        
+        setPreviousBacktestIds(currentIds);
+        setBacktests(currentActive);
       } catch (e) {
         console.log('Could not fetch backtests');
       }
@@ -42,7 +69,7 @@ export function BacktestMonitor({ user }) {
     fetchBacktests();
     const interval = setInterval(fetchBacktests, 3000); // Update every 3 seconds for smoother progress
     return () => clearInterval(interval);
-  }, [user]);
+  }, [user, previousBacktestIds]);
 
   // Handle dragging
   const handleMouseDown = (e) => {
@@ -92,8 +119,12 @@ export function BacktestMonitor({ user }) {
     }
   };
 
-  // Don't show if not mounted, no user, or no active backtests
-  if (!mounted || !user || backtests.length === 0) return null;
+  // Don't show the running backtests panel if not mounted or no user
+  // But still show completion notification if available
+  if (!mounted || !user) return null;
+  
+  // Show only the completion notification if there are no active backtests
+  if (backtests.length === 0 && !completedBacktest) return null;
 
   const getStatusColor = (status) => {
     if (status === 'processing') return 'bg-blue-500';
@@ -118,6 +149,9 @@ export function BacktestMonitor({ user }) {
   };
 
   return (
+    <>
+    {/* Active Backtests Panel */}
+    {backtests.length > 0 && (
     <div
       ref={monitorRef}
       style={{
@@ -244,6 +278,84 @@ export function BacktestMonitor({ user }) {
         )}
       </div>
     </div>
+    )}
+      
+      {/* Completion Notification Popup */}
+      {completedBacktest && (
+        <div 
+          className="fixed inset-0 flex items-center justify-center z-[10000] bg-black/30 backdrop-blur-sm"
+          onClick={() => setCompletedBacktest(null)}
+        >
+          <div 
+            className="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full mx-4 animate-in zoom-in-95 duration-300"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Success Header */}
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
+                <CheckCircle className="w-7 h-7 text-green-600" />
+              </div>
+              <div>
+                <h3 className="font-bold text-lg text-gray-900">Backtest Complete! 🎉</h3>
+                <p className="text-sm text-gray-500">{completedBacktest.strategy_name || completedBacktest.name}</p>
+              </div>
+              <button 
+                onClick={() => setCompletedBacktest(null)} 
+                className="ml-auto text-gray-400 hover:text-gray-600 transition"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            
+            {/* Results Summary */}
+            <div className="grid grid-cols-2 gap-3 mb-5">
+              <div className="bg-gray-50 rounded-lg p-3 text-center">
+                <div className={`text-xl font-bold ${
+                  (completedBacktest.net_profit || completedBacktest.netProfit) >= 0 ? 'text-green-600' : 'text-red-600'
+                }`}>
+                  {((completedBacktest.net_profit || completedBacktest.netProfit) * 100).toFixed(1)}%
+                </div>
+                <div className="text-xs text-gray-500">Return</div>
+              </div>
+              <div className="bg-gray-50 rounded-lg p-3 text-center">
+                <div className="text-xl font-bold text-gray-800">
+                  {((completedBacktest.win_rate || completedBacktest.winRate) * 100).toFixed(0)}%
+                </div>
+                <div className="text-xs text-gray-500">Win Rate</div>
+              </div>
+              <div className="bg-gray-50 rounded-lg p-3 text-center">
+                <div className="text-xl font-bold text-gray-800">
+                  {completedBacktest.total_trades || completedBacktest.totalTrades}
+                </div>
+                <div className="text-xs text-gray-500">Trades</div>
+              </div>
+              <div className="bg-gray-50 rounded-lg p-3 text-center">
+                <div className="text-xl font-bold text-orange-600">
+                  {((completedBacktest.max_drawdown || completedBacktest.maxDrawdown) * 100).toFixed(1)}%
+                </div>
+                <div className="text-xs text-gray-500">Max DD</div>
+              </div>
+            </div>
+            
+            {/* Action Buttons */}
+            <div className="flex gap-3">
+              <Link href={`/strategies/backtest-${completedBacktest.id}`} className="flex-1">
+                <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-4 rounded-lg transition flex items-center justify-center gap-2">
+                  <Eye size={18} />
+                  View Details
+                </button>
+              </Link>
+              <Link href={`/strategies/backtest-${completedBacktest.id}#live`} className="flex-1">
+                <button className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-medium py-2.5 px-4 rounded-lg transition flex items-center justify-center gap-2">
+                  <Rocket size={18} />
+                  Start Live
+                </button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 

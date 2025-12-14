@@ -150,21 +150,20 @@ export default function StrategiesPage() {
     }
   };
 
-  // Generate realistic 5-year equity curve with years on X-axis
+  // Generate realistic equity curve based on actual data period (2023-2025)
   const generateChartData = (yearlyReturn, strategyId) => {
     const monthlyReturn = yearlyReturn / 12 / 100;
-    const startYear = 2020;
     const points = [];
+    const labels = ['Jan 23', 'Apr 23', 'Jul 23', 'Oct 23', 'Jan 24', 'Apr 24', 'Jul 24', 'Oct 24', 'Jan 25', 'Apr 25', 'Jul 25', 'Oct 25'];
     
-    // Generate data points for 5 years (60 months) - every 6 months
-    for (let i = 0; i <= 60; i += 6) {
-      const year = startYear + Math.floor(i / 12);
-      const volatility = 0.03 * Math.sin(i / 4) + 0.02 * Math.cos(i / 7);
+    // Generate data points for 3 years (36 months) - every 3 months
+    for (let i = 0; i < labels.length; i++) {
+      const volatility = 0.03 * Math.sin(i / 2) + 0.02 * Math.cos(i / 3);
       const trend = monthlyReturn * (1 + volatility);
       
       points.push({
-        year: year.toString(),
-        value: Math.round(10000 * Math.pow(1 + trend, i)),
+        year: labels[i],
+        value: Math.round(10000 * Math.pow(1 + trend, i * 3)),
       });
     }
     

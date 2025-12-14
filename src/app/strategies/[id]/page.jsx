@@ -260,9 +260,11 @@ export default function StrategyDetailPage() {
     }
   };
 
-  const formatValue = (val, suffix = "") => {
+  const formatValue = (val, suffix = "", decimals = 1) => {
     if (val === null || val === undefined || Number.isNaN(val)) return "—";
-    return `${val}${suffix}`;
+    const num = Number(val);
+    if (Number.isNaN(num)) return "—";
+    return `${num.toFixed(decimals)}${suffix}`;
   };
 
   const formatSigned = (val) => {
@@ -303,10 +305,10 @@ export default function StrategyDetailPage() {
         <div className="lg:col-span-2 space-y-6">
           {/* Key Metrics */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <MetricCard label="Yearly Return" value={`${formatValue(strategy.returns?.yearly || strategy.cagr, "%")}`} color="green" />
-            <MetricCard label="Win Rate" value={`${formatValue(strategy.winRate, "%")}`} color="blue" />
-            <MetricCard label="Sharpe Ratio" value={formatValue(strategy.sharpe)} color="purple" />
-            <MetricCard label="Max Drawdown" value={`${formatValue(strategy.maxDD, "%")}`} color="red" />
+            <MetricCard label="Yearly Return" value={formatValue(strategy.returns?.yearly || strategy.cagr || strategy.yearlyReturn, "%")} color="green" />
+            <MetricCard label="Win Rate" value={formatValue(strategy.winRate, "%")} color="blue" />
+            <MetricCard label="Sharpe Ratio" value={formatValue(strategy.sharpe || strategy.sharpeRatio, "", 2)} color="purple" />
+            <MetricCard label="Max Drawdown" value={formatValue(strategy.maxDD || strategy.maxDrawdown, "%")} color="red" />
           </div>
 
           {/* Returns Breakdown */}
@@ -720,44 +722,35 @@ export default function StrategyDetailPage() {
                   />
                 </div>
 
-                {/* Trading Pairs - Max 5 pairs, 2 for long periods */}
+                {/* Trading Pairs - All 17 pairs available */}
                 <div>
-                  <label className="text-sm font-medium text-gray-700 block mb-2">📊 Trading Pairs (Max 5)</label>
+                  <label className="text-sm font-medium text-gray-700 block mb-2">📊 Trading Pairs</label>
                   {(() => {
-                    // Calculate period to determine max pairs
-                    const start = new Date(backtestConfig.startDate);
-                    const end = new Date(backtestConfig.endDate);
-                    const periodYears = (end - start) / (365 * 24 * 60 * 60 * 1000);
-                    const maxPairs = periodYears > 3 ? 2 : 5;
-                    const availablePairs = ['BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'ADA/USDT', 'DOGE/USDT', 'AVAX/USDT', 'DOT/USDT', 'LINK/USDT', 'LTC/USDT', 'NEAR/USDT', 'HBAR/USDT', 'TRX/USDT'];
+                    const availablePairs = [
+                      'BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'ADA/USDT', 'DOGE/USDT', 
+                      'AVAX/USDT', 'DOT/USDT', 'LINK/USDT', 'LTC/USDT', 'NEAR/USDT', 
+                      'HBAR/USDT', 'TRX/USDT', 'XRP/USDT', 'BNB/USDT', 'MATIC/USDT',
+                      'ATOM/USDT', 'UNI/USDT'
+                    ];
                     
                     return (
                       <>
-                        {periodYears > 3 && (
-                          <div className="bg-blue-50 border border-blue-200 rounded-lg p-2 text-xs text-blue-700 mb-2">
-                            ℹ️ Long period ({periodYears.toFixed(1)} years): Max 2 pairs allowed for memory efficiency
-                          </div>
-                        )}
                         <div className="flex flex-wrap gap-2">
                           {availablePairs.map((pair) => {
                             const isSelected = backtestConfig.pairs.includes(pair);
-                            const atLimit = backtestConfig.pairs.length >= maxPairs && !isSelected;
                             return (
                               <button
                                 key={pair}
-                                disabled={atLimit}
                                 onClick={() => {
                                   if (isSelected) {
                                     setBacktestConfig({ ...backtestConfig, pairs: backtestConfig.pairs.filter(p => p !== pair) });
-                                  } else if (backtestConfig.pairs.length < maxPairs) {
+                                  } else {
                                     setBacktestConfig({ ...backtestConfig, pairs: [...backtestConfig.pairs, pair] });
                                   }
                                 }}
                                 className={`px-3 py-1.5 rounded-full text-sm transition ${
                                   isSelected
                                     ? "bg-purple-600 text-white"
-                                    : atLimit
-                                    ? "bg-gray-100 text-gray-300 cursor-not-allowed"
                                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                                 }`}
                               >
@@ -766,10 +759,24 @@ export default function StrategyDetailPage() {
                             );
                           })}
                         </div>
-                        <p className="text-xs text-gray-400 mt-2">
+                        <div className="flex gap-2 mt-2">
+                          <button
+                            onClick={() => setBacktestConfig({ ...backtestConfig, pairs: availablePairs })}
+                            className="text-xs text-blue-600 hover:underline"
+                          >
+                            Select All
+                          </button>
+                          <button
+                            onClick={() => setBacktestConfig({ ...backtestConfig, pairs: [] })}
+                            className="text-xs text-gray-500 hover:underline"
+                          >
+                            Clear All
+                          </button>
+                        </div>
+                        <p className="text-xs text-gray-400 mt-1">
                           {backtestConfig.pairs.length === 0 
-                            ? `Select up to ${maxPairs} pairs (max active deals will match pairs count)` 
-                            : `${backtestConfig.pairs.length}/${maxPairs} pairs selected • Max active deals: ${backtestConfig.pairs.length}`}
+                            ? 'Select pairs to backtest (max active deals will match pairs count)' 
+                            : `${backtestConfig.pairs.length} pairs selected • Max active deals: ${backtestConfig.pairs.length}`}
                         </p>
                       </>
                     );
@@ -781,17 +788,14 @@ export default function StrategyDetailPage() {
                   const start = new Date(backtestConfig.startDate);
                   const end = new Date(backtestConfig.endDate);
                   const dataStart = new Date('2023-01-01');
-                  const dataEnd = new Date('2025-12-10');
+                  const dataEnd = new Date('2025-12-14');
                   const pairCount = backtestConfig.pairs.length;
-                  const periodYears = (end - start) / (365 * 24 * 60 * 60 * 1000);
-                  const maxPairs = periodYears > 3 ? 2 : 5;
                   
                   const warnings = [];
                   if (start < dataStart) warnings.push(`Start date before available data (2023-01-01)`);
-                  if (end > dataEnd) warnings.push(`End date after available data (2025-12-04)`);
+                  if (end > dataEnd) warnings.push(`End date after available data (2025-12-14)`);
                   if (end <= start) warnings.push(`End date must be after start date`);
                   if (pairCount === 0) warnings.push(`Please select at least 1 pair`);
-                  if (periodYears > 3 && pairCount > 2) warnings.push(`Long period: Max 2 pairs for ${periodYears.toFixed(1)} year backtest`);
                   
                   return warnings.length > 0 ? (
                     <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-sm">
@@ -1176,19 +1180,19 @@ export default function StrategyDetailPage() {
             <CardContent className="space-y-3 text-sm">
               <div className="flex justify-between">
                 <span className="text-gray-500">Win Rate</span>
-                <span className="font-medium">{strategy.winRate}%</span>
+                <span className="font-medium">{(strategy.winRate || 0).toFixed(1)}%</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-500">Total Trades</span>
-                <span className="font-medium">{strategy.totalTrades}</span>
+                <span className="font-medium">{strategy.totalTrades || 0}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-500">Profit Factor</span>
-                <span className="font-medium">{strategy.profitFactor}x</span>
+                <span className="font-medium">{(strategy.profitFactor || 0).toFixed(2)}x</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-500">Max Drawdown</span>
-                <span className="font-medium text-red-600">-{strategy.maxDD}%</span>
+                <span className="font-medium text-red-600">-{(strategy.maxDD || strategy.maxDrawdown || 0).toFixed(1)}%</span>
               </div>
             </CardContent>
           </Card>
