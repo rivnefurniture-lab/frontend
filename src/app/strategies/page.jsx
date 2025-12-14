@@ -93,19 +93,16 @@ export default function StrategiesPage() {
       const publicStrategies = await publicFetch("/backtest/strategies");
       
       // If user is logged in, also fetch their saved strategies and backtest results
+      // Fetch these in parallel to speed up loading
       let myStrategies = [];
       let myBacktests = [];
       if (user) {
-        try {
-          myStrategies = await apiFetch("/strategies/my");
-        } catch (e) {
-          console.log("No user strategies found");
-        }
-        try {
-          myBacktests = await apiFetch("/backtest/results");
-        } catch (e) {
-          console.log("No backtest results found");
-        }
+        const [strategiesRes, backtestsRes] = await Promise.allSettled([
+          apiFetch("/strategies/my"),
+          apiFetch("/backtest/results")
+        ]);
+        myStrategies = strategiesRes.status === 'fulfilled' ? (strategiesRes.value || []) : [];
+        myBacktests = backtestsRes.status === 'fulfilled' ? (backtestsRes.value || []) : [];
       }
 
       // Use real history data if available, otherwise generate from CAGR

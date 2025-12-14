@@ -425,7 +425,9 @@ export default function BacktestPage() {
   const [selectedPairs, setSelectedPairs] = useState(["BTC/USDT"]);
   const [maxActiveDeals, setMaxActiveDeals] = useState(1);
   const [initialBalance, setInitialBalance] = useState(10000);
-  const [baseOrderSize, setBaseOrderSize] = useState(100);
+  
+  // Base order size is auto-calculated: initialBalance / maxActiveDeals
+  const baseOrderSize = Math.floor(initialBalance / maxActiveDeals);
   const [tradingFee, setTradingFee] = useState(0.1); // 0.1%
   
   // Default to last 6 months
@@ -711,7 +713,12 @@ export default function BacktestPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium block mb-1">{t("backtest.maxActiveDeals")}</label>
+                  <label className="text-sm font-medium block mb-1">
+                    <TooltipLabel 
+                      label={t("backtest.maxActiveDeals")}
+                      tooltip="Maximum positions held at once. More deals = more diversification but capital is split across them."
+                    />
+                  </label>
                   <Input
                     type="number"
                     value={maxActiveDeals}
@@ -721,7 +728,12 @@ export default function BacktestPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium block mb-1">{t("backtest.initialBalance")}</label>
+                  <label className="text-sm font-medium block mb-1">
+                    <TooltipLabel 
+                      label={t("backtest.initialBalance")}
+                      tooltip="Starting capital for the backtest. Results scale proportionally to this amount."
+                    />
+                  </label>
                   <Input
                     type="number"
                     value={initialBalance}
@@ -729,15 +741,27 @@ export default function BacktestPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium block mb-1">{t("backtest.baseOrderSize")}</label>
+                  <label className="text-sm font-medium block mb-1">
+                    <TooltipLabel 
+                      label={t("backtest.baseOrderSize")}
+                      tooltip="Auto-calculated as Initial Balance ÷ Max Active Deals. This ensures you have enough capital for all positions."
+                    />
+                  </label>
                   <Input
                     type="number"
                     value={baseOrderSize}
-                    onChange={(e) => setBaseOrderSize(parseFloat(e.target.value))}
+                    readOnly
+                    className="bg-gray-50"
                   />
+                  <p className="text-xs text-gray-500 mt-1">= ${initialBalance.toLocaleString()} ÷ {maxActiveDeals}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium block mb-1">Trading Fee (%)</label>
+                  <label className="text-sm font-medium block mb-1">
+                    <TooltipLabel 
+                      label="Trading Fee (%)"
+                      tooltip="Exchange fee per trade. Binance: 0.1%, Bybit: 0.075%. Applied to every buy and sell."
+                    />
+                  </label>
                   <Input
                     type="number"
                     value={tradingFee}
@@ -748,7 +772,12 @@ export default function BacktestPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium block mb-1">{t("backtest.startDate")}</label>
+                  <label className="text-sm font-medium block mb-1">
+                    <TooltipLabel 
+                      label={t("backtest.startDate")}
+                      tooltip="When to start the backtest. More history = more reliable results but longer processing."
+                    />
+                  </label>
                   <Input
                     type="date"
                     value={startDate}
@@ -756,7 +785,12 @@ export default function BacktestPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium block mb-1">{t("backtest.endDate")}</label>
+                  <label className="text-sm font-medium block mb-1">
+                    <TooltipLabel 
+                      label={t("backtest.endDate")}
+                      tooltip="When to end the backtest. Usually set to today for the most recent data."
+                    />
+                  </label>
                   <Input
                     type="date"
                     value={endDate}
@@ -766,7 +800,12 @@ export default function BacktestPage() {
               </div>
 
               <div className="mt-4">
-                <label className="text-sm font-medium block mb-2">{t("backtest.tradingPairs")}</label>
+                <label className="text-sm font-medium block mb-2">
+                  <TooltipLabel 
+                    label={t("backtest.tradingPairs")}
+                    tooltip="Select which pairs to trade. More pairs = more opportunities but strategy will run across all of them."
+                  />
+                </label>
                 <div className="flex flex-wrap gap-2">
                   {PAIRS.map((pair) => (
                     <button
@@ -796,7 +835,10 @@ export default function BacktestPage() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
-                <span>Take Profit</span>
+                <TooltipLabel 
+                  label="Take Profit"
+                  tooltip="Automatically close positions when they reach your target profit percentage."
+                />
                 <button
                   onClick={() => setPriceChangeActive(!priceChangeActive)}
                   className={`w-12 h-6 rounded-full transition ${
@@ -869,7 +911,10 @@ export default function BacktestPage() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
-                <span>Stop Loss</span>
+                <TooltipLabel 
+                  label="Stop Loss"
+                  tooltip="Automatically close positions when they reach a certain loss percentage, limiting downside risk."
+                />
                 <button
                   onClick={() => setStopLossToggle(!stopLossToggle)}
                   className={`w-12 h-6 rounded-full transition ${
@@ -1037,7 +1082,12 @@ export default function BacktestPage() {
           {/* Advanced Settings */}
           <Card>
             <CardHeader>
-              <CardTitle>Advanced Settings</CardTitle>
+              <CardTitle>
+                <TooltipLabel 
+                  label="Advanced Settings"
+                  tooltip="Fine-tune your strategy with additional controls for cooldowns, volume filters, and profit management."
+                />
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid md:grid-cols-2 gap-4">
