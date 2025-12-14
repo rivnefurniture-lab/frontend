@@ -733,15 +733,14 @@ export default function StrategyDetailPage() {
                   />
                 </div>
 
-                {/* Trading Pairs - All 17 pairs available */}
+                {/* Trading Pairs - 14 pairs with data */}
                 <div>
                   <label className="text-sm font-medium text-gray-700 block mb-2">📊 Trading Pairs</label>
                   {(() => {
                     const availablePairs = [
-                      'BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'ADA/USDT', 'DOGE/USDT', 
-                      'AVAX/USDT', 'DOT/USDT', 'LINK/USDT', 'LTC/USDT', 'NEAR/USDT', 
-                      'HBAR/USDT', 'TRX/USDT', 'XRP/USDT', 'BNB/USDT', 'MATIC/USDT',
-                      'ATOM/USDT', 'UNI/USDT'
+                      'ETH/USDT', 'SOL/USDT', 'XRP/USDT', 'ADA/USDT', 'DOGE/USDT', 
+                      'AVAX/USDT', 'LINK/USDT', 'DOT/USDT', 'NEAR/USDT', 'LTC/USDT', 
+                      'HBAR/USDT', 'SUI/USDT', 'RENDER/USDT', 'ATOM/USDT'
                     ];
                     
                     return (

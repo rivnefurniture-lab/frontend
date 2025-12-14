@@ -226,15 +226,24 @@ export function BacktestMonitor({ user }) {
                 {/* Progress Bar (if processing) */}
                 {backtest.status === 'processing' && (
                   <div className="mb-2">
-                    <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
                       <div
-                        className="bg-blue-600 h-2 rounded-full transition-all duration-500"
-                        style={{ width: `${Math.min(95, backtest.progress || 0)}%` }}
+                        className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all duration-1000 ease-out"
+                        style={{ width: `${Math.max(5, backtest.progress || 0)}%` }}
                       ></div>
                     </div>
                     <div className="flex justify-between text-xs text-gray-600 mt-1">
-                      <span>{Math.round(backtest.progress || 0)}% complete</span>
-                      <span>ETA: {formatCompletionTime(backtest.estimatedCompletion)}</span>
+                      <span>{Math.round(backtest.progress || 0)}%</span>
+                      <span>
+                        {backtest.progress >= 95 
+                          ? '⏳ Finishing up...' 
+                          : backtest.estimatedRemaining 
+                            ? `~${formatTime(backtest.estimatedRemaining)} left`
+                            : backtest.estimatedSeconds
+                            ? `~${formatTime(backtest.estimatedSeconds)} total`
+                            : 'calculating...'
+                        }
+                      </span>
                     </div>
                   </div>
                 )}

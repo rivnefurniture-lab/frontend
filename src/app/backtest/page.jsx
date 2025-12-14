@@ -59,8 +59,9 @@ const PSAR_PRESETS = [
 const TRADINGVIEW_SIGNALS = ["Buy", "Strong Buy", "Sell", "Strong Sell", "Neutral"];
 
 const PAIRS = [
-  "BTC/USDT", "ETH/USDT", "SOL/USDT", "DOGE/USDT", "AVAX/USDT",
-  "LINK/USDT", "NEAR/USDT", "LTC/USDT", "HBAR/USDT", "SUI/USDT"
+  "ETH/USDT", "SOL/USDT", "XRP/USDT", "ADA/USDT", "DOGE/USDT", 
+  "AVAX/USDT", "LINK/USDT", "DOT/USDT", "NEAR/USDT", "LTC/USDT", 
+  "HBAR/USDT", "SUI/USDT", "RENDER/USDT", "ATOM/USDT"
 ];
 
 function ConditionBuilder({ condition, onChange, onRemove }) {
