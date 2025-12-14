@@ -15,7 +15,7 @@ import {
   CartesianGrid,
 } from "recharts";
 import { useAuth } from "@/context/AuthProvider";
-import { apiFetch } from "@/lib/api";
+import { apiFetch, publicFetch } from "@/lib/api";
 
 export default function StrategyDetailPage() {
   const params = useParams();
@@ -70,7 +70,7 @@ export default function StrategyDetailPage() {
       if (params.id.startsWith('backtest-')) {
         const backtestId = params.id.replace('backtest-', '');
         try {
-          const result = await apiFetch(`/backtest/results/${backtestId}`);
+          const result = await publicFetch(`/backtest/results/${backtestId}`);
           if (result) {
             // Transform backtest result to strategy format
             const transformed = {
@@ -110,8 +110,8 @@ export default function StrategyDetailPage() {
         }
       }
       
-      // Fetch preset strategies
-      const allStrategies = await apiFetch("/backtest/strategies");
+      // Fetch preset strategies (public endpoint, no auth required)
+      const allStrategies = await publicFetch("/backtest/strategies");
       const found = allStrategies?.find(s => s.id === params.id || s.id === parseInt(params.id));
       if (found) {
         // Calculate returns
@@ -129,7 +129,7 @@ export default function StrategyDetailPage() {
         // Fetch trades from the backend for preset strategies
         if (found.isPreset || params.id.startsWith('real-')) {
           try {
-            const tradesData = await apiFetch(`/backtest/preset-strategies/${params.id}/trades`);
+            const tradesData = await publicFetch(`/backtest/preset-strategies/${params.id}/trades`);
             if (tradesData?.trades && tradesData.trades.length > 0) {
               const allTrades = tradesData.trades;
               
