@@ -2,32 +2,57 @@
 
 import { useState } from "react";
 
-export function Tooltip({ children, content }) {
+/**
+ * InfoTooltip - Shows a tooltip on hover with dashed underline styling
+ * Matches the Algotcha website design
+ */
+export function InfoTooltip({ text, children }) {
   const [isVisible, setIsVisible] = useState(false);
 
   return (
-    <div 
+    <span 
       className="relative inline-block"
       onMouseEnter={() => setIsVisible(true)}
       onMouseLeave={() => setIsVisible(false)}
     >
-      {children}
+      <span className="border-b border-dashed border-gray-400 cursor-help">
+        {children}
+      </span>
       {isVisible && (
-        <div className="absolute z-50 w-64 p-2 mt-1 text-xs text-white bg-gray-900 rounded-lg shadow-lg left-0 top-full whitespace-normal">
-          {content}
+        <div className="absolute z-50 w-72 p-3 mt-2 text-sm text-gray-700 bg-white rounded-lg shadow-xl border border-gray-200 left-0 top-full">
+          <div className="absolute -top-2 left-4 w-3 h-3 bg-white border-l border-t border-gray-200 transform rotate-45"></div>
+          <p className="leading-relaxed">{text}</p>
         </div>
       )}
-    </div>
+    </span>
   );
 }
 
-export function InfoTooltip({ text }) {
+/**
+ * TooltipLabel - A label with built-in tooltip support
+ */
+export function TooltipLabel({ label, tooltip, className = "" }) {
+  const [isVisible, setIsVisible] = useState(false);
+
+  if (!tooltip) {
+    return <span className={className}>{label}</span>;
+  }
+
   return (
-    <Tooltip content={text}>
-      <span className="ml-1 cursor-help text-blue-500 hover:text-blue-600 select-none">
-        ℹ️
+    <span 
+      className={`relative inline-block ${className}`}
+      onMouseEnter={() => setIsVisible(true)}
+      onMouseLeave={() => setIsVisible(false)}
+    >
+      <span className="border-b border-dashed border-blue-400 cursor-help hover:border-blue-600 transition-colors">
+        {label}
       </span>
-    </Tooltip>
+      {isVisible && (
+        <div className="absolute z-50 w-72 p-3 mt-2 text-sm text-gray-700 bg-white rounded-xl shadow-xl border border-gray-100 left-0 top-full">
+          <div className="absolute -top-2 left-4 w-3 h-3 bg-white border-l border-t border-gray-100 transform rotate-45"></div>
+          <p className="leading-relaxed">{tooltip}</p>
+        </div>
+      )}
+    </span>
   );
 }
-

@@ -66,6 +66,51 @@ export default function StrategyDetailPage() {
 
   const fetchStrategy = async () => {
     try {
+      // Check if this is a backtest result (format: "backtest-123")
+      if (params.id.startsWith('backtest-')) {
+        const backtestId = params.id.replace('backtest-', '');
+        try {
+          const result = await apiFetch(`/backtest/results/${backtestId}`);
+          if (result) {
+            // Transform backtest result to strategy format
+            const transformed = {
+              id: `backtest-${backtestId}`,
+              name: result.name || result.strategy_name || 'Backtest Result',
+              isBacktestResult: true,
+              netProfit: (result.netProfit || result.net_profit || 0) * 100,
+              netProfitUsd: result.netProfitUsd || result.net_profit_usd || 0,
+              sharpeRatio: result.sharpeRatio || result.sharpe_ratio || 0,
+              sortinoRatio: result.sortinoRatio || result.sortino_ratio || 0,
+              maxDrawdown: (result.maxDrawdown || result.max_drawdown || 0) * 100,
+              winRate: (result.winRate || result.win_rate || 0) * 100,
+              totalTrades: result.totalTrades || result.total_trades || 0,
+              profitFactor: result.profitFactor || result.profit_factor || 0,
+              yearlyReturn: result.yearlyReturn || result.yearly_return || 0,
+              cagr: (result.yearlyReturn || result.yearly_return || 0) * 100,
+              startDate: result.startDate || result.start_date,
+              endDate: result.endDate || result.end_date,
+              initialBalance: result.initialBalance || result.initial_balance || 10000,
+              pairs: result.pairs || [],
+              history: result.chartData ? (typeof result.chartData === 'string' ? JSON.parse(result.chartData) : result.chartData) : [],
+              trades: result.trades ? (typeof result.trades === 'string' ? JSON.parse(result.trades) : result.trades) : [],
+              config: result.config ? (typeof result.config === 'string' ? JSON.parse(result.config) : result.config) : {},
+              returns: {
+                daily: ((result.yearlyReturn || 0) / 365).toFixed(3),
+                weekly: ((result.yearlyReturn || 0) / 52).toFixed(2),
+                monthly: ((result.yearlyReturn || 0) / 12).toFixed(1),
+                yearly: (result.yearlyReturn || 0).toFixed(1),
+              }
+            };
+            setStrategy(transformed);
+            setLoading(false);
+            return;
+          }
+        } catch (e) {
+          console.error("Failed to fetch backtest result:", e);
+        }
+      }
+      
+      // Fetch preset strategies
       const allStrategies = await apiFetch("/backtest/strategies");
       const found = allStrategies?.find(s => s.id === params.id || s.id === parseInt(params.id));
       if (found) {

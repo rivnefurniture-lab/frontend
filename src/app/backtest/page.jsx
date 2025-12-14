@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
-import { InfoTooltip } from "@/components/ui/tooltip";
+import { TooltipLabel } from "@/components/ui/tooltip";
 import { apiFetch } from "@/lib/api";
 import { useLanguage } from "@/context/LanguageContext";
 import {
@@ -699,8 +699,10 @@ export default function BacktestPage() {
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium block mb-1">
-                    {t("backtest.strategyName")}
-                    <InfoTooltip text="Give your strategy a unique name to identify it later in your dashboard and strategy list." />
+                    <TooltipLabel 
+                      label={t("backtest.strategyName")}
+                      tooltip="Give your strategy a unique name to identify it later in your dashboard and strategy list."
+                    />
                   </label>
                   <Input
                     value={strategyName}
@@ -915,10 +917,10 @@ export default function BacktestPage() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
-                <span>
-                  {t("backtest.safetyOrders")} (DCA)
-                  <InfoTooltip text="Safety Orders (Dollar Cost Averaging) automatically buy more when price drops, lowering your average entry price. This helps turn losing positions into winners when price recovers." />
-                </span>
+                <TooltipLabel 
+                  label={`${t("backtest.safetyOrders")} (DCA)`}
+                  tooltip="Safety Orders (Dollar Cost Averaging) automatically buy more when price drops, lowering your average entry price. This helps turn losing positions into winners when price recovers."
+                />
                 <button
                   onClick={() => setSafetyOrderToggle(!safetyOrderToggle)}
                   className={`w-12 h-6 rounded-full transition ${
@@ -938,8 +940,10 @@ export default function BacktestPage() {
                 <div className="grid md:grid-cols-3 gap-4">
                   <div>
                     <label className="text-sm font-medium block mb-1">
-                      Safety Order Size ($)
-                      <InfoTooltip text="Amount in USD for each safety order. Larger orders = faster recovery but more capital needed." />
+                      <TooltipLabel 
+                        label="Safety Order Size ($)"
+                        tooltip="Amount in USD for each safety order. Larger orders = faster recovery but more capital needed."
+                      />
                     </label>
                     <Input
                       type="number"
@@ -950,8 +954,10 @@ export default function BacktestPage() {
                   </div>
                   <div>
                     <label className="text-sm font-medium block mb-1">
-                      Max Safety Orders
-                      <InfoTooltip text="Maximum number of safety orders per deal. More orders = can handle deeper dips but requires more capital. Common range: 1-7." />
+                      <TooltipLabel 
+                        label="Max Safety Orders"
+                        tooltip="Maximum number of safety orders per deal. More orders = can handle deeper dips but requires more capital. Common range: 1-7."
+                      />
                     </label>
                     <Input
                       type="number"
@@ -963,8 +969,10 @@ export default function BacktestPage() {
                   </div>
                   <div>
                     <label className="text-sm font-medium block mb-1">
-                      Price Deviation (%)
-                      <InfoTooltip text="Price drop percentage to trigger the first safety order. Smaller = more frequent orders. Typical: 1-3%." />
+                      <TooltipLabel 
+                        label="Price Deviation (%)"
+                        tooltip="Price drop percentage to trigger the first safety order. Smaller = more frequent orders. Typical: 1-3%."
+                      />
                     </label>
                     <Input
                       type="number"
