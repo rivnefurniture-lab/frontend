@@ -6,6 +6,12 @@ import Footer from "@/components/Footer";
 import CookieConsent from "@/components/CookieConsent";
 import { BacktestMonitorWrapper } from "@/components/BacktestMonitorWrapper";
 
+// Build: 2025-12-14-v4-percentage-fixes
+const BUILD_VERSION = "2025-12-14-v4";
+if (typeof window !== 'undefined') {
+  console.log(`[Algotcha] App build: ${BUILD_VERSION}`);
+}
+
 export const metadata = {
   title: {
     default: "Algotcha - Algorithmic Crypto Trading Made Simple",
