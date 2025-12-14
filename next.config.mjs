@@ -32,4 +32,4 @@ const nextConfig = {
 };
 
 export default nextConfig;
-// Force redeploy Sun Dec 14 03:05:36 EET 2025
+// Force redeploy Sun Dec 14 18:50:00 EET 2025 - fix percentage formatting
