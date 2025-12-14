@@ -17,6 +17,9 @@ import {
 import { useAuth } from "@/context/AuthProvider";
 import { apiFetch, publicFetch } from "@/lib/api";
 
+// Build version: 2025-12-14-v3 - percentage fixes
+console.log("[Algotcha] Strategy page loaded - build v2025-12-14-v3");
+
 export default function StrategyDetailPage() {
   const params = useParams();
   const router = useRouter();

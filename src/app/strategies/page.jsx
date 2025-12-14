@@ -17,6 +17,9 @@ import { apiFetch, publicFetch } from "@/lib/api";
 import { useAuth } from "@/context/AuthProvider";
 import { useLanguage } from "@/context/LanguageContext";
 
+// Build version: 2025-12-14-v3 - chart dates and percentage fixes
+console.log("[Algotcha] Strategies list page loaded - build v2025-12-14-v3");
+
 // Helper to format returns properly (no +- issue)
 const formatReturn = (value) => {
   const num = parseFloat(value) || 0;
