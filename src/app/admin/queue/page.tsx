@@ -153,6 +153,7 @@ export default function QueueAdminPage() {
       processing: 'default',
       completed: 'outline',
       failed: 'destructive',
+      cancelled: 'destructive',
     };
 
     return (
@@ -160,6 +161,47 @@ export default function QueueAdminPage() {
         {status.toUpperCase()}
       </Badge>
     );
+  };
+
+  const cancelBacktest = async (id: number) => {
+    if (!confirm('Are you sure you want to cancel this backtest?')) return;
+    try {
+      await apiFetch(`/backtest/queue/${id}/cancel`, { method: 'POST' });
+      fetchData();
+    } catch (e: any) {
+      alert('Failed to cancel backtest: ' + (e?.message || 'Unknown error'));
+    }
+  };
+
+  const deleteQueueItem = async (id: number) => {
+    if (!confirm('Are you sure you want to delete this queue item?')) return;
+    try {
+      await apiFetch(`/backtest/queue/${id}`, { method: 'DELETE' });
+      fetchData();
+    } catch (e: any) {
+      alert('Failed to delete queue item: ' + (e?.message || 'Unknown error'));
+    }
+  };
+
+  const forceFailBacktest = async (id: number) => {
+    if (!confirm('Are you sure you want to force-fail this backtest? This will mark it as failed.')) return;
+    try {
+      await apiFetch(`/backtest/queue/${id}/force-fail`, { method: 'POST' });
+      fetchData();
+    } catch (e: any) {
+      alert('Failed to force-fail backtest: ' + (e?.message || 'Unknown error'));
+    }
+  };
+
+  const resetStuckBacktests = async () => {
+    if (!confirm('This will mark all backtests processing for over 2 hours as failed. Continue?')) return;
+    try {
+      const result = await apiFetch<{ count: number }>('/backtest/queue/reset-stuck', { method: 'POST' });
+      alert(`Reset ${result.count} stuck backtests`);
+      fetchData();
+    } catch (e: any) {
+      alert('Failed to reset stuck backtests: ' + (e?.message || 'Unknown error'));
+    }
   };
 
   const formatUptime = (seconds: number) => {
@@ -208,9 +250,14 @@ export default function QueueAdminPage() {
     <div className="container mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-        <Button onClick={fetchData} variant="outline">
-          🔄 Refresh
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={resetStuckBacktests} variant="outline" className="text-orange-600 hover:bg-orange-50">
+            🔧 Reset Stuck
+          </Button>
+          <Button onClick={fetchData} variant="outline">
+            🔄 Refresh
+          </Button>
+        </div>
       </div>
 
       {/* Tabs */}
@@ -320,6 +367,7 @@ export default function QueueAdminPage() {
                         <th className="pb-3 font-semibold">Notify Via</th>
                         <th className="pb-3 font-semibold">Created</th>
                         <th className="pb-3 font-semibold">Duration</th>
+                        <th className="pb-3 font-semibold">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -363,6 +411,40 @@ export default function QueueAdminPage() {
                             <td className="py-3 text-sm text-gray-600">
                               {duration ? `${duration} min` : '-'}
                             </td>
+                            <td className="py-3">
+                              <div className="flex gap-1">
+                                {item.status === 'queued' && (
+                                  <Button 
+                                    size="sm" 
+                                    variant="outline"
+                                    className="text-red-600 hover:bg-red-50"
+                                    onClick={() => cancelBacktest(item.id)}
+                                  >
+                                    Cancel
+                                  </Button>
+                                )}
+                                {item.status === 'processing' && (
+                                  <Button 
+                                    size="sm" 
+                                    variant="outline"
+                                    className="text-orange-600 hover:bg-orange-50"
+                                    onClick={() => forceFailBacktest(item.id)}
+                                  >
+                                    Force Fail
+                                  </Button>
+                                )}
+                                {(item.status === 'failed' || item.status === 'cancelled' || item.status === 'completed') && (
+                                  <Button 
+                                    size="sm" 
+                                    variant="ghost"
+                                    className="text-gray-500 hover:bg-gray-100"
+                                    onClick={() => deleteQueueItem(item.id)}
+                                  >
+                                    🗑️
+                                  </Button>
+                                )}
+                              </div>
+                            </td>
                           </tr>
                         );
                       })}
@@ -385,9 +467,19 @@ export default function QueueAdminPage() {
                     .filter((item) => item.errorMessage)
                     .slice(0, 5)
                     .map((item) => (
-                      <div key={item.id} className="p-3 bg-red-50 rounded-lg">
-                        <div className="font-semibold text-red-900">{item.strategyName}</div>
-                        <div className="text-sm text-red-700">{item.errorMessage}</div>
+                      <div key={item.id} className="p-3 bg-red-50 rounded-lg flex justify-between items-start">
+                        <div>
+                          <div className="font-semibold text-red-900">{item.strategyName}</div>
+                          <div className="text-sm text-red-700 max-w-xl break-words">{item.errorMessage}</div>
+                        </div>
+                        <Button 
+                          size="sm" 
+                          variant="ghost"
+                          className="text-red-600 hover:bg-red-100 ml-2 flex-shrink-0"
+                          onClick={() => deleteQueueItem(item.id)}
+                        >
+                          Delete
+                        </Button>
                       </div>
                     ))}
                 </div>
