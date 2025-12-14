@@ -92,21 +92,29 @@ export default function StrategyDetailPage() {
               };
             });
             
+            // Convert raw decimals to percentages
+            const yearlyReturnPct = (result.yearlyReturn || result.yearly_return || 0) * 100;
+            const winRatePct = (result.winRate || result.win_rate || 0) * 100;
+            const maxDDPct = (result.maxDrawdown || result.max_drawdown || 0) * 100;
+            const netProfitPct = (result.netProfit || result.net_profit || 0) * 100;
+            
             const transformed = {
               id: `backtest-${backtestId}`,
               name: result.name || result.strategy_name || 'Backtest Result',
               isBacktestResult: true,
-              netProfit: (result.netProfit || result.net_profit || 0) * 100,
+              netProfit: netProfitPct,
               netProfitUsd: result.netProfitUsd || result.net_profit_usd || 0,
+              sharpe: result.sharpeRatio || result.sharpe_ratio || 0,
               sharpeRatio: result.sharpeRatio || result.sharpe_ratio || 0,
               sortinoRatio: result.sortinoRatio || result.sortino_ratio || 0,
-              maxDrawdown: (result.maxDrawdown || result.max_drawdown || 0) * 100,
-              winRate: (result.winRate || result.win_rate || 0) * 100,
+              maxDD: maxDDPct,
+              maxDrawdown: maxDDPct,
+              winRate: winRatePct,
               totalTrades: result.totalTrades || result.total_trades || 0,
               totalBacktestTrades: result.totalTrades || result.total_trades || 0,
               profitFactor: result.profitFactor || result.profit_factor || 0,
-              yearlyReturn: result.yearlyReturn || result.yearly_return || 0,
-              cagr: (result.yearlyReturn || result.yearly_return || 0) * 100,
+              yearlyReturn: yearlyReturnPct,
+              cagr: yearlyReturnPct,
               startDate: result.startDate || result.start_date,
               endDate: result.endDate || result.end_date,
               initialBalance: result.initialBalance || result.initial_balance || 10000,
@@ -116,10 +124,10 @@ export default function StrategyDetailPage() {
               recentTrades: formattedTrades,
               config: result.config ? (typeof result.config === 'string' ? JSON.parse(result.config) : result.config) : {},
               returns: {
-                daily: ((result.yearlyReturn || 0) / 365).toFixed(3),
-                weekly: ((result.yearlyReturn || 0) / 52).toFixed(2),
-                monthly: ((result.yearlyReturn || 0) / 12).toFixed(1),
-                yearly: (result.yearlyReturn || 0).toFixed(1),
+                daily: (yearlyReturnPct / 365).toFixed(3),
+                weekly: (yearlyReturnPct / 52).toFixed(2),
+                monthly: (yearlyReturnPct / 12).toFixed(1),
+                yearly: yearlyReturnPct.toFixed(1),
               }
             };
             setStrategy(transformed);
