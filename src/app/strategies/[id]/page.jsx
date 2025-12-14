@@ -79,21 +79,22 @@ export default function StrategyDetailPage() {
             const rawTrades = result.trades ? (typeof result.trades === 'string' ? JSON.parse(result.trades) : result.trades) : [];
             
             // Transform trades to the format expected by the UI
-            const formattedTrades = rawTrades.map(t => {
-              const ts = new Date(t.timestamp);
-              return {
-                date: ts.toLocaleDateString(),
-                time: ts.toLocaleTimeString(),
-                pair: t.symbol || '',
-                side: t.action || '',
-                entry: parseFloat(t.price) || 0,
-                orderSize: 1000, // Default order size
-                pnl: parseFloat(t.profit_loss) / (result.initialBalance || 10000) || 0,
-                pnlUsd: parseFloat(t.profit_loss) || 0,
-                balance: parseFloat(t.balance) || 0,
-                comment: t.comment || '',
-              };
-            });
+                   const formattedTrades = rawTrades.map(t => {
+                     const ts = new Date(t.timestamp);
+                     const orderSize = parseFloat(t.order_size) || 1000; // Use actual order_size from backtest
+                     return {
+                       date: ts.toLocaleDateString(),
+                       time: ts.toLocaleTimeString(),
+                       pair: t.symbol || '',
+                       side: t.action || '',
+                       entry: parseFloat(t.price) || 0,
+                       orderSize: orderSize,
+                       pnl: parseFloat(t.profit_loss) / (result.initialBalance || 10000) || 0,
+                       pnlUsd: parseFloat(t.profit_loss) || 0,
+                       balance: parseFloat(t.balance) || 0,
+                       comment: t.comment || '',
+                     };
+                   });
             
             // Convert raw decimals to percentages
             const yearlyReturnPct = (result.yearlyReturn || result.yearly_return || 0) * 100;
@@ -733,12 +734,12 @@ export default function StrategyDetailPage() {
                   />
                 </div>
 
-                {/* Trading Pairs - 14 pairs with data */}
+                {/* Trading Pairs - 15 pairs with data */}
                 <div>
                   <label className="text-sm font-medium text-gray-700 block mb-2">📊 Trading Pairs</label>
                   {(() => {
                     const availablePairs = [
-                      'ETH/USDT', 'SOL/USDT', 'XRP/USDT', 'ADA/USDT', 'DOGE/USDT', 
+                      'BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'XRP/USDT', 'ADA/USDT', 'DOGE/USDT', 
                       'AVAX/USDT', 'LINK/USDT', 'DOT/USDT', 'NEAR/USDT', 'LTC/USDT', 
                       'HBAR/USDT', 'SUI/USDT', 'RENDER/USDT', 'ATOM/USDT'
                     ];
