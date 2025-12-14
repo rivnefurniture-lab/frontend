@@ -1,13 +1,15 @@
 'use client';
 
-import { useAuth } from '@/context/AuthProvider';
-import { BacktestMonitor } from './BacktestMonitor';
+// TEMPORARILY DISABLED - causing SSR issues
+// import { useAuth } from '@/context/AuthProvider';
+// import { BacktestMonitor } from './BacktestMonitor';
 
 export function BacktestMonitorWrapper() {
-  const { user } = useAuth();
+  // Disabled temporarily to fix page loading
+  return null;
   
-  if (!user) return null;
-  
-  return <BacktestMonitor user={user} />;
+  // const { user } = useAuth();
+  // if (!user) return null;
+  // return <BacktestMonitor user={user} />;
 }
 
