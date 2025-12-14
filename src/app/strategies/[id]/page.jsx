@@ -73,6 +73,25 @@ export default function StrategyDetailPage() {
           const result = await publicFetch(`/backtest/results/${backtestId}`);
           if (result) {
             // Transform backtest result to strategy format
+            const rawTrades = result.trades ? (typeof result.trades === 'string' ? JSON.parse(result.trades) : result.trades) : [];
+            
+            // Transform trades to the format expected by the UI
+            const formattedTrades = rawTrades.map(t => {
+              const ts = new Date(t.timestamp);
+              return {
+                date: ts.toLocaleDateString(),
+                time: ts.toLocaleTimeString(),
+                pair: t.symbol || '',
+                side: t.action || '',
+                entry: parseFloat(t.price) || 0,
+                orderSize: 1000, // Default order size
+                pnl: parseFloat(t.profit_loss) / (result.initialBalance || 10000) || 0,
+                pnlUsd: parseFloat(t.profit_loss) || 0,
+                balance: parseFloat(t.balance) || 0,
+                comment: t.comment || '',
+              };
+            });
+            
             const transformed = {
               id: `backtest-${backtestId}`,
               name: result.name || result.strategy_name || 'Backtest Result',
@@ -84,6 +103,7 @@ export default function StrategyDetailPage() {
               maxDrawdown: (result.maxDrawdown || result.max_drawdown || 0) * 100,
               winRate: (result.winRate || result.win_rate || 0) * 100,
               totalTrades: result.totalTrades || result.total_trades || 0,
+              totalBacktestTrades: result.totalTrades || result.total_trades || 0,
               profitFactor: result.profitFactor || result.profit_factor || 0,
               yearlyReturn: result.yearlyReturn || result.yearly_return || 0,
               cagr: (result.yearlyReturn || result.yearly_return || 0) * 100,
@@ -92,7 +112,8 @@ export default function StrategyDetailPage() {
               initialBalance: result.initialBalance || result.initial_balance || 10000,
               pairs: result.pairs || [],
               history: result.chartData ? (typeof result.chartData === 'string' ? JSON.parse(result.chartData) : result.chartData) : [],
-              trades: result.trades ? (typeof result.trades === 'string' ? JSON.parse(result.trades) : result.trades) : [],
+              trades: rawTrades,
+              recentTrades: formattedTrades,
               config: result.config ? (typeof result.config === 'string' ? JSON.parse(result.config) : result.config) : {},
               returns: {
                 daily: ((result.yearlyReturn || 0) / 365).toFixed(3),
