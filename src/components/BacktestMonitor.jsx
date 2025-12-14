@@ -11,10 +11,19 @@ import { X, Minimize2, Maximize2, XCircle } from 'lucide-react';
 export function BacktestMonitor({ user }) {
   const [backtests, setBacktests] = useState([]);
   const [isMinimized, setIsMinimized] = useState(false);
-  const [position, setPosition] = useState({ x: window.innerWidth - 420, y: 100 });
+  const [position, setPosition] = useState({ x: 100, y: 100 }); // Safe initial values
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [mounted, setMounted] = useState(false);
   const monitorRef = useRef(null);
+
+  // Set proper position after mount (window is available)
+  useEffect(() => {
+    setMounted(true);
+    if (typeof window !== 'undefined') {
+      setPosition({ x: window.innerWidth - 420, y: 100 });
+    }
+  }, []);
 
   // Fetch user's active backtests with time estimates
   useEffect(() => {
@@ -83,8 +92,8 @@ export function BacktestMonitor({ user }) {
     }
   };
 
-  // Don't show if no active backtests
-  if (!user || backtests.length === 0) return null;
+  // Don't show if not mounted, no user, or no active backtests
+  if (!mounted || !user || backtests.length === 0) return null;
 
   const getStatusColor = (status) => {
     if (status === 'processing') return 'bg-blue-500';
