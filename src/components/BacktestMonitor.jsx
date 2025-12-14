@@ -67,7 +67,7 @@ export function BacktestMonitor({ user }) {
     };
 
     fetchBacktests();
-    const interval = setInterval(fetchBacktests, 3000); // Update every 3 seconds for smoother progress
+    const interval = setInterval(fetchBacktests, 10000); // Update every 10 seconds to reduce DB load
     return () => clearInterval(interval);
   }, [user, previousBacktestIds]);
 
