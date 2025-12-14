@@ -32,3 +32,4 @@ const nextConfig = {
 };
 
 export default nextConfig;
+// Force redeploy Sun Dec 14 03:05:36 EET 2025
