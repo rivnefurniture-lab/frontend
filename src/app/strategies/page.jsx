@@ -90,19 +90,29 @@ export default function StrategiesPage() {
       setError(null);
 
       // Fetch public strategies from API (real data) - use publicFetch (no auth required)
-      const publicStrategies = await publicFetch("/backtest/strategies");
+      let publicStrategies = [];
+      try {
+        publicStrategies = await publicFetch("/backtest/strategies");
+      } catch (fetchErr) {
+        console.error("Failed to fetch public strategies:", fetchErr);
+        // Don't fail entirely - continue with empty array
+      }
       
       // If user is logged in, also fetch their saved strategies and backtest results
       // Fetch these in parallel to speed up loading
       let myStrategies = [];
       let myBacktests = [];
       if (user) {
-        const [strategiesRes, backtestsRes] = await Promise.allSettled([
-          apiFetch("/strategies/my"),
-          apiFetch("/backtest/results")
-        ]);
-        myStrategies = strategiesRes.status === 'fulfilled' ? (strategiesRes.value || []) : [];
-        myBacktests = backtestsRes.status === 'fulfilled' ? (backtestsRes.value || []) : [];
+        try {
+          const [strategiesRes, backtestsRes] = await Promise.allSettled([
+            apiFetch("/strategies/my"),
+            apiFetch("/backtest/results")
+          ]);
+          myStrategies = strategiesRes.status === 'fulfilled' ? (strategiesRes.value || []) : [];
+          myBacktests = backtestsRes.status === 'fulfilled' ? (backtestsRes.value || []) : [];
+        } catch (userFetchErr) {
+          console.error("Failed to fetch user data:", userFetchErr);
+        }
       }
 
       // Use real history data if available, otherwise generate from CAGR
