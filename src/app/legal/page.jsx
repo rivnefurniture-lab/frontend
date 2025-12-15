@@ -46,7 +46,67 @@ We reserve the right to modify these terms at any time. Continued use of the Ser
 We may terminate or suspend your account at any time, with or without cause, with or without notice.
 
 10. GOVERNING LAW
-These terms shall be governed by the laws of the jurisdiction in which our company is registered.
+These terms shall be governed by the laws of Ukraine.
+      `,
+    },
+    {
+      id: "payment",
+      title: "Payment and Delivery",
+      content: `
+Last Updated: December 2024
+
+1. ACCEPTED PAYMENT METHODS
+We accept payments through LiqPay payment system (operated by PrivatBank, Ukraine):
+- Visa, Mastercard (Ukrainian and international)
+- LiqPay account
+- PrivatBank cards
+- Other payment methods supported by LiqPay
+
+2. PRICING AND CURRENCY
+- All prices are listed in US Dollars (USD)
+- Final amount charged may vary based on your bank's exchange rate
+- Prices are inclusive of all applicable taxes
+
+3. PAYMENT PROCESSING
+- Payments are processed securely by LiqPay (www.liqpay.ua)
+- We do not store your card details
+- Payment confirmation is instant
+- You will receive a payment receipt by email
+
+4. SUBSCRIPTION BILLING
+- Pro and Enterprise subscriptions are billed monthly or annually
+- Billing occurs automatically on the renewal date
+- You can cancel your subscription at any time
+- Cancellation takes effect at the end of the current billing period
+
+5. SERVICE DELIVERY
+- Service is delivered digitally and instantly upon successful payment
+- You will receive immediate access to your subscribed plan features
+- No physical goods are shipped
+- Access is provided through your online account at algotcha.com
+
+6. FAILED PAYMENTS
+- If a payment fails, we will notify you by email
+- Your service may be suspended until payment is resolved
+- You have 7 days to update your payment method
+- After 7 days, your account may be downgraded to Free plan
+
+7. REFUND POLICY
+- 14-day money-back guarantee for all paid plans
+- Refunds are processed within 3-5 business days
+- Funds are returned via the same payment method
+- See our Refund Policy page for full details
+
+8. PRICE CHANGES
+- We reserve the right to change our pricing
+- Existing subscribers will be notified 30 days in advance
+- Price changes do not affect current subscription period
+- You may cancel before the new price takes effect
+
+9. CONTACT FOR PAYMENT ISSUES
+Email: support@algotcha.com
+Phone: +38 (097) 768-57-24
+Company: ТОВ "Алготча", Код: 46116338
       `,
     },
     {
@@ -229,7 +289,67 @@ Algotcha не несе відповідальності за будь-які н�
 Ми можемо припинити або призупинити ваш обліковий запис у будь-який час, з причиною або без неї, з повідомленням або без нього.
 
 10. ЗАСТОСОВНЕ ПРАВО
-Ці умови регулюються законодавством юрисдикції, в якій зареєстрована наша компанія.
+Ці умови регулюються законодавством України.
+      `,
+    },
+    {
+      id: "payment",
+      title: "Оплата та доставка",
+      content: `
+Останнє оновлення: Грудень 2024
+
+1. ПРИЙНЯТНІ СПОСОБИ ОПЛАТИ
+Ми приймаємо платежі через платіжну систему LiqPay (під керівництвом ПриватБанку, Україна):
+- Visa, Mastercard (українські та міжнародні)
+- Обліковий запис LiqPay
+- Картки ПриватБанку
+- Інші способи оплати, підтримувані LiqPay
+
+2. ЦІНОУТВОРЕННЯ ТА ВАЛЮТА
+- Всі ціни вказані в доларах США (USD)
+- Остаточна сума може відрізнятися залежно від курсу обміну вашого банку
+- Ціни включають усі застосовні податки
+
+3. ОБРОБКА ПЛАТЕЖІВ
+- Платежі обробляються безпечно через LiqPay (www.liqpay.ua)
+- Ми не зберігаємо дані вашої картки
+- Підтвердження платежу миттєве
+- Ви отримаєте квитанцію на електронну пошту
+
+4. РАХУНКИ ЗА ПІДПИСКУ
+- Підписки Pro та Enterprise виставляються щомісяця або щорічно
+- Оплата відбувається автоматично на дату продовження
+- Ви можете скасувати підписку в будь-який час
+- Скасування набуває чинності наприкінці поточного платіжного періоду
+
+5. ДОСТАВКА ПОСЛУГИ
+- Послуга надається цифрово та миттєво після успішної оплати
+- Ви отримаєте негайний доступ до функцій вашого плану
+- Фізичні товари не доставляються
+- Доступ надається через ваш обліковий запис на algotcha.com
+
+6. НЕВДАЛІ ПЛАТЕЖІ
+- Якщо платіж не пройде, ми повідомимо вас електронною поштою
+- Вашу послугу може бути призупинено до вирішення проблеми з оплатою
+- У вас є 7 днів для оновлення способу оплати
+- Після 7 днів ваш обліковий запис може бути переведено на безкоштовний план
+
+7. ПОЛІТИКА ПОВЕРНЕННЯ КОШТІВ
+- 14-денна гарантія повернення грошей для всіх платних планів
+- Повернення коштів обробляється протягом 3-5 робочих днів
+- Кошти повертаються тим же способом оплати
+- Повна інформація на сторінці Політики повернення коштів
+
+8. ЗМІНА ЦІН
+- Ми залишаємо за собою право змінювати ціни
+- Існуючі підписники будуть повідомлені за 30 днів
+- Зміни цін не впливають на поточний платіжний період
+- Ви можете скасувати до набуття чинності новою ціною
+
+9. КОНТАКТИ З ПИТАНЬ ОПЛАТИ
+Email: support@algotcha.com
+Телефон: +38 (097) 768-57-24
+Компанія: ТОВ "Алготча", Код: 46116338
       `,
     },
     {
