@@ -868,13 +868,30 @@ const translations = {
 };
 
 export function LanguageProvider({ children }) {
-  const [language, setLanguage] = useState("uk"); // Default to Ukrainian
+  const [language, setLanguage] = useState("uk"); // Default to Ukrainian per LiqPay requirements
 
   useEffect(() => {
-    // Load saved language preference
+    // Check for saved language preference first
     const saved = localStorage.getItem("algotcha-language");
     if (saved && (saved === "en" || saved === "uk")) {
       setLanguage(saved);
+      return;
+    }
+
+    // Auto-detect Ukrainian users per LiqPay requirement #8
+    // Check browser language first
+    const browserLang = navigator.language || navigator.userLanguage;
+    if (browserLang.startsWith('uk') || browserLang.startsWith('ru')) {
+      setLanguage("uk");
+      localStorage.setItem("algotcha-language", "uk");
+      return;
+    }
+
+    // Try to detect based on timezone (Ukraine is typically UTC+2/+3)
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    if (timezone.includes('Kyiv') || timezone.includes('Kiev') || timezone.includes('Europe/')) {
+      setLanguage("uk");
+      localStorage.setItem("algotcha-language", "uk");
     }
   }, []);
 

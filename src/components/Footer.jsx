@@ -82,6 +82,56 @@ export default function Footer() {
             <p className='text-gray-400 text-sm mt-3 leading-relaxed'>
               {t("footer.description")}
             </p>
+            
+            {/* Company Info - LiqPay Requirements */}
+            <div className="mt-4 text-xs text-gray-400 space-y-1">
+              <p className="font-semibold text-gray-300">
+                {language === "uk" ? "ТОВ \"Алготча\"" : "LLC \"Algotcha\""}
+              </p>
+              <p>{language === "uk" ? "Код: 46116338" : "Code: 46116338"}</p>
+              <p className="leading-relaxed">
+                {language === "uk" 
+                  ? "вул. Лук'яненка Левка, 21, кв. 32"
+                  : "21 Lukyanenka Levka St., apt. 32"}
+                <br />
+                {language === "uk" ? "м. Київ, 04212, Україна" : "Kyiv, 04212, Ukraine"}
+              </p>
+              <p>
+                <a href="mailto:support@algotcha.com" className="hover:text-white transition">
+                  support@algotcha.com
+                </a>
+              </p>
+              <p>
+                <a href="tel:+380977685724" className="hover:text-white transition">
+                  +38 (097) 768-57-24
+                </a>
+              </p>
+            </div>
+            
+            {/* Payment Partners */}
+            <div className="mt-4 pt-4 border-t border-gray-800">
+              <p className="text-xs text-gray-500 mb-2">
+                {language === "uk" ? "Приймаємо платежі" : "We accept"}
+              </p>
+              <a 
+                href="https://www.liqpay.ua" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-block hover:opacity-80 transition"
+              >
+                <img 
+                  src="/liqpay-logo.svg" 
+                  alt="LiqPay" 
+                  className="h-6 opacity-90"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    e.target.nextElementSibling.style.display = 'inline-block';
+                  }}
+                />
+                <span className="text-blue-400 font-semibold text-sm hidden">LiqPay</span>
+              </a>
+            </div>
+            
             {/* Social Links */}
             <div className='flex gap-4 mt-4'>
               <a href="https://twitter.com/algotcha" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition">
