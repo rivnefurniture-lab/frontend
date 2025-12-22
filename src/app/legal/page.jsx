@@ -15,7 +15,7 @@ Last Updated: December 2024
 By accessing or using Algotcha ("the Service"), you agree to be bound by these Terms of Service. If you do not agree to these terms, do not use the Service.
 
 2. DESCRIPTION OF SERVICE
-Algotcha provides algorithmic trading tools, backtesting capabilities, and automated trading execution through third-party exchanges. The Service is provided "as is" without warranty of any kind.
+Algotcha provides analytical tools, simulation capabilities, and automated data processing through third-party data sources. The Service is provided "as is" without warranty of any kind.
 
 3. ELIGIBILITY
 You must be at least 18 years old and legally able to enter into contracts to use this Service. You are responsible for ensuring that your use of the Service complies with all applicable laws in your jurisdiction.
@@ -25,15 +25,15 @@ You must be at least 18 years old and legally able to enter into contracts to us
 - You are responsible for all activities that occur under your account.
 - You must notify us immediately of any unauthorized use of your account.
 
-5. API KEYS AND EXCHANGE ACCESS
-- You grant us permission to execute trades on your behalf using the API keys you provide.
-- You must only provide API keys with trading permissions (never withdrawal permissions).
+5. API KEYS AND DATA ACCESS
+- You grant us permission to access data on your behalf using the API keys you provide.
+- You must only provide API keys with read-only permissions.
 - We are not responsible for losses resulting from compromised API keys.
 
-6. TRADING RISKS
-- Trading cryptocurrencies involves significant risk of loss.
-- Past performance of any strategy does not guarantee future results.
-- You are solely responsible for your trading decisions.
+6. ANALYTICAL RISKS
+- Market analysis involves inherent uncertainties.
+- Past performance of any model does not guarantee future results.
+- You are solely responsible for your decisions based on our analysis.
 - We do not provide financial, investment, or legal advice.
 
 7. LIMITATION OF LIABILITY
@@ -117,20 +117,20 @@ Last Updated: December 2024
 
 1. INFORMATION WE COLLECT
 - Account Information: Email, name, and optional profile data.
-- Exchange API Keys: Encrypted and stored securely.
+- API Keys: Encrypted and stored securely.
 - Usage Data: How you interact with the Service.
-- Trading Data: Strategies, backtests, and trade history.
+- Analysis Data: Models, simulations, and analysis history.
 
 2. HOW WE USE YOUR INFORMATION
 - To provide and maintain the Service.
-- To execute trades on your behalf.
+- To process data on your behalf.
 - To improve our products and services.
 - To communicate with you about the Service.
 
 3. DATA SECURITY
 - All API keys are encrypted using industry-standard encryption.
 - We use secure HTTPS connections for all data transmission.
-- We never store withdrawal-enabled API keys.
+- We never store API keys with write permissions.
 - We regularly audit our security practices.
 
 4. DATA SHARING
@@ -216,34 +216,34 @@ IMPORTANT RISK DISCLOSURE
 
 Please read this carefully before using Algotcha.
 
-TRADING RISK
-Cryptocurrency trading carries a high level of risk and may not be suitable for all investors. The high degree of leverage can work against you as well as for you. Before deciding to trade cryptocurrencies, you should carefully consider your investment objectives, level of experience, and risk appetite.
+ANALYTICAL RISK
+Market analysis carries inherent uncertainties. The analytical models provided are for informational purposes only. Before making any decisions based on our analysis, you should carefully consider your objectives, level of experience, and risk tolerance.
 
-NO GUARANTEE OF PROFIT
-There is no guarantee that you will make money using Algotcha. Historical performance shown in backtests does not guarantee future results. Market conditions change, and strategies that worked in the past may not work in the future.
+NO GUARANTEE OF ACCURACY
+There is no guarantee that the analysis provided by Algotcha will be accurate. Historical performance shown in simulations does not guarantee future results. Market conditions change, and models that worked in the past may not work in the future.
 
-ALGORITHMIC TRADING RISKS
-- Technical failures may occur, resulting in missed trades or erroneous orders.
-- Market conditions may change faster than algorithms can adapt.
-- Slippage and execution delays may impact performance.
+AUTOMATED ANALYSIS RISKS
+- Technical failures may occur, resulting in delayed or incorrect analysis.
+- Market conditions may change faster than models can adapt.
+- Processing delays may impact timeliness of insights.
 - Software bugs may cause unexpected behavior.
 
-EXCHANGE RISKS
-- Exchanges may experience downtime, hacks, or insolvency.
-- API rate limits may prevent timely trade execution.
-- Regulatory changes may affect access to exchanges.
+DATA SOURCE RISKS
+- Data providers may experience downtime or errors.
+- API rate limits may prevent timely data retrieval.
+- Regulatory changes may affect access to data sources.
 
 YOUR RESPONSIBILITY
-- Only trade with money you can afford to lose.
-- Never enable withdrawal permissions on API keys.
-- Monitor your positions regularly.
-- Understand the strategies you are using.
+- Only use analysis for informational purposes.
+- Never rely solely on automated analysis for important decisions.
+- Monitor your results regularly.
+- Understand the models you are using.
 - Keep your account credentials secure.
 
 NOT FINANCIAL ADVICE
-The information provided by Algotcha is for informational purposes only. It should not be considered as financial, investment, legal, or tax advice. Always consult with a qualified professional before making investment decisions.
+The information provided by Algotcha is for informational purposes only. It should not be considered as financial, investment, legal, or tax advice. Always consult with a qualified professional before making important decisions.
 
-By using Algotcha, you acknowledge that you have read and understood this risk disclosure and accept full responsibility for your trading activities.
+By using Algotcha, you acknowledge that you have read and understood this risk disclosure and accept full responsibility for your use of the analytical results.
       `,
     },
   ],
@@ -258,7 +258,7 @@ By using Algotcha, you acknowledge that you have read and understood this risk d
 Отримуючи доступ до Algotcha ("Сервіс") або використовуючи його, ви погоджуєтесь дотримуватися цих Умов використання. Якщо ви не згодні з цими умовами, не використовуйте Сервіс.
 
 2. ОПИС СЕРВІСУ
-Algotcha надає інструменти для алгоритмічної торгівлі, можливості бектестингу та автоматизоване виконання угод через сторонні біржі. Сервіс надається "як є" без будь-яких гарантій.
+Algotcha надає аналітичні інструменти, можливості симуляції та автоматизовану обробку даних через сторонні джерела даних. Сервіс надається "як є" без будь-яких гарантій.
 
 3. ПРАВО НА ВИКОРИСТАННЯ
 Вам має бути не менше 18 років і ви повинні мати право укладати договори для використання цього Сервісу. Ви несете відповідальність за відповідність використання Сервісу всім застосовним законам вашої юрисдикції.
@@ -268,15 +268,15 @@ Algotcha надає інструменти для алгоритмічної т�
 - Ви відповідаєте за всі дії, що відбуваються під вашим обліковим записом.
 - Ви повинні негайно повідомити нас про будь-яке несанкціоноване використання.
 
-5. API КЛЮЧІ ТА ДОСТУП ДО БІРЖІ
-- Ви надаєте нам дозвіл на виконання угод від вашого імені за допомогою наданих вами API ключів.
-- Ви повинні надавати API ключі лише з правами на торгівлю (ніколи на виведення).
+5. API КЛЮЧІ ТА ДОСТУП ДО ДАНИХ
+- Ви надаєте нам дозвіл на доступ до даних від вашого імені за допомогою наданих вами API ключів.
+- Ви повинні надавати API ключі лише з правами на читання.
 - Ми не несемо відповідальності за втрати від скомпрометованих API ключів.
 
-6. ТОРГОВІ РИЗИКИ
-- Торгівля криптовалютами несе значний ризик втрат.
-- Минулі результати стратегії не гарантують майбутніх результатів.
-- Ви несете повну відповідальність за свої торгові рішення.
+6. АНАЛІТИЧНІ РИЗИКИ
+- Аналіз ринку несе невизначеності.
+- Минулі результати моделі не гарантують майбутніх результатів.
+- Ви несете повну відповідальність за свої рішення на основі нашого аналізу.
 - Ми не надаємо фінансових, інвестиційних або юридичних порад.
 
 7. ОБМЕЖЕННЯ ВІДПОВІДАЛЬНОСТІ
@@ -360,20 +360,20 @@ Email: support@algotcha.com
 
 1. ІНФОРМАЦІЯ, ЯКУ МИ ЗБИРАЄМО
 - Інформація облікового запису: Email, ім'я та додаткові дані профілю.
-- API ключі біржі: Зашифровані та зберігаються безпечно.
+- API ключі: Зашифровані та зберігаються безпечно.
 - Дані використання: Як ви взаємодієте з Сервісом.
-- Торгові дані: Стратегії, бектести та історія угод.
+- Дані аналізу: Моделі, симуляції та історія аналізу.
 
 2. ЯК МИ ВИКОРИСТОВУЄМО ВАШУ ІНФОРМАЦІЮ
 - Для надання та підтримки Сервісу.
-- Для виконання угод від вашого імені.
+- Для обробки даних від вашого імені.
 - Для покращення наших продуктів та послуг.
 - Для спілкування з вами щодо Сервісу.
 
 3. БЕЗПЕКА ДАНИХ
 - Всі API ключі зашифровані за допомогою стандартного шифрування.
 - Ми використовуємо безпечні HTTPS з'єднання для всіх передач даних.
-- Ми ніколи не зберігаємо API ключі з правами на виведення.
+- Ми ніколи не зберігаємо API ключі з правами на запис.
 - Ми регулярно перевіряємо наші практики безпеки.
 
 4. ПЕРЕДАЧА ДАНИХ
@@ -459,34 +459,34 @@ Cookies — це невеликі текстові файли, які збері
 
 Будь ласка, уважно прочитайте перед використанням Algotcha.
 
-ТОРГОВИЙ РИЗИК
-Торгівля криптовалютами несе високий рівень ризику і може бути непридатною для всіх інвесторів. Високий ступінь кредитного плеча може працювати як на вас, так і проти вас. Перед прийняттям рішення про торгівлю криптовалютами ви повинні ретельно розглянути свої інвестиційні цілі, рівень досвіду та схильність до ризику.
+АНАЛІТИЧНИЙ РИЗИК
+Аналіз ринку несе невизначеності. Аналітичні моделі надаються лише для інформаційних цілей. Перед прийняттям будь-яких рішень на основі нашого аналізу ви повинні ретельно розглянути свої цілі, рівень досвіду та толерантність до ризику.
 
-ВІДСУТНІСТЬ ГАРАНТІЇ ПРИБУТКУ
-Немає гарантії, що ви заробите гроші, використовуючи Algotcha. Історичні результати бектестів не гарантують майбутніх результатів. Ринкові умови змінюються, і стратегії, які працювали в минулому, можуть не працювати в майбутньому.
+ВІДСУТНІСТЬ ГАРАНТІЇ ТОЧНОСТІ
+Немає гарантії, що аналіз, наданий Algotcha, буде точним. Історичні результати симуляцій не гарантують майбутніх результатів. Ринкові умови змінюються, і моделі, які працювали в минулому, можуть не працювати в майбутньому.
 
-РИЗИКИ АЛГОРИТМІЧНОЇ ТОРГІВЛІ
-- Можуть виникати технічні збої, що призводять до пропущених угод або помилкових ордерів.
-- Ринкові умови можуть змінюватися швидше, ніж алгоритми можуть адаптуватися.
-- Прослизання та затримки виконання можуть вплинути на результати.
+РИЗИКИ АВТОМАТИЗОВАНОГО АНАЛІЗУ
+- Можуть виникати технічні збої, що призводять до затриманого або неправильного аналізу.
+- Ринкові умови можуть змінюватися швидше, ніж моделі можуть адаптуватися.
+- Затримки обробки можуть вплинути на своєчасність інсайтів.
 - Програмні баги можуть спричинити несподівану поведінку.
 
-РИЗИКИ БІРЖІ
-- Біржі можуть зазнавати простоїв, зломів або неплатоспроможності.
-- Ліміти API можуть перешкоджати своєчасному виконанню угод.
-- Регуляторні зміни можуть вплинути на доступ до бірж.
+РИЗИКИ ДЖЕРЕЛ ДАНИХ
+- Постачальники даних можуть зазнавати простоїв або помилок.
+- Ліміти API можуть перешкоджати своєчасному отриманню даних.
+- Регуляторні зміни можуть вплинути на доступ до джерел даних.
 
 ВАША ВІДПОВІДАЛЬНІСТЬ
-- Торгуйте лише тими грошима, які можете дозволити собі втратити.
-- Ніколи не вмикайте права на виведення в API ключах.
-- Регулярно моніторте свої позиції.
-- Розумійте стратегії, які використовуєте.
+- Використовуйте аналіз лише для інформаційних цілей.
+- Ніколи не покладайтеся виключно на автоматизований аналіз для важливих рішень.
+- Регулярно моніторте свої результати.
+- Розумійте моделі, які використовуєте.
 - Тримайте облікові дані в безпеці.
 
 НЕ ФІНАНСОВА ПОРАДА
-Інформація, надана Algotcha, призначена лише для інформаційних цілей. Її не слід розглядати як фінансову, інвестиційну, юридичну або податкову пораду. Завжди консультуйтеся з кваліфікованим фахівцем перед прийняттям інвестиційних рішень.
+Інформація, надана Algotcha, призначена лише для інформаційних цілей. Її не слід розглядати як фінансову, інвестиційну, юридичну або податкову пораду. Завжди консультуйтеся з кваліфікованим фахівцем перед прийняттям важливих рішень.
 
-Використовуючи Algotcha, ви підтверджуєте, що прочитали та зрозуміли це розкриття ризиків і приймаєте повну відповідальність за свою торгову діяльність.
+Використовуючи Algotcha, ви підтверджуєте, що прочитали та зрозуміли це розкриття ризиків і приймаєте повну відповідальність за використання аналітичних результатів.
       `,
     },
   ],

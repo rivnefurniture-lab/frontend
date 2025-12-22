@@ -80,7 +80,9 @@ export default function Footer() {
               <img src="/logo-white.svg" alt="Algotcha" className="h-8" />
             </Link>
             <p className='text-gray-400 text-sm mt-3 leading-relaxed'>
-              {t("footer.description")}
+              {language === "uk" 
+                ? "Автоматизуй свій аналіз ринку за допомогою потужних аналітичних моделей. SaaS платформа для дослідження даних."
+                : "Automate your market analysis with powerful analytical models. SaaS platform for data research."}
             </p>
             
             {/* Company Info - LiqPay Requirements */}

@@ -13,19 +13,19 @@ const faqsData = {
       items: [
         {
           q: "What is Algotcha?",
-          a: "Algotcha is an algorithmic trading platform that lets you automate your crypto trading using proven strategies. You can browse pre-built strategies, backtest your own ideas, and run them 24/7 on your exchange account.",
+          a: "Algotcha is an analytical platform that lets you automate your market research using proven models. You can browse pre-built analytical models, simulate your own ideas, and run them 24/7 with your data sources.",
         },
         {
           q: "How do I get started?",
-          a: "1. Create a free account. 2. Browse our featured strategies or build your own using the backtest tool. 3. Connect your exchange (Binance, Bybit, or OKX) with API keys. 4. Select a strategy and start live trading. That's it!",
+          a: "1. Create a free account. 2. Browse our featured models or build your own using the simulation tool. 3. Connect your data source with API keys. 4. Select a model and start live analysis. That's it!",
         },
         {
           q: "Is it free to use?",
-          a: "You can browse strategies, run backtests, and explore the platform for free. Live trading requires a subscription plan. We offer different tiers based on your trading needs.",
+          a: "You can browse models, run simulations, and explore the platform for free. Live analysis requires a subscription plan. We offer different tiers based on your needs.",
         },
         {
-          q: "Which exchanges are supported?",
-          a: "We currently support Binance, Bybit, and OKX. More exchanges will be added based on user demand. All major spot trading pairs are available.",
+          q: "Which data sources are supported?",
+          a: "We currently support multiple data providers including TradingView, Polygon.io, and others. More integrations will be added based on user demand.",
         },
       ],
     },
@@ -33,62 +33,62 @@ const faqsData = {
       category: "Security & Safety",
       items: [
         {
-          q: "Is my money safe?",
-          a: "Your funds never leave your exchange. We only use API keys with trading permissions — never withdrawal access. You maintain full custody of your assets at all times.",
+          q: "Is my data safe?",
+          a: "Your data never leaves your control. We only use API keys with read-only permissions — never write access. You maintain full control of your data at all times.",
         },
         {
           q: "How are my API keys protected?",
-          a: "API keys are encrypted using industry-standard encryption before storage. They are only decrypted on our secure trading server when executing trades. We recommend enabling IP whitelisting on your exchange for additional security.",
+          a: "API keys are encrypted using industry-standard encryption before storage. They are only decrypted on our secure server when accessing data. We recommend enabling IP whitelisting for additional security.",
         },
         {
           q: "What IP should I whitelist?",
-          a: "Our trading server IP is 46.224.99.27. Whitelisting this IP on your exchange ensures only our server can execute trades with your API keys, adding an extra layer of security.",
+          a: "Our server IP is 46.224.99.27. Whitelisting this IP on your data provider ensures only our server can access data with your API keys, adding an extra layer of security.",
         },
         {
-          q: "Can you withdraw my funds?",
-          a: "No. When creating API keys, you should ONLY enable trading permissions. Never enable withdrawals. This is a fundamental security practice we strongly recommend.",
+          q: "Can you modify my data?",
+          a: "No. When creating API keys, you should ONLY enable read-only permissions. Never enable write access. This is a fundamental security practice we strongly recommend.",
         },
       ],
     },
     {
-      category: "Strategies & Backtesting",
+      category: "Models & Simulations",
       items: [
         {
-          q: "How accurate are the backtests?",
-          a: "Our backtests use real 1-minute OHLCV data from Binance going back to 2020. We account for trading fees and realistic execution. However, past performance doesn't guarantee future results — slippage and market conditions vary.",
+          q: "How accurate are the simulations?",
+          a: "Our simulations use real 1-minute OHLCV data going back to 2020. We account for realistic conditions. However, past performance doesn't guarantee future results — market conditions vary.",
         },
         {
           q: "What indicators are available?",
           a: "We support 20+ technical indicators including RSI, MACD, Bollinger Bands, Moving Averages, Stochastic, ATR, CCI, ADX, Ichimoku, and more. Each indicator can be customized with your preferred parameters.",
         },
         {
-          q: "Can I create my own strategy?",
-          a: "Yes! Use our visual backtest builder to combine indicators and create custom entry/exit conditions. Test your strategy against 5 years of data before going live.",
+          q: "Can I create my own model?",
+          a: "Yes! Use our visual simulation builder to combine indicators and create custom entry/exit conditions. Test your model against 5 years of data before going live.",
         },
         {
-          q: "How often are strategy results updated?",
-          a: "Featured strategies are recalculated every hour using the latest market data. This ensures the performance metrics you see reflect current market conditions.",
+          q: "How often are model results updated?",
+          a: "Featured models are recalculated every hour using the latest market data. This ensures the performance metrics you see reflect current market conditions.",
         },
       ],
     },
     {
-      category: "Trading & Execution",
+      category: "Analysis & Processing",
       items: [
         {
-          q: "How quickly are trades executed?",
-          a: "Trades are executed on a dedicated server with a static IP, ensuring low-latency connections to exchanges. Market orders are typically filled within seconds.",
+          q: "How quickly is data processed?",
+          a: "Data is processed on a dedicated server with a static IP, ensuring low-latency connections to data sources. Analysis is typically completed within seconds.",
         },
         {
           q: "What happens if the server goes down?",
-          a: "Your open positions remain on the exchange. We have monitoring and auto-restart systems in place. If extended downtime occurs, you can manually manage positions from your exchange.",
+          a: "Your analysis history remains accessible. We have monitoring and auto-restart systems in place. If extended downtime occurs, you can access your data from your account.",
         },
         {
-          q: "Can I set stop losses and take profits?",
-          a: "Yes. Our backtest and live trading support stop loss, take profit, trailing stops, and safety orders (DCA). You can configure risk management for each strategy.",
+          q: "Can I set alerts and notifications?",
+          a: "Yes. Our platform supports email and Telegram notifications. You can configure alerts for each model based on your preferences.",
         },
         {
-          q: "What trading pairs are available?",
-          a: "We support all major crypto pairs against USDT including BTC, ETH, SOL, XRP, ADA, DOGE, AVAX, LINK, DOT, NEAR, LTC, and more. 17 pairs with full historical data.",
+          q: "What assets are available?",
+          a: "We support analysis for multiple asset classes including stocks, indices, commodities, and more. 17+ assets with full historical data.",
         },
       ],
     },
@@ -101,11 +101,11 @@ const faqsData = {
         },
         {
           q: "What payment methods are accepted?",
-          a: "We accept Binance Pay and direct crypto payments (USDT). More payment options coming soon.",
+          a: "We accept payments through LiqPay including Visa, Mastercard, and PrivatBank cards. All payments are processed securely.",
         },
         {
           q: "Is there a free trial?",
-          a: "Yes! You can explore the platform, run backtests, and analyze strategies without any payment. Only live trading requires a subscription.",
+          a: "Yes! You can explore the platform, run simulations, and analyze models without any payment. Only live analysis requires a subscription.",
         },
         {
           q: "What is the refund policy?",
@@ -120,19 +120,19 @@ const faqsData = {
       items: [
         {
           q: "Що таке Algotcha?",
-          a: "Algotcha — це платформа для алгоритмічної торгівлі, яка дозволяє автоматизувати вашу крипто-торгівлю за допомогою перевірених стратегій. Ви можете переглядати готові стратегії, тестувати власні ідеї та запускати їх 24/7 на вашому біржовому акаунті.",
+          a: "Algotcha — це аналітична платформа, яка дозволяє автоматизувати ваші дослідження ринку за допомогою перевірених моделей. Ви можете переглядати готові аналітичні моделі, симулювати власні ідеї та запускати їх 24/7 з вашими джерелами даних.",
         },
         {
           q: "Як почати?",
-          a: "1. Створіть безкоштовний акаунт. 2. Перегляньте наші популярні стратегії або створіть власну за допомогою бектестера. 3. Підключіть біржу (Binance, Bybit або OKX) за допомогою API ключів. 4. Виберіть стратегію та почніть живу торгівлю. Це все!",
+          a: "1. Створіть безкоштовний акаунт. 2. Перегляньте наші популярні моделі або створіть власну за допомогою симулятора. 3. Підключіть джерело даних за допомогою API ключів. 4. Виберіть модель та почніть живий аналіз. Це все!",
         },
         {
           q: "Це безкоштовно?",
-          a: "Ви можете переглядати стратегії, запускати бектести та досліджувати платформу безкоштовно. Жива торгівля вимагає підписки. Ми пропонуємо різні тарифи залежно від ваших потреб.",
+          a: "Ви можете переглядати моделі, запускати симуляції та досліджувати платформу безкоштовно. Живий аналіз вимагає підписки. Ми пропонуємо різні тарифи залежно від ваших потреб.",
         },
         {
-          q: "Які біржі підтримуються?",
-          a: "Наразі ми підтримуємо Binance, Bybit та OKX. Більше бірж буде додано за запитом користувачів. Доступні всі основні спотові торгові пари.",
+          q: "Які джерела даних підтримуються?",
+          a: "Наразі ми підтримуємо кілька постачальників даних, включаючи TradingView, Polygon.io та інші. Більше інтеграцій буде додано за запитом користувачів.",
         },
       ],
     },
@@ -140,62 +140,62 @@ const faqsData = {
       category: "Безпека",
       items: [
         {
-          q: "Чи в безпеці мої кошти?",
-          a: "Ваші кошти ніколи не покидають біржу. Ми використовуємо лише API ключі з правами на торгівлю — ніколи на виведення. Ви завжди зберігаєте повний контроль над своїми активами.",
+          q: "Чи в безпеці мої дані?",
+          a: "Ваші дані ніколи не покидають ваш контроль. Ми використовуємо лише API ключі з правами на читання — ніколи на запис. Ви завжди зберігаєте повний контроль над своїми даними.",
         },
         {
           q: "Як захищені мої API ключі?",
-          a: "API ключі шифруються за допомогою стандартного шифрування перед збереженням. Вони розшифровуються лише на нашому захищеному торговому сервері під час виконання угод. Рекомендуємо увімкнути білий список IP на біржі для додаткової безпеки.",
+          a: "API ключі шифруються за допомогою стандартного шифрування перед збереженням. Вони розшифровуються лише на нашому захищеному сервері під час доступу до даних. Рекомендуємо увімкнути білий список IP для додаткової безпеки.",
         },
         {
           q: "Яку IP-адресу додати в білий список?",
-          a: "IP нашого торгового сервера: 46.224.99.27. Додавання цієї IP на біржі гарантує, що тільки наш сервер може виконувати угоди з вашими API ключами.",
+          a: "IP нашого сервера: 46.224.99.27. Додавання цієї IP у провайдера даних гарантує, що тільки наш сервер може отримувати дані з вашими API ключами.",
         },
         {
-          q: "Чи можете ви вивести мої кошти?",
-          a: "Ні. При створенні API ключів ви повинні увімкнути ТІЛЬКИ права на торгівлю. Ніколи не вмикайте виведення. Це фундаментальна практика безпеки.",
+          q: "Чи можете ви змінити мої дані?",
+          a: "Ні. При створенні API ключів ви повинні увімкнути ТІЛЬКИ права на читання. Ніколи не вмикайте права на запис. Це фундаментальна практика безпеки.",
         },
       ],
     },
     {
-      category: "Стратегії та бектестинг",
+      category: "Моделі та симуляції",
       items: [
         {
-          q: "Наскільки точні бектести?",
-          a: "Наші бектести використовують реальні хвилинні OHLCV дані з Binance з 2020 року. Ми враховуємо торгові комісії та реалістичне виконання. Однак минулі результати не гарантують майбутніх — проскок та ринкові умови варіюються.",
+          q: "Наскільки точні симуляції?",
+          a: "Наші симуляції використовують реальні хвилинні OHLCV дані з 2020 року. Ми враховуємо реалістичні умови. Однак минулі результати не гарантують майбутніх — ринкові умови варіюються.",
         },
         {
           q: "Які індикатори доступні?",
           a: "Ми підтримуємо 20+ технічних індикаторів, включаючи RSI, MACD, Bollinger Bands, Moving Averages, Stochastic, ATR, CCI, ADX, Ichimoku та інші. Кожен індикатор можна налаштувати.",
         },
         {
-          q: "Чи можу я створити власну стратегію?",
-          a: "Так! Використовуйте наш візуальний бектестер для комбінування індикаторів та створення умов входу/виходу. Протестуйте стратегію на 5 роках даних перед запуском.",
+          q: "Чи можу я створити власну модель?",
+          a: "Так! Використовуйте наш візуальний симулятор для комбінування індикаторів та створення умов входу/виходу. Протестуйте модель на 5 роках даних перед запуском.",
         },
         {
-          q: "Як часто оновлюються результати стратегій?",
-          a: "Популярні стратегії перераховуються щогодини з використанням найновіших ринкових даних. Це гарантує, що показники відображають поточні ринкові умови.",
+          q: "Як часто оновлюються результати моделей?",
+          a: "Популярні моделі перераховуються щогодини з використанням найновіших ринкових даних. Це гарантує, що показники відображають поточні ринкові умови.",
         },
       ],
     },
     {
-      category: "Торгівля та виконання",
+      category: "Аналіз та обробка",
       items: [
         {
-          q: "Як швидко виконуються угоди?",
-          a: "Угоди виконуються на виділеному сервері зі статичним IP, що забезпечує з'єднання з низькою затримкою. Ринкові ордери зазвичай виконуються за секунди.",
+          q: "Як швидко обробляються дані?",
+          a: "Дані обробляються на виділеному сервері зі статичним IP, що забезпечує з'єднання з низькою затримкою. Аналіз зазвичай завершується за секунди.",
         },
         {
           q: "Що буде, якщо сервер впаде?",
-          a: "Ваші відкриті позиції залишаються на біржі. Ми маємо системи моніторингу та автоматичного перезапуску. При тривалому простої ви можете керувати позиціями вручну з біржі.",
+          a: "Ваша історія аналізу залишається доступною. Ми маємо системи моніторингу та автоматичного перезапуску. При тривалому простої ви можете отримати доступ до даних з акаунта.",
         },
         {
-          q: "Чи можу я встановити stop loss і take profit?",
-          a: "Так. Наш бектест та жива торгівля підтримують stop loss, take profit, trailing stop та safety orders (DCA). Ви можете налаштувати управління ризиками для кожної стратегії.",
+          q: "Чи можу я встановити сповіщення?",
+          a: "Так. Наша платформа підтримує сповіщення через email та Telegram. Ви можете налаштувати алерти для кожної моделі за вашими вподобаннями.",
         },
         {
-          q: "Які торгові пари доступні?",
-          a: "Ми підтримуємо всі основні криптопари до USDT, включаючи BTC, ETH, SOL, XRP, ADA, DOGE, AVAX, LINK, DOT, NEAR, LTC та інші. 17 пар з повними історичними даними.",
+          q: "Які активи доступні?",
+          a: "Ми підтримуємо аналіз для різних класів активів, включаючи акції, індекси, товари та інше. 17+ активів з повними історичними даними.",
         },
       ],
     },
@@ -208,11 +208,11 @@ const faqsData = {
         },
         {
           q: "Які способи оплати приймаються?",
-          a: "Ми приймаємо Binance Pay та прямі криптоплатежі (USDT). Більше способів оплати скоро.",
+          a: "Ми приймаємо платежі через LiqPay, включаючи Visa, Mastercard та картки ПриватБанку. Всі платежі обробляються безпечно.",
         },
         {
           q: "Чи є безкоштовний пробний період?",
-          a: "Так! Ви можете досліджувати платформу, запускати бектести та аналізувати стратегії без оплати. Тільки жива торгівля вимагає підписки.",
+          a: "Так! Ви можете досліджувати платформу, запускати симуляції та аналізувати моделі без оплати. Тільки живий аналіз вимагає підписки.",
         },
         {
           q: "Яка політика повернення коштів?",

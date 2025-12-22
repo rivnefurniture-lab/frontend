@@ -39,12 +39,12 @@ export default function Page() {
   const [strategies, setStrategies] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Testimonials data with photos
+  // Testimonials data with photos - rebranded roles
   const testimonials = [
     {
       id: 1,
       name: "Олег К.",
-      role: language === "uk" ? "Активний трейдер" : "Active Trader",
+      role: language === "uk" ? "Бізнес-аналітик" : "Business Analyst",
       initials: "ОК",
       photo: "/testimonials/oleg.jpeg",
       gradient: "from-blue-500 to-cyan-500",
@@ -64,7 +64,7 @@ export default function Page() {
     {
       id: 3,
       name: "Дмитро С.",
-      role: language === "uk" ? "Криптоентузіаст" : "Crypto Enthusiast",
+      role: language === "uk" ? "Дослідник даних" : "Data Researcher",
       initials: "ДС",
       gradient: "from-amber-500 to-orange-500",
       rating: 5,
@@ -73,7 +73,7 @@ export default function Page() {
     {
       id: 4,
       name: "Каріна Г.",
-      role: language === "uk" ? "Приватний інвестор" : "Private Investor",
+      role: language === "uk" ? "Приватний аналітик" : "Private Analyst",
       initials: "КГ",
       gradient: "from-green-500 to-emerald-500",
       rating: 5,
@@ -374,7 +374,7 @@ export default function Page() {
         </div>
       </section>
 
-      {/* Trusted Partners */}
+      {/* Trusted Partners - Neutral data providers instead of crypto exchanges */}
       <section className="py-16 border-t border-gray-100">
         <div className="container">
           <p className="text-center text-gray-500 mb-10">
@@ -383,62 +383,7 @@ export default function Page() {
               : "Integrated with leading platforms and data providers"}
           </p>
           
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 max-w-6xl mx-auto">
-            {/* Binance */}
-            <a 
-              href="https://www.binance.com" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="flex flex-col items-center justify-center p-4 bg-white rounded-lg border border-gray-200 hover:border-yellow-400 hover:shadow-md transition-all group"
-            >
-              <svg className="w-8 h-8 mb-2 group-hover:scale-110 transition-transform" viewBox="0 0 126 126" fill="#F3BA2F">
-                <path d="M38.73 53.2L63 28.93l24.27 24.27 14.14-14.14L63 .79 24.59 39.06l14.14 14.14zM.79 63l14.14-14.14L29.07 63l-14.14 14.14zm37.94 9.8L63 97.07l24.27-24.27 14.14 14.14L63 125.21 24.59 86.94l-.07-.07 14.21-14.07zM96.93 63l14.14-14.14L125.21 63l-14.14 14.14zm-18.47-.06h.06L63 47.43 50.6 59.76l-1.42 1.42-.42.42L63 75.99l15.52-15.52.07-.07-.13-.06z"/>
-              </svg>
-              <span className="text-xs font-medium text-gray-700">Binance</span>
-            </a>
-            
-            {/* Bybit */}
-            <a 
-              href="https://www.bybit.com" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="flex flex-col items-center justify-center p-4 bg-white rounded-lg border border-gray-200 hover:border-orange-400 hover:shadow-md transition-all group"
-            >
-              <svg className="w-8 h-8 mb-2 group-hover:scale-110 transition-transform" viewBox="0 0 40 40" fill="none">
-                <path d="M8 8h6v6H8V8zm0 18h6v6H8v-6zm18-18h6v6h-6V8zm0 18h6v6h-6v-6zM14 14h12v12H14V14z" fill="#F7A600"/>
-              </svg>
-              <span className="text-xs font-medium text-gray-700">Bybit</span>
-            </a>
-            
-            {/* OKX */}
-            <a 
-              href="https://www.okx.com" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="flex flex-col items-center justify-center p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-800 hover:shadow-md transition-all group"
-            >
-              <div className="w-8 h-8 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                <span className="text-xl font-black text-black">OKX</span>
-              </div>
-              <span className="text-xs font-medium text-gray-700">OKX</span>
-            </a>
-            
-            {/* CoinGecko */}
-            <a 
-              href="https://www.coingecko.com" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="flex flex-col items-center justify-center p-4 bg-white rounded-lg border border-gray-200 hover:border-green-400 hover:shadow-md transition-all group"
-            >
-              <svg className="w-8 h-8 mb-2 group-hover:scale-110 transition-transform" viewBox="0 0 40 40" fill="none">
-                <circle cx="20" cy="20" r="18" fill="#8DC63F"/>
-                <circle cx="14" cy="16" r="4" fill="white"/>
-                <circle cx="14" cy="16" r="2" fill="#1E1E1E"/>
-                <ellipse cx="24" cy="24" rx="8" ry="6" fill="#F9E988"/>
-              </svg>
-              <span className="text-xs font-medium text-gray-700">CoinGecko</span>
-            </a>
-            
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 max-w-4xl mx-auto">
             {/* TradingView */}
             <a 
               href="https://www.tradingview.com" 
@@ -450,7 +395,7 @@ export default function Page() {
                 <path d="M14 22V6h8v16h-8zM0 22V10h8v12H0z" fill="#2962FF"/>
                 <path d="M28 22l8-16v16h-8z" fill="#2962FF"/>
               </svg>
-              <span className="text-xs font-medium text-gray-700 text-center leading-tight">Trading<br/>View</span>
+              <span className="text-xs font-medium text-gray-700 text-center leading-tight">TradingView</span>
             </a>
             
             {/* Polygon */}
@@ -463,23 +408,32 @@ export default function Page() {
               <svg className="w-8 h-8 mb-2 group-hover:scale-110 transition-transform" viewBox="0 0 38.4 33.5" fill="none">
                 <path d="M29 10.2c-.7-.4-1.6-.4-2.4 0L21 13.5l-3.8 2.1-5.5 3.3c-.7.4-1.6.4-2.4 0l-4.3-2.6c-.7-.4-1.2-1.2-1.2-2.1v-5c0-.8.4-1.6 1.2-2.1l4.3-2.5c.7-.4 1.6-.4 2.4 0l4.3 2.6c.7.4 1.2 1.2 1.2 2.1v3.3l3.8-2.2V7c0-.8-.4-1.6-1.2-2.1l-8-4.7c-.7-.4-1.6-.4-2.4 0L1.2 5C.4 5.4 0 6.2 0 7v9.4c0 .8.4 1.6 1.2 2.1l8.1 4.7c.7.4 1.6.4 2.4 0l5.5-3.2 3.8-2.2 5.5-3.2c.7-.4 1.6-.4 2.4 0l4.3 2.5c.7.4 1.2 1.2 1.2 2.1v5c0 .8-.4 1.6-1.2 2.1l-4.2 2.5c-.7.4-1.6.4-2.4 0l-4.3-2.5c-.7-.4-1.2-1.2-1.2-2.1v-3.2l-3.8 2.2v3.3c0 .8.4 1.6 1.2 2.1l8.1 4.7c.7.4 1.6.4 2.4 0l8.1-4.7c.7-.4 1.2-1.2 1.2-2.1V17c0-.8-.4-1.6-1.2-2.1L29 10.2z" fill="#8247E5"/>
               </svg>
-              <span className="text-xs font-medium text-gray-700">Polygon</span>
+              <span className="text-xs font-medium text-gray-700">Polygon.io</span>
             </a>
             
-            {/* CoinMarketCap */}
-            <a 
-              href="https://coinmarketcap.com" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="flex flex-col items-center justify-center p-4 bg-white rounded-lg border border-gray-200 hover:border-blue-500 hover:shadow-md transition-all group"
-            >
-              <svg className="w-8 h-8 mb-2 group-hover:scale-110 transition-transform" viewBox="0 0 40 40" fill="none">
-                <circle cx="20" cy="20" r="18" fill="#17181B"/>
-                <path d="M12 26V14h4v8c0 1.5.8 2 1.5 2s1.5-.5 1.5-2v-8h4v8c0 3-2 5-5.5 5-1.5 0-2.8-.4-3.8-1.2-.5.8-1.5 1.2-2.7 1.2H12z" fill="white"/>
-                <path d="M24 14h4l3 6 3-6h4v12h-4v-7l-3 5-3-5v7h-4V14z" fill="#3861FB"/>
-              </svg>
-              <span className="text-xs font-medium text-gray-700 text-center leading-tight">CoinMarket<br/>Cap</span>
-            </a>
+            {/* Alpha Vantage */}
+            <div className="flex flex-col items-center justify-center p-4 bg-white rounded-lg border border-gray-200 hover:border-green-400 hover:shadow-md transition-all group">
+              <div className="w-8 h-8 mb-2 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <span className="text-xl font-black text-green-600">αV</span>
+              </div>
+              <span className="text-xs font-medium text-gray-700 text-center leading-tight">Alpha<br/>Vantage</span>
+            </div>
+            
+            {/* Yahoo Finance */}
+            <div className="flex flex-col items-center justify-center p-4 bg-white rounded-lg border border-gray-200 hover:border-purple-500 hover:shadow-md transition-all group">
+              <div className="w-8 h-8 mb-2 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <span className="text-xl font-black text-purple-600">Y!</span>
+              </div>
+              <span className="text-xs font-medium text-gray-700 text-center leading-tight">Yahoo<br/>Finance</span>
+            </div>
+            
+            {/* Quandl */}
+            <div className="flex flex-col items-center justify-center p-4 bg-white rounded-lg border border-gray-200 hover:border-orange-400 hover:shadow-md transition-all group">
+              <div className="w-8 h-8 mb-2 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <span className="text-xl font-black text-orange-600">Q</span>
+              </div>
+              <span className="text-xs font-medium text-gray-700">Quandl</span>
+            </div>
           </div>
         </div>
       </section>

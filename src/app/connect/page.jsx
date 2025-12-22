@@ -10,13 +10,13 @@ import { useAuth } from "@/context/AuthProvider";
 import { useLanguage } from "@/context/LanguageContext";
 import Link from "next/link";
 
-const EXCHANGES = [
+const DATA_SOURCES = [
   {
     id: "binance",
     name: "Binance",
     icon: <svg className="w-6 h-6 text-yellow-500" viewBox="0 0 126 126" fill="currentColor"><path d="M63 0L78.75 25.2H47.25L63 0Z"/><path d="M63 126L47.25 100.8H78.75L63 126Z"/><path d="M31.5 37.8L0 63L31.5 88.2V63V37.8Z"/><path d="M94.5 37.8V63V88.2L126 63L94.5 37.8Z"/><path d="M31.5 63L63 37.8L94.5 63L63 88.2L31.5 63Z"/></svg>,
     color: "from-yellow-400 to-yellow-600",
-    description: { en: "World's largest crypto exchange", uk: "Найбільша криптобіржа у світі" },
+    description: { en: "Market data provider", uk: "Постачальник ринкових даних" },
     fields: ["apiKey", "secret"],
     testnetUrl: "https://testnet.binance.vision/",
     docsUrl: "https://www.binance.com/en/support/faq/how-to-create-api-keys-on-binance-360002502072"
@@ -26,7 +26,7 @@ const EXCHANGES = [
     name: "Bybit",
     icon: <svg className="w-6 h-6 text-orange-500" viewBox="0 0 32 32" fill="currentColor"><path d="M16 2L2 9v7l14 7 14-7V9L16 2zm0 4l9 4.5-9 4.5-9-4.5L16 6z"/></svg>,
     color: "from-orange-400 to-orange-600",
-    description: { en: "Fast derivatives exchange", uk: "Швидка біржа деривативів" },
+    description: { en: "Real-time data feed", uk: "Потік даних в реальному часі" },
     fields: ["apiKey", "secret"],
     testnetUrl: "https://testnet.bybit.com/",
     docsUrl: "https://learn.bybit.com/bybit-guide/how-to-create-bybit-api-key/"
@@ -36,7 +36,7 @@ const EXCHANGES = [
     name: "OKX",
     icon: <div className="text-xl font-black text-gray-700">OKX</div>,
     color: "from-gray-700 to-gray-900",
-    description: { en: "Advanced trading platform", uk: "Просунута торгова платформа" },
+    description: { en: "Advanced data platform", uk: "Просунута платформа даних" },
     fields: ["apiKey", "secret", "password"],
     testnetUrl: "https://www.okx.com/docs-v5/en/",
     docsUrl: "https://www.okx.com/support/hc/en-us/articles/360048917891"
@@ -46,7 +46,7 @@ const EXCHANGES = [
     name: "Kraken",
     icon: <svg className="w-6 h-6 text-purple-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/><path d="M12 6c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6z"/></svg>,
     color: "from-purple-500 to-indigo-600",
-    description: { en: "Trusted US-based exchange", uk: "Надійна біржа зі США" },
+    description: { en: "Reliable US data source", uk: "Надійне джерело даних США" },
     fields: ["apiKey", "secret"],
     testnetUrl: "https://docs.kraken.com/rest/",
     docsUrl: "https://support.kraken.com/hc/en-us/articles/360000919966"
@@ -56,24 +56,24 @@ const EXCHANGES = [
     name: "KuCoin",
     icon: <svg className="w-6 h-6 text-green-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>,
     color: "from-green-400 to-emerald-600",
-    description: { en: "People's exchange with low fees", uk: "Народна біржа з низькими комісіями" },
+    description: { en: "Comprehensive market data", uk: "Комплексні ринкові дані" },
     fields: ["apiKey", "secret", "password"],
     testnetUrl: "https://www.kucoin.com/docs/",
     docsUrl: "https://www.kucoin.com/support/360015102174"
   },
   {
     id: "coinbase",
-    name: "Coinbase Pro",
+    name: "Coinbase",
     icon: <svg className="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path fill="white" d="M12 7a5 5 0 100 10 5 5 0 000-10z"/></svg>,
     color: "from-blue-500 to-indigo-600",
-    description: { en: "Leading US exchange", uk: "Провідна біржа США" },
+    description: { en: "Leading data provider", uk: "Провідний постачальник даних" },
     fields: ["apiKey", "secret"],
     testnetUrl: "https://docs.cloud.coinbase.com/",
     docsUrl: "https://help.coinbase.com/en/exchange/managing-my-account/how-to-create-an-api-key"
   }
 ];
 
-function ExchangeCard({ exchange, onConnect, onDisconnect, isConnected, t, language }) {
+function DataSourceCard({ exchange, onConnect, onDisconnect, isConnected, t, language }) {
   const [form, setForm] = useState({ testnet: false }); // Default: REAL money
   const [loading, setLoading] = useState(false);
   const [testing, setTesting] = useState(false);
@@ -429,28 +429,28 @@ export default function ConnectPage() {
   };
 
   const t = {
-    title: language === "uk" ? "Підключення біржі" : "Connect Your Exchange",
+    title: language === "uk" ? "Підключення джерела даних" : "Connect Data Source",
     subtitle: language === "uk" 
-      ? "Підключіть свій обліковий запис біржі для автоматичної торгівлі. Нам потрібні лише права на торгівлю - ніколи на виведення." 
-      : "Connect your exchange account to start automated trading. We only need trading permissions - never withdrawal access.",
+      ? "Підключіть джерело даних для автоматичного аналізу. Нам потрібні лише права на читання - ніколи на запис." 
+      : "Connect your data source to start automated analysis. We only need read-only permissions - never write access.",
     securityTitle: language === "uk" ? "🔒 Безпека насамперед" : "🔒 Security First",
     securityItem1: language === "uk" ? "API ключі зберігаються зашифрованими і ніколи не передаються" : "API keys are stored encrypted and never shared",
-    securityItem2: language === "uk" ? "Створюйте ключі лише з правами на торгівлю (без виведення)" : "Create keys with trading only permissions (no withdrawals)",
-    securityItem3: language === "uk" ? "Використовуйте тестнет для тестування перед запуском" : "Use testnet for testing before going live",
-    securityItem4: language === "uk" ? "Ви можете відкликати доступ у будь-який час з біржі" : "You can revoke access anytime from your exchange",
+    securityItem2: language === "uk" ? "Створюйте ключі лише з правами на читання" : "Create keys with read-only permissions",
+    securityItem3: language === "uk" ? "Використовуйте тестове середовище для тестування перед запуском" : "Use test environment for testing before going live",
+    securityItem4: language === "uk" ? "Ви можете відкликати доступ у будь-який час від провайдера" : "You can revoke access anytime from your provider",
     ipTitle: language === "uk" ? "🌐 Білий список IP (Рекомендовано)" : "🌐 IP Whitelisting (Recommended)",
     ipText: language === "uk" 
-      ? "Для максимальної безпеки додайте IP нашого торгового сервера у білий список на біржі:" 
-      : "For maximum security, whitelist our trading server IP on your exchange:",
+      ? "Для максимальної безпеки додайте IP нашого сервера у білий список у провайдера:" 
+      : "For maximum security, whitelist our server IP on your data provider:",
     ipNote: language === "uk" 
-      ? "Це гарантує, що тільки наш сервер може виконувати угоди з вашими API ключами." 
-      : "This ensures only our server can execute trades with your API keys.",
+      ? "Це гарантує, що тільки наш сервер може отримувати дані з вашими API ключами." 
+      : "This ensures only our server can access data with your API keys.",
     copy: language === "uk" ? "Копіювати" : "Copy",
     copied: language === "uk" ? "Скопійовано!" : "Copied!",
     loginRequired: language === "uk" ? "Потрібна авторизація" : "Login Required",
     loginText: language === "uk" 
-      ? "Щоб підключити біржу, потрібно увійти в обліковий запис." 
-      : "You need to be logged in to connect your exchange account.",
+      ? "Щоб підключити джерело даних, потрібно увійти в обліковий запис." 
+      : "You need to be logged in to connect your data source.",
     login: language === "uk" ? "Увійти / Зареєструватись" : "Login / Sign Up",
     loading: language === "uk" ? "Завантаження..." : "Loading...",
     connected: language === "uk" ? "Підключено" : "Connected",
@@ -460,38 +460,38 @@ export default function ConnectPage() {
     enterApiKey: language === "uk" ? "Введіть API ключ" : "Enter your API key",
     enterApiSecret: language === "uk" ? "Введіть API секрет" : "Enter your API secret",
     enterPassphrase: language === "uk" ? "Введіть пароль" : "Enter your passphrase",
-    useTestnet: language === "uk" ? "Використовувати Testnet (рекомендовано для тестування)" : "Use Testnet (recommended for testing)",
+    useTestnet: language === "uk" ? "Використовувати тестове середовище (рекомендовано для тестування)" : "Use Test Environment (recommended for testing)",
     connect: language === "uk" ? "Підключити" : "Connect",
     reconnect: language === "uk" ? "Перепідключити" : "Reconnect",
     connecting: language === "uk" ? "Підключення..." : "Connecting...",
-    testBalance: language === "uk" ? "Перевірити баланс" : "Test Balance",
+    testBalance: language === "uk" ? "Перевірити підключення" : "Test Connection",
     testing: language === "uk" ? "Перевірка..." : "Testing...",
-    balance: language === "uk" ? "Баланс" : "Balance",
+    balance: language === "uk" ? "Дані" : "Data",
     howToCreate: language === "uk" ? "Як створити API ключі" : "How to create API keys",
-    getTestnet: language === "uk" ? "Отримати testnet акаунт" : "Get testnet account",
+    getTestnet: language === "uk" ? "Отримати тестовий акаунт" : "Get test account",
     connectedSuccess: language === "uk" ? "Підключено успішно!" : "Connected successfully!",
     connectionFailed: language === "uk" ? "Помилка підключення" : "Connection failed",
-    loginFirst: language === "uk" ? "Спочатку увійдіть, щоб підключити біржу" : "Please login first to connect your exchange",
+    loginFirst: language === "uk" ? "Спочатку увійдіть, щоб підключити джерело даних" : "Please login first to connect your data source",
     invalidCredentials: language === "uk" ? "Невірний API ключ або секрет. Перевірте дані." : "Invalid API key or secret. Please check your credentials.",
     networkError: language === "uk" ? "Помилка мережі. Перевірте з'єднання і спробуйте ще раз." : "Network error. Please check your connection and try again.",
-    noAssets: language === "uk" ? "Немає активів (баланс 0)" : "No assets (balance is 0)",
-    balanceFetched: language === "uk" ? "Баланс отримано успішно" : "Balance fetched successfully",
-    exchangeConnected: language === "uk" ? "Біржу підключено!" : "Exchange Connected!",
+    noAssets: language === "uk" ? "Дані недоступні" : "No data available",
+    balanceFetched: language === "uk" ? "Підключення успішне" : "Connection successful",
+    exchangeConnected: language === "uk" ? "Джерело даних підключено!" : "Data Source Connected!",
     whatNext: language === "uk" 
-      ? "Ви готові почати торгувати. Ось що можна зробити далі:" 
-      : "You're ready to start trading. Here's what you can do next:",
-    createStrategy: language === "uk" ? "Створити стратегію" : "Create Strategy",
+      ? "Ви готові почати аналіз. Ось що можна зробити далі:" 
+      : "You're ready to start analyzing. Here's what you can do next:",
+    createStrategy: language === "uk" ? "Створити модель" : "Create Model",
     goToDashboard: language === "uk" ? "До панелі управління" : "Go to Dashboard",
     needHelp: language === "uk" ? "Потрібна допомога? Перегляньте" : "Need help? Check our",
     faq: language === "uk" ? "FAQ" : "FAQ",
     or: language === "uk" ? "або" : "or",
     contactSupport: language === "uk" ? "зв'яжіться з підтримкою" : "contact support",
     disconnect: language === "uk" ? "Відключити" : "Disconnect",
-    disconnected: language === "uk" ? "Біржу відключено" : "Exchange disconnected",
+    disconnected: language === "uk" ? "Джерело відключено" : "Data source disconnected",
     updateKeys: language === "uk" ? "Оновити ключі" : "Update Keys",
     updateAndSave: language === "uk" ? "Оновити та зберегти" : "Update & Save",
     cancel: language === "uk" ? "Скасувати" : "Cancel",
-    exchangeConnectedInfo: language === "uk" ? "Ваш обліковий запис біржі підключено та готовий до торгівлі" : "Your exchange account is connected and ready to trade",
+    exchangeConnectedInfo: language === "uk" ? "Джерело даних підключено та готове до аналізу" : "Data source is connected and ready for analysis",
     keysSecure: language === "uk" ? "API ключі зберігаються зашифрованими" : "API keys are stored encrypted",
     updateKeysInfo: language === "uk" ? "Введіть нові API ключі для оновлення підключення" : "Enter new API keys to update the connection",
   };
@@ -611,8 +611,8 @@ export default function ConnectPage() {
               <p className="mt-4 text-gray-600">{t.loading}</p>
             </div>
           ) : (
-            EXCHANGES.map((exchange) => (
-              <ExchangeCard 
+            DATA_SOURCES.map((exchange) => (
+              <DataSourceCard 
                 key={exchange.id} 
                 exchange={exchange}
                 isConnected={connectedExchanges.includes(exchange.id)}

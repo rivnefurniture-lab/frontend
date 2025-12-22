@@ -14,7 +14,7 @@ export default function AboutPage() {
     },
     {
       value: "17",
-      label: language === "uk" ? "Криптопар" : "Crypto Pairs",
+      label: language === "uk" ? "Активів" : "Assets",
     },
     {
       value: "20+",
@@ -32,24 +32,24 @@ export default function AboutPage() {
       title: language === "uk" ? "Тільки реальні дані" : "Real Data Only",
       description:
         language === "uk"
-          ? "Жодних гіпотетичних бектестів. Всі показники розраховані на хвилинних історичних даних з 2020 року."
-          : "No hypothetical backtests. All performance metrics come from minute-by-minute historical data going back to 2020.",
+          ? "Жодних гіпотетичних симуляцій. Всі показники розраховані на хвилинних історичних даних з 2020 року."
+          : "No hypothetical simulations. All performance metrics come from minute-by-minute historical data going back to 2020.",
     },
     {
       icon: "🔍",
       title: language === "uk" ? "Повна прозорість" : "Full Transparency",
       description:
         language === "uk"
-          ? "Бачте кожну угоду, кожне значення індикатора, кожне рішення. Жодних чорних ящиків. Розумійте, чому саме така угода."
-          : "See every trade, every indicator value, every decision. No black boxes. Understand exactly why each trade was made.",
+          ? "Бачте кожен сигнал, кожне значення індикатора, кожне рішення. Жодних чорних ящиків. Розумійте, чому саме такий результат."
+          : "See every signal, every indicator value, every decision. No black boxes. Understand exactly why each result occurred.",
     },
     {
       icon: "🔒",
       title: language === "uk" ? "Безпека перш за все" : "Security First",
       description:
         language === "uk"
-          ? "Ваші API ключі зашифровані. Тільки торгівля — ніколи виведення. Виділений сервер зі статичним IP для надійного виконання."
-          : "Your API keys are encrypted. Trading only permissions — never withdrawals. Dedicated server with static IP for reliable execution.",
+          ? "Ваші API ключі зашифровані. Тільки читання — ніколи запис. Виділений сервер зі статичним IP для надійної обробки."
+          : "Your API keys are encrypted. Read-only access — never write permissions. Dedicated server with static IP for reliable processing.",
     },
   ];
 
@@ -59,15 +59,15 @@ export default function AboutPage() {
       <section className="bg-gradient-to-b from-blue-50 to-white py-20">
         <div className="container max-w-4xl text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-6">
-            {language === "uk" ? "Алгоритмічна торгівля," : "Algorithmic Trading,"}{" "}
+            {language === "uk" ? "Аналітика ринку," : "Market Analytics,"}{" "}
             <span className="text-blue-600">
               {language === "uk" ? "просто" : "Made Simple"}
             </span>
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
             {language === "uk"
-              ? "Algotcha надає трейдерам можливість автоматизувати свої стратегії за допомогою інструментів інституційного рівня, прозорих даних та безпечного виконання."
-              : "Algotcha empowers traders to automate their strategies with institutional-grade tools, transparent performance data, and secure execution."}
+              ? "Algotcha надає аналітикам можливість автоматизувати свої дослідження за допомогою інструментів професійного рівня, прозорих даних та безпечної обробки."
+              : "Algotcha empowers analysts to automate their research with professional-grade tools, transparent performance data, and secure processing."}
           </p>
         </div>
       </section>
@@ -81,13 +81,13 @@ export default function AboutPage() {
             </h2>
             <p className="text-gray-600 leading-relaxed mb-4">
               {language === "uk"
-                ? "Ми віримо, що алгоритмічна торгівля не повинна бути привілеєм хедж-фондів та інституцій. Наша місія — демократизувати кількісну торгівлю, надаючи інструменти, дані та інфраструктуру, необхідні роздрібним трейдерам для успіху."
-                : "We believe that algorithmic trading shouldn't be reserved for hedge funds and institutions. Our mission is to democratize quantitative trading by providing the tools, data, and infrastructure that retail traders need to succeed."}
+                ? "Ми віримо, що професійний аналіз ринку не повинен бути привілеєм великих компаній та інституцій. Наша місія — демократизувати кількісний аналіз, надаючи інструменти, дані та інфраструктуру, необхідні аналітикам для успіху."
+                : "We believe that professional market analysis shouldn't be reserved for large companies and institutions. Our mission is to democratize quantitative analysis by providing the tools, data, and infrastructure that analysts need to succeed."}
             </p>
             <p className="text-gray-600 leading-relaxed">
               {language === "uk"
-                ? "Кожна стратегія на Algotcha тестується на реальних історичних даних, з прозорими метриками, які допомагають зрозуміти справжній ризик та потенційну винагороду."
-                : "Every strategy on Algotcha is backtested against real historical data, with transparent metrics that help you understand the true risk and potential reward."}
+                ? "Кожна модель на Algotcha тестується на реальних історичних даних, з прозорими метриками, які допомагають зрозуміти справжній ризик та потенційний результат."
+                : "Every model on Algotcha is tested against real historical data, with transparent metrics that help you understand the true risk and potential outcome."}
             </p>
           </div>
           <div className="bg-gradient-to-br from-blue-100 to-purple-100 rounded-2xl p-8">
@@ -125,14 +125,14 @@ export default function AboutPage() {
       <section className="container py-16 max-w-4xl">
         <h2 className="text-3xl font-bold mb-10 text-center">
           {language === "uk"
-            ? "Створено трейдерами для трейдерів"
-            : "Built by Traders, for Traders"}
+            ? "Створено аналітиками для аналітиків"
+            : "Built by Analysts, for Analysts"}
         </h2>
         <div className="bg-white border rounded-2xl p-8 text-center">
           <p className="text-gray-600 leading-relaxed max-w-2xl mx-auto">
             {language === "uk"
-              ? "Наша команда поєднує роки досвіду в кількісній торгівлі, розробці програмного забезпечення та фінансових технологіях. Ми створили Algotcha, щоб вирішити проблеми, з якими стикалися самі: ненадійні бектести, непрозорі стратегії та розрізнені інструменти."
-              : "Our team combines years of experience in quantitative trading, software engineering, and financial technology. We've built Algotcha to solve the problems we faced ourselves: unreliable backtests, opaque strategies, and fragmented tools."}
+              ? "Наша команда поєднує роки досвіду в кількісному аналізі, розробці програмного забезпечення та фінансових технологіях. Ми створили Algotcha, щоб вирішити проблеми, з якими стикалися самі: ненадійні симуляції, непрозорі моделі та розрізнені інструменти."
+              : "Our team combines years of experience in quantitative analysis, software engineering, and financial technology. We've built Algotcha to solve the problems we faced ourselves: unreliable simulations, opaque models, and fragmented tools."}
           </p>
         </div>
       </section>
@@ -150,8 +150,8 @@ export default function AboutPage() {
               </h3>
               <p className="text-gray-600 text-sm">
                 {language === "uk"
-                  ? "Ми показуємо все — кожну угоду, кожне рішення, кожен індикатор. Жодних прихованих алгоритмів."
-                  : "We show everything — every trade, every decision, every indicator. No hidden algorithms."}
+                  ? "Ми показуємо все — кожен сигнал, кожне рішення, кожен індикатор. Жодних прихованих алгоритмів."
+                  : "We show everything — every signal, every decision, every indicator. No hidden algorithms."}
               </p>
             </div>
             <div className="bg-white p-6 rounded-xl">
@@ -160,8 +160,8 @@ export default function AboutPage() {
               </h3>
               <p className="text-gray-600 text-sm">
                 {language === "uk"
-                  ? "Ваші кошти та ключі завжди під вашим контролем. Ми використовуємо найсучасніше шифрування."
-                  : "Your funds and keys are always under your control. We use state-of-the-art encryption."}
+                  ? "Ваші дані та ключі завжди під вашим контролем. Ми використовуємо найсучасніше шифрування."
+                  : "Your data and keys are always under your control. We use state-of-the-art encryption."}
               </p>
             </div>
             <div className="bg-white p-6 rounded-xl">
@@ -170,8 +170,8 @@ export default function AboutPage() {
               </h3>
               <p className="text-gray-600 text-sm">
                 {language === "uk"
-                  ? "Складні алгоритми, простий інтерфейс. Вам не потрібно бути програмістом, щоб торгувати як професіонал."
-                  : "Complex algorithms, simple interface. You don't need to be a programmer to trade like a pro."}
+                  ? "Складні алгоритми, простий інтерфейс. Вам не потрібно бути програмістом, щоб аналізувати як професіонал."
+                  : "Complex algorithms, simple interface. You don't need to be a programmer to analyze like a pro."}
               </p>
             </div>
             <div className="bg-white p-6 rounded-xl">
@@ -196,8 +196,8 @@ export default function AboutPage() {
           </h2>
           <p className="text-blue-100 mb-8 max-w-xl mx-auto">
             {language === "uk"
-              ? "Приєднуйтесь до трейдерів, які довіряють Algotcha для автоматизованої, прозорої та безпечної алгоритмічної торгівлі."
-              : "Join traders who trust Algotcha for automated, transparent, and secure algorithmic trading."}
+              ? "Приєднуйтесь до аналітиків, які довіряють Algotcha для автоматизованого, прозорого та безпечного аналізу ринку."
+              : "Join analysts who trust Algotcha for automated, transparent, and secure market analysis."}
           </p>
           <div className="flex gap-4 justify-center flex-wrap">
             <Link href="/auth?mode=signup">
@@ -210,7 +210,7 @@ export default function AboutPage() {
                 variant="outline"
                 className="border-white text-white hover:bg-white/10"
               >
-                {language === "uk" ? "Переглянути стратегії" : "Browse Strategies"}
+                {language === "uk" ? "Переглянути моделі" : "Browse Models"}
               </Button>
             </Link>
           </div>
