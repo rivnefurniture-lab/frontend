@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +9,8 @@ import { Select } from "@/components/ui/select";
 import { TooltipLabel } from "@/components/ui/tooltip";
 import { apiFetch } from "@/lib/api";
 import { useLanguage } from "@/context/LanguageContext";
+import { useAuth } from "@/context/AuthProvider";
+import Link from "next/link";
 import {
   ResponsiveContainer,
   LineChart,
@@ -421,7 +424,9 @@ function ConditionBuilder({ condition, onChange, onRemove }) {
 }
 
 export default function BacktestPage() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const { user, loading: authLoading } = useAuth();
+  const router = useRouter();
   const [strategyName, setStrategyName] = useState("My Strategy");
   const [selectedPairs, setSelectedPairs] = useState(["BTC/USDT"]);
   const [maxActiveDeals, setMaxActiveDeals] = useState(1);
@@ -680,6 +685,45 @@ export default function BacktestPage() {
   const formatDate = (dateStr) => {
     return new Date(dateStr).toLocaleDateString();
   };
+
+  // Auth guard - require login
+  if (authLoading) {
+    return (
+      <div className="container py-16 text-center">
+        <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto"></div>
+        <p className="mt-4 text-gray-600">{language === "uk" ? "Завантаження..." : "Loading..."}</p>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="container py-16">
+        <Card className="max-w-md mx-auto">
+          <CardContent className="pt-8 text-center">
+            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            </div>
+            <h2 className="text-xl font-bold mb-2">
+              {language === "uk" ? "Потрібна авторизація" : "Login Required"}
+            </h2>
+            <p className="text-gray-600 mb-6">
+              {language === "uk" 
+                ? "Увійдіть, щоб створювати та тестувати моделі" 
+                : "Please log in to create and test models"}
+            </p>
+            <Link href="/auth">
+              <Button className="w-full">
+                {language === "uk" ? "Увійти / Зареєструватися" : "Login / Sign Up"}
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="container py-8">

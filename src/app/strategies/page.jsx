@@ -40,10 +40,10 @@ export default function StrategiesPage() {
 
   // Translations
   const t = {
-    title: language === "uk" ? "Торгові стратегії" : "Trading Strategies",
+    title: language === "uk" ? "Аналітичні моделі" : "Analytical Models",
     subtitle: language === "uk" 
-      ? "Реальні дані оновлюються щогодини з історичних бектестів" 
-      : "Real performance data updated every hour from historical backtests",
+      ? "Моделі тестуються на реальних історичних даних" 
+      : "Models tested on real historical data",
     createCustom: language === "uk" ? "+ Створити власну стратегію" : "+ Create Custom Strategy",
     search: language === "uk" ? "Пошук стратегій..." : "Search strategies...",
     sortByYearly: language === "uk" ? "Сортувати: Річна дохідність" : "Sort by: Yearly Return",
@@ -242,18 +242,12 @@ export default function StrategiesPage() {
         </Button>
       </div>
 
-      {/* Summary Stats */}
+      {/* Summary Stats - neutral metrics only */}
       {strategies.length > 0 && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <div className="bg-gradient-to-br from-indigo-500 via-indigo-600 to-blue-600 text-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all">
             <div className="text-4xl font-bold mb-1">{strategies.length}</div>
-            <div className="text-sm text-indigo-100 font-medium">{t.activeStrategies}</div>
-          </div>
-          <div className="bg-gradient-to-br from-emerald-500 via-green-500 to-teal-600 text-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all">
-            <div className="text-4xl font-bold mb-1">
-              {Math.max(...strategies.map(s => s.cagr || 0)).toFixed(1)}%
-            </div>
-            <div className="text-sm text-emerald-100 font-medium">{t.bestYearlyReturn}</div>
+            <div className="text-sm text-indigo-100 font-medium">{language === "uk" ? "Доступних моделей" : "Available Models"}</div>
           </div>
           <div className="bg-gradient-to-br from-violet-500 via-purple-500 to-indigo-600 text-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all">
             <div className="text-4xl font-bold mb-1">
@@ -261,13 +255,13 @@ export default function StrategiesPage() {
             </div>
             <div className="text-sm text-violet-100 font-medium">{t.bestSharpe}</div>
           </div>
+          <div className="bg-gradient-to-br from-emerald-500 via-green-500 to-teal-600 text-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all">
+            <div className="text-4xl font-bold mb-1">5</div>
+            <div className="text-sm text-emerald-100 font-medium">{language === "uk" ? "Років даних" : "Years of Data"}</div>
+          </div>
           <div className="bg-gradient-to-br from-amber-500 via-orange-500 to-red-500 text-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all">
-            <div className="text-4xl font-bold mb-1">
-              {strategies.length > 0 
-                ? Math.round(strategies.reduce((a, s) => a + (s.winRate || 0), 0) / strategies.length)
-                : 0}%
-            </div>
-            <div className="text-sm text-amber-100 font-medium">{t.avgWinRate}</div>
+            <div className="text-4xl font-bold mb-1">17</div>
+            <div className="text-sm text-amber-100 font-medium">{language === "uk" ? "Ринкових пар" : "Market Pairs"}</div>
           </div>
         </div>
       )}
