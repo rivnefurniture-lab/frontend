@@ -201,7 +201,6 @@ function DataSourceCard({ exchange, onConnect, onDisconnect, isConnected, t, lan
             <p className="text-sm font-normal text-gray-500 truncate">{exchange.description[language]}</p>
           </div>
         </div>
-      <CardContent>
         {/* Connected state - no form, just actions */}
         {isConnected && !showForm ? (
           <div className="space-y-4">
