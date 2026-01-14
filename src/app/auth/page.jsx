@@ -174,128 +174,127 @@ function AuthForm() {
           </>
         )}
 
-          <form onSubmit={onSubmit} className="space-y-4">
-            {isSignup && (
-              <>
-                <Input
-                  placeholder="Full name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                />
-                <Input
-                  placeholder="Phone (optional)"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                />
-                <Input
-                  placeholder="Country (optional)"
-                  value={country}
-                  onChange={(e) => setCountry(e.target.value)}
-                />
-              </>
-            )}
-
-            <Input
-              placeholder="Email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-
-            {mode !== "forgot" && (
+        <form onSubmit={onSubmit} className="space-y-4">
+          {isSignup && (
+            <>
               <Input
-                placeholder="Password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={6}
+                placeholder="Full name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
               />
-            )}
+              <Input
+                placeholder="Phone (optional)"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+              />
+              <Input
+                placeholder="Country (optional)"
+                value={country}
+                onChange={(e) => setCountry(e.target.value)}
+              />
+            </>
+          )}
 
-            {(error || authError) && (
-              <div className="bg-red-50 border-2 border-red-200 text-red-700 px-4 py-3 text-sm" style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'}}>
-                {error || authError}
-              </div>
-            )}
-            
-            {message && (
-              <div className="bg-emerald-50 border-2 border-emerald-200 text-emerald-700 px-4 py-3 text-sm" style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'}}>
-                {message}
-              </div>
-            )}
+          <Input
+            placeholder="Email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
 
-            <button 
-              type="submit" 
-              className="w-full px-4 py-3 bg-black text-white font-bold hover:bg-gray-800 transition-all disabled:opacity-50" 
-              disabled={submitting}
-              style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}
-            >
-              {submitting ? (
-                <span className="flex items-center justify-center gap-2">
-                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
-                  </svg>
-                  Processing...
-                </span>
-              ) : mode === "forgot"
-                ? "Send reset link"
-                : isSignup
-                  ? "Create account"
-                  : "Sign in"}
-            </button>
-          </form>
+          {mode !== "forgot" && (
+            <Input
+              placeholder="Password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              minLength={6}
+            />
+          )}
 
-          <div className="mt-6 text-sm text-gray-600">
-            {mode === "forgot" ? (
+          {(error || authError) && (
+            <div className="bg-red-50 border-2 border-red-200 text-red-700 px-4 py-3 text-sm" style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'}}>
+              {error || authError}
+            </div>
+          )}
+          
+          {message && (
+            <div className="bg-emerald-50 border-2 border-emerald-200 text-emerald-700 px-4 py-3 text-sm" style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'}}>
+              {message}
+            </div>
+          )}
+
+          <button 
+            type="submit" 
+            className="w-full px-4 py-3 bg-black text-white font-bold hover:bg-gray-800 transition-all disabled:opacity-50" 
+            disabled={submitting}
+            style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}
+          >
+            {submitting ? (
+              <span className="flex items-center justify-center gap-2">
+                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                </svg>
+                Processing...
+              </span>
+            ) : mode === "forgot"
+              ? "Send reset link"
+              : isSignup
+                ? "Create account"
+                : "Sign in"}
+          </button>
+        </form>
+
+        <div className="mt-6 text-sm text-gray-600">
+          {mode === "forgot" ? (
+            <p>
+              Remember your password?{" "}
+              <button
+                type="button"
+                className="text-black font-bold hover:underline"
+                onClick={() => setMode("login")}
+              >
+                Back to login
+              </button>
+            </p>
+          ) : isSignup ? (
+            <p>
+              Already have an account?{" "}
+              <button
+                type="button"
+                className="text-black font-bold hover:underline"
+                onClick={() => setMode("login")}
+              >
+                Sign in
+              </button>
+            </p>
+          ) : (
+            <>
               <p>
-                Remember your password?{" "}
+                Don&apos;t have an account?{" "}
                 <button
                   type="button"
                   className="text-black font-bold hover:underline"
-                  onClick={() => setMode("login")}
+                  onClick={() => setMode("register")}
                 >
-                  Back to login
+                  Sign up
                 </button>
               </p>
-            ) : isSignup ? (
-              <p>
-                Already have an account?{" "}
+              <p className="mt-2">
+                Forgot password?{" "}
                 <button
                   type="button"
                   className="text-black font-bold hover:underline"
-                  onClick={() => setMode("login")}
+                  onClick={() => setMode("forgot")}
                 >
-                  Sign in
+                  Reset here
                 </button>
               </p>
-            ) : (
-              <>
-                <p>
-                  Don&apos;t have an account?{" "}
-                  <button
-                    type="button"
-                    className="text-black font-bold hover:underline"
-                    onClick={() => setMode("register")}
-                  >
-                    Sign up
-                  </button>
-                </p>
-                <p className="mt-2">
-                  Forgot password?{" "}
-                  <button
-                    type="button"
-                    className="text-black font-bold hover:underline"
-                    onClick={() => setMode("forgot")}
-                  >
-                    Reset here
-                  </button>
-                </p>
-              </>
-            )}
-          </div>
+            </>
+          )}
         </div>
       </div>
     </div>
