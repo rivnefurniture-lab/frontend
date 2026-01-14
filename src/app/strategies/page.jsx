@@ -17,8 +17,8 @@ import { apiFetch, publicFetch } from "@/lib/api";
 import { useAuth } from "@/context/AuthProvider";
 import { useLanguage } from "@/context/LanguageContext";
 
-// Build version: 2026-01-14-v5 - new design with logo
-console.log("[Algotcha] Strategies list page loaded - build v2026-01-14-v5");
+// Build version: 2026-01-14-v6 - geometric design
+console.log("[Algotcha] Strategies list page loaded - build v2026-01-14-v6");
 
 // Helper to format returns properly (no +- issue)
 const formatReturn = (value) => {

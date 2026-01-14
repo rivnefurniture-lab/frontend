@@ -6,8 +6,8 @@ import Footer from "@/components/Footer";
 import CookieConsent from "@/components/CookieConsent";
 import { BacktestMonitorWrapper } from "@/components/BacktestMonitorWrapper";
 
-// Build: 2026-01-14-v5-new-design
-const BUILD_VERSION = "2026-01-14-v5";
+// Build: 2026-01-14-v6-geometric-design
+const BUILD_VERSION = "2026-01-14-v6";
 if (typeof window !== 'undefined') {
   console.log(`[Algotcha] App build: ${BUILD_VERSION}`);
 }

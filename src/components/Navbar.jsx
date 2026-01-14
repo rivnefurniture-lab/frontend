@@ -467,7 +467,7 @@ export default function Navbar() {
                   href={n.to}
                   className={
                     pathname === n.to
-                      ? "text-blue-600 font-medium"
+                      ? "text-black font-bold"
                       : "text-gray-800"
                   }
                 >
@@ -480,20 +480,20 @@ export default function Navbar() {
                   <Link href="/auth" className="text-gray-800">
                     {t("nav.signIn")}
                   </Link>
-                  <Link href="/auth?mode=signup" className="text-blue-600 font-medium">
+                  <Link href="/auth?mode=signup" className="text-black font-bold">
                     {t("nav.getStarted")}
                   </Link>
                 </>
               ) : (
                 <>
-                  <div className="border-t border-gray-100 my-2"></div>
-                  <div className="p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl">
+                  <div className="border-t-2 border-gray-100 my-2"></div>
+                  <div className="p-3 bg-gray-50 border-2 border-gray-100" style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}>
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-sm font-semibold">
+                      <div className="w-10 h-10 bg-black flex items-center justify-center text-white text-sm font-bold" style={{clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'}}>
                         {(user.name || user.email || "U").slice(0, 2).toUpperCase()}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-gray-900 truncate">{user.name || "Trader"}</p>
+                        <p className="font-bold text-gray-900 truncate">{user.name || "User"}</p>
                         <p className="text-sm text-gray-500 truncate">{user.email}</p>
                       </div>
                     </div>
