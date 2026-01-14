@@ -296,8 +296,11 @@ export default function StrategyDetailPage() {
 
       {/* Header */}
       <div className="flex items-center gap-4 mb-6">
-        <Link href="/strategies" className="text-gray-500 hover:text-gray-700">
-          ← Back
+        <Link href="/strategies" className="text-gray-600 hover:text-black flex items-center gap-1 font-medium transition-colors">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          Back
         </Link>
         <div className="flex-1">
           <h1 className="text-3xl font-bold">{strategy.name}</h1>
@@ -305,7 +308,7 @@ export default function StrategyDetailPage() {
         </div>
         <div className="flex gap-2">
           {strategy.tags?.map((tag) => (
-            <span key={tag} className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">
+            <span key={tag} className="px-3 py-1 bg-gray-100 text-gray-700 text-sm font-medium" style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'}}>
               {tag}
             </span>
           ))}
@@ -317,94 +320,94 @@ export default function StrategyDetailPage() {
         <div className="lg:col-span-2 space-y-6">
           {/* Key Metrics */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <MetricCard label="Yearly Return" value={formatValue(strategy.returns?.yearly || strategy.cagr || strategy.yearlyReturn, "%")} color="green" />
-            <MetricCard label="Win Rate" value={formatValue(strategy.winRate, "%")} color="blue" />
-            <MetricCard label="Sharpe Ratio" value={formatValue(strategy.sharpe || strategy.sharpeRatio, "", 2)} color="purple" />
+            <MetricCard label="Yearly Return" value={formatValue(strategy.returns?.yearly || strategy.cagr || strategy.yearlyReturn, "%")} color="emerald" />
+            <MetricCard label="Win Rate" value={formatValue(strategy.winRate, "%")} color="black" />
+            <MetricCard label="Sharpe Ratio" value={formatValue(strategy.sharpe || strategy.sharpeRatio, "", 2)} color="gray" />
             <MetricCard label="Max Drawdown" value={formatValue(strategy.maxDD || strategy.maxDrawdown, "%")} color="red" />
           </div>
 
           {/* Returns Breakdown */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Returns Breakdown</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-4 gap-4 text-center mb-6">
-                {[
-                  { label: "Daily", val: strategy.returns?.daily },
-                  { label: "Weekly", val: strategy.returns?.weekly },
-                  { label: "Monthly", val: strategy.returns?.monthly },
-                  { label: "Yearly", val: strategy.returns?.yearly || strategy.cagr },
-                ].map((item) => (
-                  <div key={item.label} className="p-4 bg-gray-50 rounded-lg">
-                    <div className="text-2xl font-bold text-green-600">
-                      {item.val !== null && item.val !== undefined ? `${formatSigned(Number(item.val))}%` : "—"}
-                    </div>
-                    <div className="text-sm text-gray-500">{item.label}</div>
+          <div className="bg-white border-2 border-gray-100 p-6" style={{clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))'}}>
+            <h3 className="text-lg font-bold mb-4">Returns Breakdown</h3>
+            <div className="grid grid-cols-4 gap-4 text-center mb-6">
+              {[
+                { label: "Daily", val: strategy.returns?.daily },
+                { label: "Weekly", val: strategy.returns?.weekly },
+                { label: "Monthly", val: strategy.returns?.monthly },
+                { label: "Yearly", val: strategy.returns?.yearly || strategy.cagr },
+              ].map((item) => (
+                <div key={item.label} className="p-4 bg-gray-50" style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}>
+                  <div className="text-2xl font-bold text-emerald-600">
+                    {item.val !== null && item.val !== undefined ? `${formatSigned(Number(item.val))}%` : "—"}
                   </div>
-                ))}
-              </div>
-              
-              {/* Yearly Performance History */}
-              <div className="border-t pt-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="text-sm text-gray-500 font-medium">{item.label}</div>
+                </div>
+              ))}
+            </div>
+            
+            {/* Yearly Performance History */}
+            <div className="border-t-2 border-gray-100 pt-4">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-6 h-6 bg-gray-800 flex items-center justify-center" style={{clipPath: 'polygon(0 0, calc(100% - 3px) 0, 100% 3px, 100% 100%, 3px 100%, 0 calc(100% - 3px))'}}>
+                  <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
-                  <h4 className="font-medium text-gray-700">Historical Yearly Performance</h4>
                 </div>
-                <div className="grid grid-cols-3 gap-3">
-                  {[2023, 2024, 2025].map((year) => {
-                    const yearData = strategy.yearlyBreakdown?.[year];
-                    const value = yearData?.return || strategy.yearlyReturns?.[year];
-                    const isPositive = value !== undefined && value !== null && value >= 0;
-                    const isPast = year <= new Date().getFullYear();
-                    return (
-                      <div
-                        key={year}
-                        className={`p-3 rounded-lg text-center ${
-                          isPast ? 'bg-gray-50' : 'bg-gray-100 opacity-60'
-                        }`}
-                      >
-                        <div className="text-xs text-gray-500 mb-1">{year}</div>
-                        <div className={`font-bold ${
-                          value === undefined || value === null
-                            ? 'text-gray-400'
-                            : isPositive
-                              ? 'text-green-600'
-                              : 'text-red-600'
-                        }`}>
-                          {value === undefined || value === null ? '—' : `${isPositive ? '+' : ''}${value.toFixed(1)}%`}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-                <p className="text-xs text-gray-500 mt-3">
-                  Awaiting updated yearly breakdown from the latest backtest. Past performance does not guarantee future results.
-                </p>
+                <h4 className="font-bold text-gray-700">Historical Yearly Performance</h4>
               </div>
-            </CardContent>
-          </Card>
+              <div className="grid grid-cols-3 gap-3">
+                {[2023, 2024, 2025].map((year) => {
+                  const yearData = strategy.yearlyBreakdown?.[year];
+                  const value = yearData?.return || strategy.yearlyReturns?.[year];
+                  const isPositive = value !== undefined && value !== null && value >= 0;
+                  const isPast = year <= new Date().getFullYear();
+                  return (
+                    <div
+                      key={year}
+                      className={`p-3 text-center ${
+                        isPast ? 'bg-gray-50' : 'bg-gray-100 opacity-60'
+                      }`}
+                      style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'}}
+                    >
+                      <div className="text-xs text-gray-500 mb-1 font-medium">{year}</div>
+                      <div className={`font-bold ${
+                        value === undefined || value === null
+                          ? 'text-gray-400'
+                          : isPositive
+                            ? 'text-emerald-600'
+                            : 'text-red-600'
+                      }`}>
+                        {value === undefined || value === null ? '—' : `${isPositive ? '+' : ''}${value.toFixed(1)}%`}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <p className="text-xs text-gray-500 mt-3">
+                Awaiting updated yearly breakdown from the latest backtest. Past performance does not guarantee future results.
+              </p>
+            </div>
+          </div>
 
           {/* Tabs */}
-          <div className="flex gap-2 border-b">
+          <div className="flex gap-1 border-b-2 border-gray-100">
             {["overview", "trades", "conditions", "backtest"].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`px-4 py-2 font-medium capitalize ${
+                className={`px-4 py-3 font-bold capitalize transition-all ${
                   activeTab === tab
-                    ? "border-b-2 border-blue-600 text-blue-600"
-                    : "text-gray-500 hover:text-gray-700"
+                    ? "bg-black text-white"
+                    : "text-gray-500 hover:text-black hover:bg-gray-50"
                 }`}
+                style={activeTab === tab ? {clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)'} : {}}
               >
                 {tab === "backtest" ? (
                   <span className="flex items-center gap-1.5">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                     </svg>
-                    Rerun Backtest
+                    Rerun
                   </span>
                 ) : tab}
               </button>
@@ -1215,16 +1218,22 @@ export default function StrategyDetailPage() {
 
 function MetricCard({ label, value, color }) {
   const colors = {
-    green: "bg-green-50 text-green-700 border-green-200",
-    blue: "bg-blue-50 text-blue-700 border-blue-200",
-    purple: "bg-purple-50 text-purple-700 border-purple-200",
-    red: "bg-red-50 text-red-700 border-red-200",
+    emerald: "bg-emerald-500 text-white",
+    black: "bg-black text-white",
+    gray: "bg-gray-800 text-white",
+    red: "bg-red-500 text-white",
+    green: "bg-emerald-500 text-white",
+    blue: "bg-black text-white",
+    purple: "bg-gray-800 text-white",
   };
 
   return (
-    <div className={`p-4 rounded-xl border ${colors[color] || colors.blue}`}>
+    <div 
+      className={`p-4 ${colors[color] || colors.black} shadow-lg hover:shadow-xl transition-all`}
+      style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'}}
+    >
       <div className="text-2xl font-bold">{value}</div>
-      <div className="text-sm opacity-75">{label}</div>
+      <div className="text-sm opacity-80">{label}</div>
     </div>
   );
 }
@@ -1232,11 +1241,11 @@ function MetricCard({ label, value, color }) {
 function ConditionGroup({ title, conditions }) {
   return (
     <div>
-      <h4 className="font-medium mb-3">{title}</h4>
+      <h4 className="font-bold mb-3">{title}</h4>
       <div className="space-y-2">
         {conditions.map((cond, i) => (
-          <div key={i} className="p-3 bg-gray-50 rounded-lg">
-            <div className="font-medium text-blue-600">{cond.indicator}</div>
+          <div key={i} className="p-3 bg-gray-50 border-2 border-gray-100" style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}>
+            <div className="font-bold text-black">{cond.indicator}</div>
             <div className="grid grid-cols-2 gap-2 mt-2 text-sm">
               {Object.entries(cond.subfields || {}).map(([key, val]) => (
                 <div key={key} className="flex justify-between">

@@ -76,18 +76,19 @@ function ConditionBuilder({ condition, onChange, onRemove }) {
   };
 
   return (
-    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+    <div className="bg-gray-50 p-4 border-2 border-gray-100" style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'}}>
       <div className="flex justify-between items-center mb-3">
         <select
           value={condition.indicator}
           onChange={(e) => onChange({ ...condition, indicator: e.target.value, subfields: { Timeframe: "1m" } })}
-          className="font-medium bg-white border rounded-lg px-3 py-2"
+          className="font-bold bg-white border-2 border-gray-200 px-3 py-2"
+          style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'}}
         >
           {INDICATORS.map((ind) => (
             <option key={ind.id} value={ind.id}>{ind.name}</option>
           ))}
         </select>
-        <button onClick={onRemove} className="text-red-500 hover:text-red-700 text-sm">
+        <button onClick={onRemove} className="text-red-500 hover:text-red-700 text-sm font-bold">
           Remove
         </button>
       </div>
@@ -699,28 +700,26 @@ export default function BacktestPage() {
   if (!user) {
     return (
       <div className="container py-16">
-        <Card className="max-w-md mx-auto">
-          <CardContent className="pt-8 text-center">
-            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
-            </div>
-            <h2 className="text-xl font-bold mb-2">
-              {language === "uk" ? "Потрібна авторизація" : "Login Required"}
-            </h2>
-            <p className="text-gray-600 mb-6">
-              {language === "uk" 
-                ? "Увійдіть, щоб створювати та тестувати моделі" 
-                : "Please log in to create and test models"}
-            </p>
-            <Link href="/auth">
-              <Button className="w-full">
-                {language === "uk" ? "Увійти / Зареєструватися" : "Login / Sign Up"}
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
+        <div className="max-w-md mx-auto bg-white border-2 border-gray-100 p-8 text-center" style={{clipPath: 'polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px))'}}>
+          <div className="w-16 h-16 bg-black flex items-center justify-center mx-auto mb-4" style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}>
+            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+          </div>
+          <h2 className="text-xl font-bold mb-2">
+            {language === "uk" ? "Потрібна авторизація" : "Login Required"}
+          </h2>
+          <p className="text-gray-600 mb-6">
+            {language === "uk" 
+              ? "Увійдіть, щоб створювати та тестувати моделі" 
+              : "Please log in to create and test models"}
+          </p>
+          <Link href="/auth">
+            <button className="w-full px-4 py-3 bg-black text-white font-bold hover:bg-gray-800 transition-all" style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}>
+              {language === "uk" ? "Увійти / Зареєструватися" : "Login / Sign Up"}
+            </button>
+          </Link>
+        </div>
       </div>
     );
   }
@@ -862,11 +861,12 @@ export default function BacktestPage() {
                           setSelectedPairs([...selectedPairs, pair]);
                         }
                       }}
-                      className={`px-3 py-1 rounded-full text-sm transition ${
+                      className={`px-3 py-1.5 text-sm font-medium transition ${
                         selectedPairs.includes(pair)
-                          ? "bg-blue-600 text-white"
+                          ? "bg-black text-white"
                           : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
+                      style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'}}
                     >
                       {pair}
                     </button>

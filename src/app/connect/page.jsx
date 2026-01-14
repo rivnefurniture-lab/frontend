@@ -179,18 +179,18 @@ function DataSourceCard({ exchange, onConnect, onDisconnect, isConnected, t, lan
   };
 
   return (
-    <Card className={`overflow-hidden ${isConnected ? 'ring-2 ring-green-500' : ''}`}>
+    <div className={`bg-white border-2 overflow-hidden ${isConnected ? 'border-emerald-500' : 'border-gray-100 hover:border-black'} transition-all`} style={{clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))'}}>
       <div className={`h-2 bg-gradient-to-r ${exchange.color}`}></div>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-3">
-          <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${exchange.color} flex items-center justify-center flex-shrink-0`}>
+      <div className="p-6">
+        <div className="flex items-center gap-3 mb-4">
+          <div className={`w-12 h-12 bg-gradient-to-br ${exchange.color} flex items-center justify-center flex-shrink-0`} style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}>
             {exchange.icon}
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="font-semibold">{exchange.name}</span>
+              <span className="font-bold">{exchange.name}</span>
               {isConnected && (
-                <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full font-medium flex items-center gap-1">
+                <span className="px-2 py-0.5 bg-emerald-500 text-white text-xs font-bold flex items-center gap-1" style={{clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'}}>
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
@@ -200,8 +200,7 @@ function DataSourceCard({ exchange, onConnect, onDisconnect, isConnected, t, lan
             </div>
             <p className="text-sm font-normal text-gray-500 truncate">{exchange.description[language]}</p>
           </div>
-        </CardTitle>
-      </CardHeader>
+        </div>
       <CardContent>
         {/* Connected state - no form, just actions */}
         {isConnected && !showForm ? (
@@ -364,12 +363,12 @@ function DataSourceCard({ exchange, onConnect, onDisconnect, isConnected, t, lan
         </form>
         )}
         
-        <div className="mt-4 pt-4 border-t flex gap-4 text-xs">
+        <div className="mt-4 pt-4 border-t-2 border-gray-100 flex gap-4 text-xs">
           <a 
             href={exchange.docsUrl} 
             target="_blank" 
             rel="noopener noreferrer"
-            className="text-blue-600 hover:underline"
+            className="text-black font-bold hover:underline"
           >
             {t.howToCreate} →
           </a>
@@ -378,14 +377,14 @@ function DataSourceCard({ exchange, onConnect, onDisconnect, isConnected, t, lan
               href={exchange.testnetUrl} 
               target="_blank" 
               rel="noopener noreferrer"
-              className="text-blue-600 hover:underline"
+              className="text-black font-bold hover:underline"
             >
               {t.getTestnet} →
             </a>
           )}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
 

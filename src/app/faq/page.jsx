@@ -237,8 +237,12 @@ export default function FAQPage() {
   return (
     <div className="min-h-screen">
       {/* Hero */}
-      <section className="bg-gradient-to-b from-gray-50 to-white py-16">
-        <div className="container max-w-3xl text-center">
+      <section className="bg-gradient-to-b from-gray-50 to-white py-16 relative overflow-hidden">
+        {/* Geometric decorations */}
+        <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-500/10" style={{clipPath: 'polygon(100% 0, 100% 100%, 0 0)'}}></div>
+        <div className="absolute bottom-0 left-0 w-32 h-32 bg-black/5" style={{clipPath: 'polygon(0 100%, 100% 100%, 0 0)'}}></div>
+        
+        <div className="container max-w-3xl text-center relative">
           <h1 className="text-4xl font-bold mb-4">
             {language === "uk" ? "Часті запитання" : "Frequently Asked Questions"}
           </h1>
@@ -246,7 +250,7 @@ export default function FAQPage() {
             {language === "uk"
               ? "Все, що вам потрібно знати про Algotcha. Не знайшли відповідь?"
               : "Everything you need to know about Algotcha. Can't find what you're looking for?"}{" "}
-            <Link href="/support" className="text-blue-600 hover:underline">
+            <Link href="/support" className="text-black font-bold hover:underline">
               {language === "uk" ? "Зв'яжіться з підтримкою" : "Contact support"}
             </Link>
           </p>
@@ -257,7 +261,10 @@ export default function FAQPage() {
       <section className="container max-w-3xl py-12">
         {faqs.map((section, sectionIndex) => (
           <div key={sectionIndex} className="mb-10">
-            <h2 className="text-xl font-bold mb-4 text-blue-600">
+            <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+              <div className="w-6 h-6 bg-black flex items-center justify-center text-white text-xs font-bold" style={{clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'}}>
+                {sectionIndex + 1}
+              </div>
               {section.category}
             </h2>
             <div className="space-y-3">
@@ -268,7 +275,8 @@ export default function FAQPage() {
                 return (
                   <div
                     key={itemIndex}
-                    className="bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm"
+                    className="bg-white border-2 border-gray-100 overflow-hidden shadow-sm hover:border-black transition-all"
+                    style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'}}
                   >
                     <button
                       onClick={() => toggle(currentIndex)}
@@ -276,7 +284,7 @@ export default function FAQPage() {
                       aria-expanded={isOpen}
                       aria-controls={`faq-answer-${currentIndex}`}
                     >
-                      <span className="font-medium pr-4">{faq.q}</span>
+                      <span className="font-bold pr-4">{faq.q}</span>
                       <ChevronDown
                         className={`w-5 h-5 text-gray-500 transition-transform flex-shrink-0 ${
                           isOpen ? "rotate-180" : ""
@@ -286,7 +294,7 @@ export default function FAQPage() {
                     {isOpen && (
                       <div
                         id={`faq-answer-${currentIndex}`}
-                        className="px-6 pb-4 text-gray-600 leading-relaxed border-t bg-gray-50"
+                        className="px-6 pb-4 text-gray-600 leading-relaxed border-t-2 border-gray-100 bg-gray-50"
                       >
                         <p className="pt-4">{faq.a}</p>
                       </div>
@@ -300,20 +308,20 @@ export default function FAQPage() {
       </section>
 
       {/* Still have questions */}
-      <section className="bg-blue-50 py-12">
+      <section className="bg-gray-900 py-12">
         <div className="container max-w-xl text-center">
-          <h2 className="text-2xl font-bold mb-4">
+          <h2 className="text-2xl font-bold mb-4 text-white">
             {language === "uk" ? "Ще маєте питання?" : "Still have questions?"}
           </h2>
-          <p className="text-gray-600 mb-6">
+          <p className="text-gray-300 mb-6">
             {language === "uk"
               ? "Наша команда підтримки готова допомогти. Зверніться до нас і ми відповімо якнайшвидше."
               : "Our support team is here to help. Reach out and we'll get back to you as soon as possible."}
           </p>
           <Link href="/support">
-            <Button>
+            <button className="px-6 py-3 bg-white text-black font-bold hover:bg-gray-100 transition-all" style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}>
               {language === "uk" ? "Зв'язатися з підтримкою" : "Contact Support"}
-            </Button>
+            </button>
           </Link>
         </div>
       </section>

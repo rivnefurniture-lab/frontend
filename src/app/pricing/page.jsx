@@ -109,8 +109,12 @@ function PricingContent() {
   return (
     <div className="min-h-screen">
       {/* Hero */}
-      <section className="bg-gradient-to-b from-blue-50 to-white py-16">
-        <div className="container max-w-4xl text-center">
+      <section className="bg-gradient-to-b from-gray-50 to-white py-16 relative overflow-hidden">
+        {/* Geometric decorations */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10" style={{clipPath: 'polygon(100% 0, 100% 100%, 0 0)'}}></div>
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-black/5" style={{clipPath: 'polygon(0 100%, 100% 100%, 0 0)'}}></div>
+        
+        <div className="container max-w-4xl text-center relative">
           <h1 className="text-4xl font-bold mb-4">
             {language === "uk" ? "Тарифні плани" : "Pricing Plans"}
           </h1>
@@ -121,27 +125,29 @@ function PricingContent() {
           </p>
           
           {/* Billing toggle */}
-          <div className="flex items-center justify-center gap-4 mb-8">
+          <div className="flex items-center justify-center gap-2 mb-8">
             <button
               onClick={() => setBilling("monthly")}
-              className={`px-4 py-2 rounded-lg font-medium transition ${
+              className={`px-5 py-2.5 font-bold transition ${
                 billing === "monthly"
-                  ? "bg-blue-600 text-white"
+                  ? "bg-black text-white"
                   : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               }`}
+              style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}
             >
               {language === "uk" ? "Щомісяця" : "Monthly"}
             </button>
             <button
               onClick={() => setBilling("yearly")}
-              className={`px-4 py-2 rounded-lg font-medium transition flex items-center gap-2 ${
+              className={`px-5 py-2.5 font-bold transition flex items-center gap-2 ${
                 billing === "yearly"
-                  ? "bg-blue-600 text-white"
+                  ? "bg-black text-white"
                   : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               }`}
+              style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}
             >
               {language === "uk" ? "Щорічно" : "Yearly"}
-              <span className="text-xs bg-green-500 text-white px-2 py-0.5 rounded-full">
+              <span className="text-xs bg-emerald-500 text-white px-2 py-0.5 font-bold" style={{clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'}}>
                 -20%
               </span>
             </button>
@@ -157,25 +163,26 @@ function PricingContent() {
             const price = billing === "yearly" ? plan.priceYearly : plan.price;
             
             return (
-              <Card
+              <div
                 key={plan.id}
-                className={`relative overflow-hidden transition-all hover:shadow-xl ${
-                  plan.popular ? "ring-2 ring-blue-500 scale-105" : ""
+                className={`relative bg-white border-2 p-6 transition-all hover:shadow-2xl ${
+                  plan.popular ? "border-black scale-105 shadow-xl" : "border-gray-100 hover:border-black"
                 }`}
+                style={{clipPath: 'polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px))'}}
               >
                 {plan.popular && (
-                  <div className="absolute top-0 right-0 bg-blue-500 text-white text-xs px-3 py-1 rounded-bl-lg font-medium">
+                  <div className="absolute top-0 right-0 bg-black text-white text-xs px-4 py-1.5 font-bold" style={{clipPath: 'polygon(0 0, 100% 0, 100% 100%, 8px 100%)'}}>
                     {language === "uk" ? "Популярний" : "Popular"}
                   </div>
                 )}
-                <CardHeader className="pb-4">
-                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${plan.color} flex items-center justify-center mb-4`}>
+                <div className="pb-4">
+                  <div className={`w-12 h-12 ${plan.popular ? 'bg-black' : 'bg-gray-800'} flex items-center justify-center mb-4`} style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}>
                     <Icon className="w-6 h-6 text-white" />
                   </div>
-                  <CardTitle className="text-xl">{plan.name}</CardTitle>
+                  <h3 className="text-xl font-bold">{plan.name}</h3>
                   <p className="text-sm text-gray-500">{plan.description}</p>
-                </CardHeader>
-                <CardContent>
+                </div>
+                <div>
                   <div className="mb-6">
                     <span className="text-4xl font-bold">${price}</span>
                     {price > 0 && (
@@ -184,7 +191,7 @@ function PricingContent() {
                       </span>
                     )}
                     {billing === "yearly" && price > 0 && (
-                      <p className="text-sm text-green-600 mt-1">
+                      <p className="text-sm text-emerald-600 mt-1 font-medium">
                         {language === "uk" 
                           ? `Економія $${(plan.price - plan.priceYearly) * 12}/рік`
                           : `Save $${(plan.price - plan.priceYearly) * 12}/year`}
@@ -195,27 +202,30 @@ function PricingContent() {
                   <ul className="space-y-3 mb-6">
                     {plan.features.map((feature, i) => (
                       <li key={i} className="flex items-start gap-2 text-sm">
-                        <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                        <div className="w-5 h-5 bg-emerald-500 flex items-center justify-center flex-shrink-0 mt-0.5" style={{clipPath: 'polygon(0 0, calc(100% - 3px) 0, 100% 3px, 100% 100%, 3px 100%, 0 calc(100% - 3px))'}}>
+                          <Check className="w-3 h-3 text-white" />
+                        </div>
                         <span>{feature}</span>
                       </li>
                     ))}
                   </ul>
                   
-                  <Button
-                    className={`w-full ${
+                  <button
+                    className={`w-full px-4 py-3 font-bold transition-all ${
                       plan.popular
-                        ? "bg-blue-600 hover:bg-blue-700"
+                        ? "bg-black text-white hover:bg-gray-800"
                         : plan.isCurrent
                         ? "bg-gray-100 text-gray-500 cursor-default"
-                        : ""
+                        : "bg-white border-2 border-black text-black hover:bg-black hover:text-white"
                     }`}
+                    style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}
                     onClick={() => pay(plan.id)}
                     disabled={plan.isCurrent}
                   >
                     {plan.buttonText}
-                  </Button>
-                </CardContent>
-              </Card>
+                  </button>
+                </div>
+              </div>
             );
           })}
         </div>
@@ -234,14 +244,14 @@ function PricingContent() {
           </p>
           <div className="flex gap-4 justify-center flex-wrap">
             <Link href="/faq">
-              <Button variant="outline">
+              <button className="px-6 py-3 border-2 border-black text-black font-bold hover:bg-black hover:text-white transition-all" style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}>
                 {language === "uk" ? "Переглянути FAQ" : "View FAQ"}
-              </Button>
+              </button>
             </Link>
             <Link href="/support">
-              <Button>
+              <button className="px-6 py-3 bg-black text-white font-bold hover:bg-gray-800 transition-all" style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}>
                 {language === "uk" ? "Зв'язатися" : "Contact Us"}
-              </Button>
+              </button>
             </Link>
           </div>
         </div>
@@ -249,8 +259,10 @@ function PricingContent() {
 
       {/* Money-back guarantee */}
       <section className="container py-12 max-w-2xl text-center">
-        <div className="bg-green-50 border border-green-200 rounded-2xl p-8">
-          <div className="text-4xl mb-4">💰</div>
+        <div className="bg-emerald-50 border-2 border-emerald-200 p-8" style={{clipPath: 'polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px))'}}>
+          <div className="w-16 h-16 bg-emerald-500 flex items-center justify-center mx-auto mb-4" style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}>
+            <span className="text-2xl">💰</span>
+          </div>
           <h3 className="text-xl font-bold mb-2">
             {language === "uk" ? "14-денна гарантія повернення" : "14-Day Money-Back Guarantee"}
           </h3>

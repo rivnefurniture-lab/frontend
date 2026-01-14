@@ -188,8 +188,8 @@ export default function StrategiesPage() {
   if (loading) {
     return (
       <div className="container py-16 text-center">
-        <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto"></div>
-        <p className="mt-4 text-gray-600">{t.loading}</p>
+        <div className="w-12 h-12 border-4 border-black border-t-transparent mx-auto" style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))', animation: 'spin 1s linear infinite'}}></div>
+        <p className="mt-4 text-gray-600 font-medium">{t.loading}</p>
       </div>
     );
   }
@@ -203,16 +203,18 @@ export default function StrategiesPage() {
           <p className="text-gray-600 mt-1">{t.subtitle}</p>
         </div>
         <Link href="/backtest">
-          <Button variant="outline">{t.createCustom}</Button>
+          <button className="px-6 py-3 bg-white border-2 border-black text-black font-bold hover:bg-black hover:text-white transition-all" style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}>
+            {t.createCustom}
+          </button>
         </Link>
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg mb-6">
-          {error}
-          <Button variant="outline" size="sm" className="ml-4" onClick={fetchStrategies}>
+        <div className="bg-red-50 border-2 border-red-200 text-red-700 p-4 mb-6 flex items-center justify-between" style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}>
+          <span>{error}</span>
+          <button onClick={fetchStrategies} className="px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 font-bold transition-all" style={{clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'}}>
             {t.retry}
-          </Button>
+          </button>
         </div>
       )}
 
@@ -223,45 +225,47 @@ export default function StrategiesPage() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           className="md:w-80"
+          style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}
         />
         <select
           value={sort}
           onChange={(e) => setSort(e.target.value)}
-          className="h-11"
+          className="h-11 border-2 border-gray-200 px-4 font-medium focus:border-black focus:outline-none"
+          style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}
         >
           <option value="cagr">{t.sortByYearly}</option>
           <option value="sharpe">{t.sortBySharpe}</option>
           <option value="winRate">{t.sortByWinRate}</option>
           <option value="maxDD">{t.sortByDD}</option>
         </select>
-        <Button variant="outline" onClick={fetchStrategies} className="flex items-center gap-2">
+        <button onClick={fetchStrategies} className="flex items-center gap-2 px-4 py-2 bg-white border-2 border-gray-200 hover:border-black font-medium transition-all" style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}>
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
           </svg>
           {t.refresh}
-        </Button>
+        </button>
       </div>
 
-      {/* Summary Stats - neutral metrics only */}
+      {/* Summary Stats - geometric design */}
       {strategies.length > 0 && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-gradient-to-br from-indigo-500 via-indigo-600 to-blue-600 text-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all">
+          <div className="bg-black text-white p-6 shadow-lg hover:shadow-2xl transition-all group" style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'}}>
             <div className="text-4xl font-bold mb-1">{strategies.length}</div>
-            <div className="text-sm text-indigo-100 font-medium">{language === "uk" ? "Доступних моделей" : "Available Models"}</div>
+            <div className="text-sm text-gray-300 font-medium">{language === "uk" ? "Доступних моделей" : "Available Models"}</div>
           </div>
-          <div className="bg-gradient-to-br from-violet-500 via-purple-500 to-indigo-600 text-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all">
+          <div className="bg-emerald-500 text-white p-6 shadow-lg hover:shadow-2xl transition-all group" style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'}}>
             <div className="text-4xl font-bold mb-1">
               {Math.max(...strategies.map(s => s.sharpe || 0)).toFixed(2)}
             </div>
-            <div className="text-sm text-violet-100 font-medium">{t.bestSharpe}</div>
+            <div className="text-sm text-emerald-100 font-medium">{t.bestSharpe}</div>
           </div>
-          <div className="bg-gradient-to-br from-emerald-500 via-green-500 to-teal-600 text-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all">
+          <div className="bg-gray-800 text-white p-6 shadow-lg hover:shadow-2xl transition-all group" style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'}}>
             <div className="text-4xl font-bold mb-1">5</div>
-            <div className="text-sm text-emerald-100 font-medium">{language === "uk" ? "Років даних" : "Years of Data"}</div>
+            <div className="text-sm text-gray-300 font-medium">{language === "uk" ? "Років даних" : "Years of Data"}</div>
           </div>
-          <div className="bg-gradient-to-br from-amber-500 via-orange-500 to-red-500 text-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all">
+          <div className="bg-black text-white p-6 shadow-lg hover:shadow-2xl transition-all group" style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'}}>
             <div className="text-4xl font-bold mb-1">17</div>
-            <div className="text-sm text-amber-100 font-medium">{language === "uk" ? "Ринкових пар" : "Market Pairs"}</div>
+            <div className="text-sm text-gray-300 font-medium">{language === "uk" ? "Ринкових пар" : "Market Pairs"}</div>
           </div>
         </div>
       )}
@@ -270,66 +274,64 @@ export default function StrategiesPage() {
       {userStrategies.length > 0 && (
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-4">
-            <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z" />
-            </svg>
+            <div className="w-6 h-6 bg-black flex items-center justify-center" style={{clipPath: 'polygon(0 0, calc(100% - 3px) 0, 100% 3px, 100% 100%, 3px 100%, 0 calc(100% - 3px))'}}>
+              <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z" />
+              </svg>
+            </div>
             <h2 className="text-xl font-bold">{t.yourStrategies}</h2>
           </div>
           <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
             {userStrategies.map((s) => (
-              <Card key={s.id} className="hover:shadow-lg transition border-blue-200 bg-blue-50/30 relative group">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    {s.name}
-                    <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full">
-                      {t.yourStrategy}
+              <div key={s.id} className="bg-white border-2 border-gray-100 hover:border-black p-5 shadow-lg hover:shadow-2xl transition-all relative group" style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'}}>
+                <div className="flex items-center gap-2 mb-3">
+                  <h3 className="font-bold text-lg">{s.name}</h3>
+                  <span className="px-2 py-0.5 bg-black text-white text-xs font-bold" style={{clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'}}>
+                    {t.yourStrategy}
+                  </span>
+                  {s.isActive && (
+                    <span className="px-2 py-0.5 bg-emerald-500 text-white text-xs font-bold" style={{clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'}}>
+                      {language === "uk" ? "Активна" : "Active"}
                     </span>
-                    {s.isActive && (
-                      <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full">
-                        {language === "uk" ? "Активна" : "Active"}
-                      </span>
-                    )}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-3 gap-2 text-sm mb-3">
-                    <div>
-                      <div className="text-gray-500">{t.profit}</div>
-                      <div className="font-semibold text-green-600">
-                        +{s.lastBacktestProfit?.toFixed(1) || 0}%
-                      </div>
-                    </div>
-                    <div>
-                      <div className="text-gray-500">{t.sharpe}</div>
-                      <div className="font-semibold">{s.lastBacktestSharpe?.toFixed(2) || 'N/A'}</div>
-                    </div>
-                    <div>
-                      <div className="text-gray-500">{t.winRate}</div>
-                      <div className="font-semibold">{s.lastBacktestWinRate?.toFixed(0) || 0}%</div>
+                  )}
+                </div>
+                <div className="grid grid-cols-3 gap-2 text-sm mb-4">
+                  <div className="p-2 bg-gray-50" style={{clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'}}>
+                    <div className="text-gray-500 text-xs">{t.profit}</div>
+                    <div className="font-bold text-emerald-600">
+                      +{s.lastBacktestProfit?.toFixed(1) || 0}%
                     </div>
                   </div>
-                  <div className="flex gap-2">
-                    <Link href={`/strategies/${s.id}`} className="flex-1">
-                      <Button className="w-full" size="sm">{t.useStrategy}</Button>
-                    </Link>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      className="text-red-600 hover:bg-red-50 hover:text-red-700 border-red-200 hover:border-red-300 px-3"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        deleteStrategy(s.id);
-                      }}
-                    >
-                      <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                      {language === "uk" ? "Видалити" : "Delete"}
-                    </Button>
+                  <div className="p-2 bg-gray-50" style={{clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'}}>
+                    <div className="text-gray-500 text-xs">{t.sharpe}</div>
+                    <div className="font-bold">{s.lastBacktestSharpe?.toFixed(2) || 'N/A'}</div>
                   </div>
-                </CardContent>
-              </Card>
+                  <div className="p-2 bg-gray-50" style={{clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'}}>
+                    <div className="text-gray-500 text-xs">{t.winRate}</div>
+                    <div className="font-bold">{s.lastBacktestWinRate?.toFixed(0) || 0}%</div>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Link href={`/strategies/${s.id}`} className="flex-1">
+                    <button className="w-full px-4 py-2 bg-black text-white font-bold hover:bg-gray-800 transition-all" style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'}}>
+                      {t.useStrategy}
+                    </button>
+                  </Link>
+                  <button 
+                    className="px-3 py-2 border-2 border-red-200 text-red-600 hover:bg-red-50 hover:border-red-400 font-bold transition-all flex items-center gap-1"
+                    style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'}}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      deleteStrategy(s.id);
+                    }}
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
             ))}
           </div>
         </div>
@@ -339,85 +341,82 @@ export default function StrategiesPage() {
       {backtestResults.length > 0 && (
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-4">
-            <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
+            <div className="w-6 h-6 bg-gray-800 flex items-center justify-center" style={{clipPath: 'polygon(0 0, calc(100% - 3px) 0, 100% 3px, 100% 100%, 3px 100%, 0 calc(100% - 3px))'}}>
+              <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+            </div>
             <h2 className="text-xl font-bold">
               {language === "uk" ? "Ваші результати бектестів" : "Your Backtest Results"}
             </h2>
           </div>
           <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
             {backtestResults.map((result) => (
-              <Card key={result.id} className="hover:shadow-lg transition border-purple-200 bg-purple-50/30 h-full group hover:border-purple-400 relative">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg flex items-center justify-between">
-                    <span className="truncate">{result.name || result.strategy_name || 'Backtest'}</span>
-                    <span className={`text-sm font-semibold ml-2 ${
-                      (result.netProfit || result.net_profit) >= 0 ? 'text-green-600' : 'text-red-600'
-                    }`}>
-                      {((result.netProfit || result.net_profit) >= 0 ? '+' : '')}
-                      {((result.netProfit || result.net_profit) * 100).toFixed(1)}%
-                    </span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-3 gap-2 text-sm mb-3">
-                    <div>
-                      <div className="text-gray-500">{t.sharpe}</div>
-                      <div className="font-semibold">
-                        {(result.sharpeRatio || result.sharpe_ratio)?.toFixed(2) || 'N/A'}
-                      </div>
-                    </div>
-                    <div>
-                      <div className="text-gray-500">{t.maxDD}</div>
-                      <div className="font-semibold">
-                        {((result.maxDrawdown || result.max_drawdown) * 100)?.toFixed(1)}%
-                      </div>
-                    </div>
-                    <div>
-                      <div className="text-gray-500">{t.winRate}</div>
-                      <div className="font-semibold">
-                        {((result.winRate || result.win_rate) * 100)?.toFixed(0)}%
-                      </div>
+              <div key={result.id} className="bg-white border-2 border-gray-100 hover:border-gray-800 p-5 shadow-lg hover:shadow-2xl transition-all h-full group relative" style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'}}>
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-bold text-lg truncate">{result.name || result.strategy_name || 'Backtest'}</h3>
+                  <span className={`text-sm font-bold ml-2 px-2 py-0.5 ${
+                    (result.netProfit || result.net_profit) >= 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
+                  }`} style={{clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'}}>
+                    {((result.netProfit || result.net_profit) >= 0 ? '+' : '')}
+                    {((result.netProfit || result.net_profit) * 100).toFixed(1)}%
+                  </span>
+                </div>
+                <div className="grid grid-cols-3 gap-2 text-sm mb-3">
+                  <div className="p-2 bg-gray-50" style={{clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'}}>
+                    <div className="text-gray-500 text-xs">{t.sharpe}</div>
+                    <div className="font-bold">
+                      {(result.sharpeRatio || result.sharpe_ratio)?.toFixed(2) || 'N/A'}
                     </div>
                   </div>
-                  <div className="text-xs text-gray-400 flex items-center justify-between mb-3">
-                    <span>{(result.totalTrades || result.total_trades || 0)} trades</span>
-                    <span>{new Date(result.createdAt || result.timestamp_run).toLocaleDateString()}</span>
+                  <div className="p-2 bg-gray-50" style={{clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'}}>
+                    <div className="text-gray-500 text-xs">{t.maxDD}</div>
+                    <div className="font-bold">
+                      {((result.maxDrawdown || result.max_drawdown) * 100)?.toFixed(1)}%
+                    </div>
                   </div>
-                  <div className="flex gap-2">
-                    <Link href={`/strategies/backtest-${result.id}`} className="flex-1">
-                      <Button className="w-full" size="sm" variant="outline">
-                        {language === "uk" ? "Переглянути" : "View Details"}
-                      </Button>
-                    </Link>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      className="text-red-600 hover:bg-red-50 hover:text-red-700 border-red-200 hover:border-red-300 px-3"
-                      onClick={async (e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        const confirmMsg = language === "uk" 
-                          ? "Видалити цей результат бектесту?" 
-                          : "Delete this backtest result?";
-                        if (confirm(confirmMsg)) {
-                          try {
-                            await apiFetch(`/backtest/results/${result.id}`, { method: 'DELETE' });
-                            setBacktestResults(prev => prev.filter(r => r.id !== result.id));
-                          } catch (e) {
-                            alert(language === "uk" ? "Помилка видалення" : "Failed to delete");
-                          }
+                  <div className="p-2 bg-gray-50" style={{clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'}}>
+                    <div className="text-gray-500 text-xs">{t.winRate}</div>
+                    <div className="font-bold">
+                      {((result.winRate || result.win_rate) * 100)?.toFixed(0)}%
+                    </div>
+                  </div>
+                </div>
+                <div className="text-xs text-gray-500 flex items-center justify-between mb-3 font-medium">
+                  <span>{(result.totalTrades || result.total_trades || 0)} trades</span>
+                  <span>{new Date(result.createdAt || result.timestamp_run).toLocaleDateString()}</span>
+                </div>
+                <div className="flex gap-2">
+                  <Link href={`/strategies/backtest-${result.id}`} className="flex-1">
+                    <button className="w-full px-4 py-2 border-2 border-gray-200 text-gray-800 font-bold hover:border-black hover:bg-gray-50 transition-all" style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'}}>
+                      {language === "uk" ? "Переглянути" : "View Details"}
+                    </button>
+                  </Link>
+                  <button 
+                    className="px-3 py-2 border-2 border-red-200 text-red-600 hover:bg-red-50 hover:border-red-400 font-bold transition-all flex items-center"
+                    style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'}}
+                    onClick={async (e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      const confirmMsg = language === "uk" 
+                        ? "Видалити цей результат бектесту?" 
+                        : "Delete this backtest result?";
+                      if (confirm(confirmMsg)) {
+                        try {
+                          await apiFetch(`/backtest/results/${result.id}`, { method: 'DELETE' });
+                          setBacktestResults(prev => prev.filter(r => r.id !== result.id));
+                        } catch (e) {
+                          alert(language === "uk" ? "Помилка видалення" : "Failed to delete");
                         }
-                      }}
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+                      }
+                    }}
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
             ))}
           </div>
         </div>
@@ -425,154 +424,151 @@ export default function StrategiesPage() {
 
       {/* Public Strategies Grid */}
       <div className="flex items-center gap-2 mb-4">
-        <div className="w-1 h-6 bg-gradient-to-b from-blue-600 to-indigo-600 rounded-full"></div>
+        <div className="w-6 h-6 bg-emerald-500 flex items-center justify-center" style={{clipPath: 'polygon(0 0, calc(100% - 3px) 0, 100% 3px, 100% 100%, 3px 100%, 0 calc(100% - 3px))'}}>
+          <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+          </svg>
+        </div>
         <h2 className="text-xl font-bold">{t.featured}</h2>
       </div>
       
       {strategies.length === 0 && !loading ? (
-        <Card>
-          <CardContent className="p-8 text-center">
-            <p className="text-gray-500 mb-4">{t.noStrategies}</p>
-            <p className="text-sm text-gray-400">{t.noStrategiesDesc}</p>
-          </CardContent>
-        </Card>
+        <div className="bg-white border-2 border-gray-100 p-8 text-center" style={{clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))'}}>
+          <p className="text-gray-500 mb-4">{t.noStrategies}</p>
+          <p className="text-sm text-gray-400">{t.noStrategiesDesc}</p>
+        </div>
       ) : (
         <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
           {filtered.map((s) => (
-            <Card key={s.id} className="hover:shadow-lg transition group">
-              <CardHeader className="pb-2">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <CardTitle className="text-xl">{s.name}</CardTitle>
-                    <p className="text-sm text-gray-500 mt-1">{s.category}</p>
+            <div key={s.id} className="bg-white border-2 border-gray-100 hover:border-black p-5 shadow-lg hover:shadow-2xl transition-all group" style={{clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))'}}>
+              <div className="flex items-start justify-between mb-4">
+                <div>
+                  <h3 className="text-xl font-bold">{s.name}</h3>
+                  <p className="text-sm text-gray-500 mt-1">{s.category}</p>
+                </div>
+                <span className="px-2 py-1 bg-emerald-500 text-white text-xs font-bold" style={{clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'}}>
+                  {t.realData}
+                </span>
+              </div>
+
+              {/* Returns */}
+              <div className="grid grid-cols-4 gap-2 text-center mb-4">
+                <div className="p-2 bg-gray-50" style={{clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'}}>
+                  <div className={`text-sm font-bold ${(s.cagr || 0) >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                    {formatReturn(s.returns?.daily || (s.cagr / 365))}%
                   </div>
-                  <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full font-medium">
-                    {t.realData}
+                  <div className="text-xs text-gray-500">{t.daily}</div>
+                </div>
+                <div className="p-2 bg-gray-50" style={{clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'}}>
+                  <div className={`text-sm font-bold ${(s.cagr || 0) >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                    {formatReturn(s.returns?.weekly || (s.cagr / 52))}%
+                  </div>
+                  <div className="text-xs text-gray-500">{t.weekly}</div>
+                </div>
+                <div className="p-2 bg-gray-50" style={{clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'}}>
+                  <div className={`text-sm font-bold ${(s.cagr || 0) >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                    {formatReturn(s.returns?.monthly || (s.cagr / 12))}%
+                  </div>
+                  <div className="text-xs text-gray-500">{t.monthly}</div>
+                </div>
+                <div className="p-2 bg-gray-50" style={{clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'}}>
+                  <div className={`text-sm font-bold ${(s.cagr || 0) >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                    {formatReturn(s.cagr)}%
+                  </div>
+                  <div className="text-xs text-gray-500">{t.yearly}</div>
+                </div>
+              </div>
+
+              {/* Key Metrics */}
+              <div className="grid grid-cols-3 gap-4 text-sm mb-4">
+                <div>
+                  <div className="text-gray-500">{t.winRate}</div>
+                  <div className="font-bold">{s.winRate?.toFixed(1) || 0}%</div>
+                  </div>
+                <div>
+                  <div className="text-gray-500">{t.sharpe}</div>
+                  <div className="font-bold">{s.sharpe?.toFixed(2) || 0}</div>
+                </div>
+                <div>
+                  <div className="text-gray-500">{t.maxDD}</div>
+                  <div className="font-bold text-red-600">-{s.maxDD?.toFixed(1) || 0}%</div>
+                </div>
+              </div>
+
+              {/* Equity Curve */}
+              {s.history && s.history.length > 0 && (
+                <div className="h-28 mb-4 p-2 bg-gray-50" style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={s.history} margin={{ bottom: 15, left: 0, right: 0 }}>
+                      <XAxis 
+                        dataKey="year" 
+                        tick={{ fontSize: 9, fill: '#6b7280' }}
+                        tickLine={false}
+                        axisLine={{ stroke: '#e5e7eb' }}
+                        interval={'preserveStartEnd'}
+                        minTickGap={30}
+                      />
+                      <YAxis hide domain={['dataMin', 'dataMax']} />
+                      <Tooltip 
+                        formatter={(v) => [`$${v?.toLocaleString()}`, "Balance"]}
+                        labelFormatter={(l) => l}
+                        contentStyle={{ fontSize: 12, border: '2px solid black', borderRadius: 0 }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="value"
+                        stroke={s.cagr >= 0 ? "#10b981" : "#ef4444"}
+                        strokeWidth={2}
+                        dot={false}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+
+              {/* Tags */}
+              <div className="flex flex-wrap gap-1 mb-4">
+                {s.tags?.map((tag, i) => (
+                  <span key={i} className="px-2 py-0.5 bg-gray-100 text-gray-700 text-xs font-medium" style={{clipPath: 'polygon(0 0, calc(100% - 3px) 0, 100% 3px, 100% 100%, 3px 100%, 0 calc(100% - 3px))'}}>
+                    {tag}
                   </span>
-                </div>
-              </CardHeader>
-              <CardContent>
-                {/* Returns */}
-                <div className="grid grid-cols-4 gap-2 text-center mb-4">
-                  <div className="p-2 bg-gray-50 rounded">
-                    <div className={`text-sm font-semibold ${(s.cagr || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {formatReturn(s.returns?.daily || (s.cagr / 365))}%
-                    </div>
-                    <div className="text-xs text-gray-500">{t.daily}</div>
-                  </div>
-                  <div className="p-2 bg-gray-50 rounded">
-                    <div className={`text-sm font-semibold ${(s.cagr || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {formatReturn(s.returns?.weekly || (s.cagr / 52))}%
-                    </div>
-                    <div className="text-xs text-gray-500">{t.weekly}</div>
-                  </div>
-                  <div className="p-2 bg-gray-50 rounded">
-                    <div className={`text-sm font-semibold ${(s.cagr || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {formatReturn(s.returns?.monthly || (s.cagr / 12))}%
-                    </div>
-                    <div className="text-xs text-gray-500">{t.monthly}</div>
-                  </div>
-                  <div className="p-2 bg-gray-50 rounded">
-                    <div className={`text-sm font-semibold ${(s.cagr || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {formatReturn(s.cagr)}%
-                    </div>
-                    <div className="text-xs text-gray-500">{t.yearly}</div>
-                  </div>
-                </div>
+                ))}
+              </div>
 
-                {/* Key Metrics */}
-                <div className="grid grid-cols-3 gap-4 text-sm mb-4">
-                  <div>
-                    <div className="text-gray-500">{t.winRate}</div>
-                    <div className="font-semibold">{s.winRate?.toFixed(1) || 0}%</div>
-                  </div>
-                  <div>
-                    <div className="text-gray-500">{t.sharpe}</div>
-                    <div className="font-semibold">{s.sharpe?.toFixed(2) || 0}</div>
-                  </div>
-                  <div>
-                    <div className="text-gray-500">{t.maxDD}</div>
-                    <div className="font-semibold text-red-600">-{s.maxDD?.toFixed(1) || 0}%</div>
-                  </div>
-                </div>
+              {/* Last Updated */}
+              {s.updatedAt && (
+                <p className="text-xs text-gray-500 mb-3 font-medium">
+                  {t.updated}: {new Date(s.updatedAt).toLocaleString()}
+                </p>
+              )}
 
-                {/* Equity Curve */}
-                {s.history && s.history.length > 0 && (
-                  <div className="h-28 mb-4">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={s.history} margin={{ bottom: 15, left: 0, right: 0 }}>
-                        <XAxis 
-                          dataKey="year" 
-                          tick={{ fontSize: 9, fill: '#6b7280' }}
-                          tickLine={false}
-                          axisLine={{ stroke: '#e5e7eb' }}
-                          interval={'preserveStartEnd'}
-                          minTickGap={30}
-                        />
-                        <YAxis hide domain={['dataMin', 'dataMax']} />
-                        <Tooltip 
-                          formatter={(v) => [`$${v?.toLocaleString()}`, "Balance"]}
-                          labelFormatter={(l) => l}
-                          contentStyle={{ fontSize: 12 }}
-                        />
-                        <Line
-                          type="monotone"
-                          dataKey="value"
-                          stroke={s.cagr >= 0 ? "#22c55e" : "#ef4444"}
-                          strokeWidth={2}
-                          dot={false}
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </div>
-                )}
-
-                {/* Tags */}
-                <div className="flex flex-wrap gap-1 mb-4">
-                  {s.tags?.map((tag, i) => (
-                    <span key={i} className="px-2 py-0.5 bg-blue-50 text-blue-600 text-xs rounded">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-
-                {/* Last Updated */}
-                {s.updatedAt && (
-                  <p className="text-xs text-gray-400 mb-3">
-                    {t.updated}: {new Date(s.updatedAt).toLocaleString()}
-                  </p>
-                )}
-
-                {/* Actions */}
-                <div className="flex gap-2">
-                  <Link href={`/strategies/${s.id}`} className="flex-1">
-                    <Button variant="outline" className="w-full">
-                      {t.viewDetails}
-                    </Button>
-                  </Link>
-                  <Link href={`/strategies/${s.id}`} className="flex-1">
-                    <Button className="w-full">
-                      {t.useStrategy}
-                    </Button>
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
+              {/* Actions */}
+              <div className="flex gap-2">
+                <Link href={`/strategies/${s.id}`} className="flex-1">
+                  <button className="w-full px-4 py-2 border-2 border-gray-200 text-gray-800 font-bold hover:border-black hover:bg-gray-50 transition-all" style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'}}>
+                    {t.viewDetails}
+                  </button>
+                </Link>
+                <Link href={`/strategies/${s.id}`} className="flex-1">
+                  <button className="w-full px-4 py-2 bg-black text-white font-bold hover:bg-gray-800 transition-all" style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'}}>
+                    {t.useStrategy}
+                  </button>
+                </Link>
+              </div>
+            </div>
           ))}
         </div>
       )}
 
       {filtered.length === 0 && strategies.length > 0 && (
-        <Card>
-          <CardContent className="p-8 text-center">
-            <p className="text-gray-500">{t.noResults}</p>
-          </CardContent>
-        </Card>
+        <div className="bg-white border-2 border-gray-100 p-8 text-center" style={{clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))'}}>
+          <p className="text-gray-500">{t.noResults}</p>
+        </div>
       )}
 
       {/* Info Banner */}
-      <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800 flex items-start gap-3">
-        <svg className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div className="mt-8 p-4 bg-gray-900 text-white text-sm flex items-start gap-3" style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'}}>
+        <svg className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
         <span>{t.realDataBanner}</span>

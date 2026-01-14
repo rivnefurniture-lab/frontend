@@ -515,7 +515,7 @@ export default function LegalPage() {
         <div className="flex flex-col md:flex-row gap-8">
           {/* Sidebar Navigation */}
           <div className="md:w-64 flex-shrink-0">
-            <div className="bg-white rounded-xl border p-4 sticky top-24">
+            <div className="bg-white border-2 border-gray-100 p-4 sticky top-24" style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'}}>
               <nav className="space-y-2">
                 {sections.map((section) => (
                   <button
@@ -524,11 +524,12 @@ export default function LegalPage() {
                       setActiveSection(section.id);
                       window.history.replaceState(null, "", `#${section.id}`);
                     }}
-                    className={`w-full text-left px-4 py-2 rounded-lg transition ${
+                    className={`w-full text-left px-4 py-2 transition font-medium ${
                       activeSection === section.id
-                        ? "bg-blue-50 text-blue-600 font-medium"
+                        ? "bg-black text-white"
                         : "text-gray-600 hover:bg-gray-50"
                     }`}
+                    style={activeSection === section.id ? {clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'} : {}}
                     aria-current={activeSection === section.id ? "page" : undefined}
                   >
                     {section.title}
@@ -546,13 +547,13 @@ export default function LegalPage() {
                 id={section.id}
                 className={activeSection === section.id ? "block" : "hidden"}
               >
-                <div className="bg-white rounded-xl border p-8">
+                <div className="bg-white border-2 border-gray-100 p-8" style={{clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))'}}>
                   <h2 className="text-2xl font-bold mb-6">{section.title}</h2>
                   <div className="prose prose-gray max-w-none">
                     {section.content.split("\n").map((paragraph, i) => {
                       if (paragraph.trim().match(/^\d+\./)) {
                         return (
-                          <h3 key={i} className="font-semibold mt-6 mb-2 text-gray-900">
+                          <h3 key={i} className="font-bold mt-6 mb-2 text-gray-900">
                             {paragraph.trim()}
                           </h3>
                         );

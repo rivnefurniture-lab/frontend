@@ -56,11 +56,15 @@ export default function AboutPage() {
   return (
     <div className="min-h-screen">
       {/* Hero */}
-      <section className="bg-gradient-to-b from-blue-50 to-white py-20">
-        <div className="container max-w-4xl text-center">
+      <section className="bg-gradient-to-b from-gray-50 to-white py-20 relative overflow-hidden">
+        {/* Geometric decorations */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10" style={{clipPath: 'polygon(100% 0, 100% 100%, 0 0)'}}></div>
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-black/5" style={{clipPath: 'polygon(0 100%, 100% 100%, 0 0)'}}></div>
+        
+        <div className="container max-w-4xl text-center relative">
           <h1 className="text-4xl md:text-5xl font-bold mb-6">
             {language === "uk" ? "Аналітика ринку," : "Market Analytics,"}{" "}
-            <span className="text-blue-600">
+            <span className="text-emerald-600">
               {language === "uk" ? "просто" : "Made Simple"}
             </span>
           </h1>
@@ -90,12 +94,12 @@ export default function AboutPage() {
                 : "Every model on Algotcha is tested against real historical data, with transparent metrics that help you understand the true risk and potential outcome."}
             </p>
           </div>
-          <div className="bg-gradient-to-br from-blue-100 to-purple-100 rounded-2xl p-8">
+          <div className="bg-black p-8" style={{clipPath: 'polygon(0 0, calc(100% - 24px) 0, 100% 24px, 100% 100%, 24px 100%, 0 calc(100% - 24px))'}}>
             <div className="grid grid-cols-2 gap-6 text-center">
               {stats.map((stat, i) => (
-                <div key={i}>
-                  <div className="text-4xl font-bold text-blue-600">{stat.value}</div>
-                  <div className="text-sm text-gray-600">{stat.label}</div>
+                <div key={i} className="p-4 bg-white/10" style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}>
+                  <div className="text-4xl font-bold text-emerald-400">{stat.value}</div>
+                  <div className="text-sm text-gray-300">{stat.label}</div>
                 </div>
               ))}
             </div>
@@ -111,9 +115,11 @@ export default function AboutPage() {
           </h2>
           <div className="grid md:grid-cols-3 gap-8">
             {features.map((feature, i) => (
-              <div key={i} className="bg-white p-6 rounded-2xl shadow-sm">
-                <div className="text-3xl mb-4">{feature.icon}</div>
-                <h3 className="font-semibold text-lg mb-2">{feature.title}</h3>
+              <div key={i} className="bg-white p-6 border-2 border-gray-100 hover:border-black transition-all shadow-sm" style={{clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))'}}>
+                <div className="w-12 h-12 bg-black flex items-center justify-center text-2xl mb-4" style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}>
+                  {feature.icon}
+                </div>
+                <h3 className="font-bold text-lg mb-2">{feature.title}</h3>
                 <p className="text-gray-600 text-sm">{feature.description}</p>
               </div>
             ))}
