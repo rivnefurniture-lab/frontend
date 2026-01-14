@@ -111,7 +111,7 @@ export default function Page() {
         {loading ? (
           <div className="grid md:grid-cols-3 gap-6">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-gray-100 p-5 rounded-2xl h-32 animate-pulse" />
+              <div key={i} className="bg-gray-100 p-5 h-32 animate-pulse" style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'}} />
             ))}
           </div>
         ) : strategies.length > 0 ? (
@@ -120,29 +120,30 @@ export default function Page() {
             <Link
               key={s.id}
               href={`/strategies/${s.id}`}
-              className="block bg-white p-5 rounded-2xl shadow-soft border border-gray-100 hover:-translate-y-0.5 transition"
+              className="block bg-white p-5 shadow-lg border-2 border-gray-100 hover:border-black hover:-translate-y-1 hover:shadow-2xl transition-all"
+              style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'}}
             >
                 <div className="flex items-start justify-between">
                   <div>
-              <h3 className="font-semibold">{s.name}</h3>
+              <h3 className="font-bold text-gray-900">{s.name}</h3>
               <p className="text-sm text-gray-500">{s.category}</p>
                   </div>
-                  <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full">
+                  <span className="px-2 py-0.5 bg-black text-white text-xs font-bold uppercase tracking-wider" style={{clipPath: 'polygon(4px 0, 100% 0, 100% 100%, 0 100%, 0 4px)'}}>
                     {language === "uk" ? "Модель" : "Model"}
                   </span>
                 </div>
-              <div className="mt-3 flex items-center gap-3 text-sm">
-                  <div className="flex items-center gap-1 text-gray-600">
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="mt-4 flex items-center gap-4 text-sm">
+                  <div className="flex items-center gap-1.5 text-gray-700">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                     </svg>
-                    <span>{language === "uk" ? "Шарп" : "Sharpe"}: {s.sharpe?.toFixed(2) || 'N/A'}</span>
+                    <span className="font-semibold">{language === "uk" ? "Шарп" : "Sharpe"}: {s.sharpe?.toFixed(2) || 'N/A'}</span>
                   </div>
-                  <div className="flex items-center gap-1 text-gray-600">
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="flex items-center gap-1.5 text-gray-700">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
                     </svg>
-                    <span>DD: {s.maxDD?.toFixed(1) || 0}%</span>
+                    <span className="font-semibold">DD: {s.maxDD?.toFixed(1) || 0}%</span>
                   </div>
                 </div>
               </Link>
@@ -155,8 +156,8 @@ export default function Page() {
           </div>
         )}
 
-        <div className="mt-6 p-4 bg-blue-50 border border-blue-100 rounded-lg text-sm text-blue-800 flex items-start gap-3">
-          <svg className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="mt-6 p-4 bg-gray-900 text-white text-sm flex items-start gap-3" style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}>
+          <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           <span>{t("landing.metricsNote")}</span>
@@ -164,10 +165,11 @@ export default function Page() {
       </section>
 
       {/* How it Works */}
-      <section className="bg-gradient-to-b from-white via-gray-50 to-white py-20">
-        <div className="container">
+      <section className="bg-gray-50 py-20 relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-64 h-64 bg-black opacity-5" style={{clipPath: 'polygon(0 0, 100% 0, 0 100%)'}}></div>
+        <div className="container relative">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent">
+            <h2 className="text-4xl font-bold mb-4 text-black">
               {t("landing.howItWorks")}
             </h2>
             <p className="text-gray-600 text-lg max-w-2xl mx-auto">
@@ -248,7 +250,7 @@ export default function Page() {
 
           <div className="text-center">
             <Link href="/auth?mode=signup">
-              <button className="bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white px-10 py-4 rounded-xl font-semibold text-lg shadow-xl hover:shadow-2xl transition-all transform hover:scale-105">
+              <button className="bg-black hover:bg-gray-900 text-white px-10 py-4 font-bold text-lg shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-0.5" style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'}}>
                 {t("landing.getStartedFree")}
               </button>
             </Link>
@@ -433,24 +435,24 @@ export default function Page() {
       </section>
 
       {/* CTA */}
-      <section className="relative bg-gradient-to-r from-indigo-600 via-blue-600 to-indigo-700 py-20 overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-10 left-10 w-72 h-72 bg-white rounded-full filter blur-3xl"></div>
-          <div className="absolute bottom-10 right-10 w-96 h-96 bg-white rounded-full filter blur-3xl"></div>
+      <section className="relative bg-black py-24 overflow-hidden">
+        <div className="absolute inset-0 opacity-20">
+          <div className="absolute inset-0" style={{backgroundImage: 'linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)', backgroundSize: '40px 40px'}}></div>
         </div>
+        <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500 opacity-10" style={{clipPath: 'polygon(100% 0, 100% 100%, 0 0)'}}></div>
         <div className="container text-center text-white relative">
           <h2 className="text-4xl md:text-5xl font-bold mb-6">{t("landing.readyToAutomate")}</h2>
-          <p className="text-indigo-100 text-lg mb-10 max-w-2xl mx-auto">
+          <p className="text-gray-400 text-lg mb-10 max-w-2xl mx-auto">
             {t("landing.ctaSubtitle")}
           </p>
           <div className="flex gap-4 justify-center flex-wrap">
             <Link href="/auth?mode=signup">
-              <button className="bg-white text-indigo-600 px-10 py-4 rounded-xl font-semibold text-lg hover:bg-indigo-50 transition-all shadow-2xl hover:shadow-xl hover:scale-105">
+              <button className="bg-white text-black px-10 py-4 font-bold text-lg hover:bg-gray-100 transition-all shadow-2xl hover:-translate-y-0.5" style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'}}>
                 {t("landing.createFreeAccount")}
               </button>
             </Link>
             <Link href="/strategies">
-              <button className="border-2 border-white text-white px-10 py-4 rounded-xl font-semibold text-lg hover:bg-white/20 backdrop-blur transition-all">
+              <button className="border-2 border-white text-white px-10 py-4 font-bold text-lg hover:bg-white hover:text-black transition-all" style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'}}>
                 {t("landing.viewStrategies")}
               </button>
             </Link>

@@ -131,8 +131,8 @@ function BalanceWidget() {
   return (
     <div className="flex items-center gap-2">
       {/* Balance Display */}
-      <div className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-100">
-        <Wallet className="w-4 h-4 text-blue-600" />
+      <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 border-2 border-gray-200">
+        <Wallet className="w-4 h-4 text-gray-700" />
         <div className="flex flex-col">
           <span className="text-xs text-gray-500 leading-none">
             {language === "uk" ? "Баланс" : "Balance"}
@@ -271,7 +271,7 @@ function UserDropdown({ user, onLogout }) {
             className="w-8 h-8 rounded-full object-cover border-2 border-white shadow-sm"
           />
         ) : (
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-xs font-semibold">
+          <div className="w-8 h-8 bg-black flex items-center justify-center text-white text-xs font-bold">
             {initials}
           </div>
         )}
@@ -282,9 +282,9 @@ function UserDropdown({ user, onLogout }) {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-          <div className="px-4 py-3 border-b border-gray-100">
-            <p className="font-semibold text-gray-900 truncate">{user.name || "Trader"}</p>
+        <div className="absolute right-0 top-full mt-2 w-64 bg-white shadow-2xl border-2 border-gray-100 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="px-4 py-3 border-b-2 border-gray-100">
+            <p className="font-bold text-gray-900 truncate">{user.name || "User"}</p>
             <p className="text-sm text-gray-500 truncate">{user.email}</p>
           </div>
 
@@ -398,25 +398,25 @@ export default function Navbar() {
   };
 
   return (
-    <header className="bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-b border-gray-100 sticky top-0 z-40">
+    <header className="bg-white/95 backdrop-blur-md supports-[backdrop-filter]:bg-white/80 border-b-2 border-gray-100 sticky top-0 z-40">
       <div className="container h-16 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2">
-          <img src="/logo.svg" alt="Algotcha" className="h-8" />
+        <Link href="/" className="flex items-center gap-2 group">
+          <img src="/logo.svg" alt="Algotcha" className="h-7 transition-transform group-hover:scale-105" />
         </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden md:flex items-center gap-5">
+        <nav className="hidden md:flex items-center gap-6">
           {nav.map((n) => {
             const isActive = pathname === n.to;
             return (
               <Link
                 key={n.to}
                 href={n.to}
-                className={
+                className={`font-medium transition-colors relative ${
                   isActive
-                    ? "text-blue-600 font-medium"
-                    : "text-gray-700 hover:text-blue-600"
-                }
+                    ? "text-black after:absolute after:bottom-[-4px] after:left-0 after:w-full after:h-0.5 after:bg-black"
+                    : "text-gray-600 hover:text-black"
+                }`}
               >
                 {n.label}
               </Link>
@@ -428,19 +428,19 @@ export default function Navbar() {
         <div className="hidden md:flex items-center gap-3">
           {user && <BalanceWidget />}
           
-          <div className="h-6 w-px bg-gray-200"></div>
+          <div className="h-6 w-px bg-gray-300"></div>
           
           <LanguageSwitcher />
           
           {!user ? (
             <>
               <Link href="/auth">
-                <Button variant="ghost" size="sm">
+                <Button variant="ghost" size="sm" className="text-gray-700 hover:text-black hover:bg-gray-100">
                   {t("nav.signIn")}
                 </Button>
               </Link>
               <Link href="/auth?mode=signup">
-                <Button size="sm" className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
+                <Button size="sm" className="bg-black hover:bg-gray-900 text-white font-semibold shadow-lg hover:shadow-xl transition-all">
                   {t("nav.getStarted")}
                 </Button>
               </Link>

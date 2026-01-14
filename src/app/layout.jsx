@@ -14,11 +14,11 @@ if (typeof window !== 'undefined') {
 
 export const metadata = {
   title: {
-    default: "Algotcha - Algorithmic Crypto Trading Made Simple",
+    default: "Algotcha - Market Analysis Platform",
     template: "%s | Algotcha"
   },
-  description: "Automate your crypto trading with proven algorithmic strategies. Backtest on 5 years of real data, connect your exchange, and trade 24/7. Support for Binance, Bybit, and OKX.",
-  keywords: ["algorithmic trading", "crypto trading", "trading bot", "binance bot", "automated trading", "backtest", "RSI", "MACD", "trading strategy", "bitcoin", "ethereum"],
+  description: "Automate your market analysis with powerful analytical models. Backtest on 5 years of real data. SaaS platform for data research and strategy simulation.",
+  keywords: ["market analysis", "data analytics", "backtest", "strategy simulation", "SaaS platform", "analytical models", "data research"],
   authors: [{ name: "Algotcha" }],
   creator: "Algotcha",
   metadataBase: new URL("https://algotcha.com"),
@@ -27,8 +27,8 @@ export const metadata = {
     locale: "en_US",
     url: "https://algotcha.com",
     siteName: "Algotcha",
-    title: "Algotcha - Algorithmic Crypto Trading Made Simple",
-    description: "Automate your crypto trading with proven algorithmic strategies. Backtest on 5 years of real data, connect your exchange, and trade 24/7.",
+    title: "Algotcha - Market Analysis Platform",
+    description: "Automate your market analysis with powerful analytical models. Backtest on 5 years of real data. SaaS platform for data research.",
     images: [
       {
         url: "/og-image.png",
@@ -40,8 +40,8 @@ export const metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Algotcha - Algorithmic Crypto Trading Made Simple",
-    description: "Automate your crypto trading with proven algorithmic strategies. Backtest on 5 years of real data.",
+    title: "Algotcha - Market Analysis Platform",
+    description: "Automate your market analysis with powerful analytical models. Backtest on 5 years of real data.",
     images: ["/og-image.png"],
     creator: "@algotcha",
   },
