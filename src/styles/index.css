@@ -2,7 +2,7 @@
 
 @layer base {
   :root {
-    --color-brand: #2563eb;
+    --color-brand: #000000;
     --color-brand-foreground: #ffffff;
   }
 }
