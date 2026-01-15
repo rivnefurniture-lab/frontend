@@ -1,9 +1,39 @@
 // Trading Mode Configuration
 // This file controls whether the platform shows crypto or traditional stocks/commodities
 
+// Check localStorage for runtime override (client-side only)
+const getStoredMode = () => {
+  if (typeof window !== 'undefined') {
+    const stored = localStorage.getItem('TRADING_MODE');
+    if (stored === 'crypto' || stored === 'stocks') {
+      return stored;
+    }
+  }
+  return null;
+};
+
 // Modes: 'crypto' | 'stocks'
-// Default mode - can be changed via admin panel or environment variable
-export const TRADING_MODE = process.env.NEXT_PUBLIC_TRADING_MODE || 'stocks';
+// Priority: localStorage > env var > default ('stocks')
+export const TRADING_MODE = getStoredMode() || process.env.NEXT_PUBLIC_TRADING_MODE || 'stocks';
+
+// Function to get current mode (checks localStorage each time for reactivity)
+export function getCurrentTradingMode() {
+  if (typeof window !== 'undefined') {
+    const stored = localStorage.getItem('TRADING_MODE');
+    if (stored === 'crypto' || stored === 'stocks') {
+      return stored;
+    }
+  }
+  return process.env.NEXT_PUBLIC_TRADING_MODE || 'stocks';
+}
+
+// Function to set trading mode (stores in localStorage and reloads)
+export function setTradingMode(mode) {
+  if (typeof window !== 'undefined' && (mode === 'crypto' || mode === 'stocks')) {
+    localStorage.setItem('TRADING_MODE', mode);
+    window.location.reload();
+  }
+}
 
 // ============================================
 // CRYPTO MODE CONFIGURATION
@@ -204,7 +234,8 @@ export const STOCKS_CONFIG = {
 
 // Get current configuration based on mode
 export function getCurrentConfig() {
-  return TRADING_MODE === 'crypto' ? CRYPTO_CONFIG : STOCKS_CONFIG;
+  const mode = getCurrentTradingMode();
+  return mode === 'crypto' ? CRYPTO_CONFIG : STOCKS_CONFIG;
 }
 
 // Get trading pairs
@@ -229,19 +260,18 @@ export function getPartners() {
 
 // Check if in crypto mode
 export function isCryptoMode() {
-  return TRADING_MODE === 'crypto';
+  return getCurrentTradingMode() === 'crypto';
 }
 
 // Check if in stocks mode
 export function isStocksMode() {
-  return TRADING_MODE === 'stocks';
+  return getCurrentTradingMode() === 'stocks';
 }
 
 // Get mode label
 export function getModeLabel(language = 'en') {
-  if (TRADING_MODE === 'crypto') {
+  if (getCurrentTradingMode() === 'crypto') {
     return language === 'uk' ? 'Криптовалюти' : 'Crypto';
   }
   return language === 'uk' ? 'Акції та товари' : 'Stocks & Commodities';
 }
-
