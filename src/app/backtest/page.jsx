@@ -22,6 +22,7 @@ import {
   AreaChart,
   Area,
 } from "recharts";
+import { getTradingPairs, getDefaultPair, isCryptoMode, STOCKS_CONFIG } from "@/config/tradingMode";
 
 // INDICATORS matching backtest2.py exactly
 const INDICATORS = [
@@ -61,11 +62,9 @@ const PSAR_PRESETS = [
 ];
 const TRADINGVIEW_SIGNALS = ["Buy", "Strong Buy", "Sell", "Strong Sell", "Neutral"];
 
-const PAIRS = [
-  "ETH/USDT", "SOL/USDT", "XRP/USDT", "ADA/USDT", "DOGE/USDT", 
-  "AVAX/USDT", "LINK/USDT", "DOT/USDT", "NEAR/USDT", "LTC/USDT", 
-  "HBAR/USDT", "SUI/USDT", "RENDER/USDT", "ATOM/USDT"
-];
+// Get pairs from config based on trading mode
+const PAIRS = getTradingPairs();
+const DEFAULT_PAIR = getDefaultPair();
 
 function ConditionBuilder({ condition, onChange, onRemove }) {
   const handleChange = (key, value) => {
@@ -429,7 +428,7 @@ export default function BacktestPage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const [strategyName, setStrategyName] = useState("My Strategy");
-  const [selectedPairs, setSelectedPairs] = useState(["BTC/USDT"]);
+  const [selectedPairs, setSelectedPairs] = useState([DEFAULT_PAIR]);
   const [maxActiveDeals, setMaxActiveDeals] = useState(1);
   const [initialBalance, setInitialBalance] = useState(10000);
   

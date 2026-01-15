@@ -9,72 +9,108 @@ import { apiFetch } from "@/lib/api";
 import { useAuth } from "@/context/AuthProvider";
 import { useLanguage } from "@/context/LanguageContext";
 import Link from "next/link";
+import { TRADING_MODE, getExchanges, isCryptoMode } from "@/config/tradingMode";
 
-const DATA_SOURCES = [
-  {
-    id: "binance",
-    name: "Binance",
-    icon: <svg className="w-6 h-6 text-yellow-500" viewBox="0 0 126 126" fill="currentColor"><path d="M63 0L78.75 25.2H47.25L63 0Z"/><path d="M63 126L47.25 100.8H78.75L63 126Z"/><path d="M31.5 37.8L0 63L31.5 88.2V63V37.8Z"/><path d="M94.5 37.8V63V88.2L126 63L94.5 37.8Z"/><path d="M31.5 63L63 37.8L94.5 63L63 88.2L31.5 63Z"/></svg>,
-    color: "from-yellow-400 to-yellow-600",
-    description: { en: "Market data provider", uk: "Постачальник ринкових даних" },
-    fields: ["apiKey", "secret"],
-    testnetUrl: "https://testnet.binance.vision/",
-    docsUrl: "https://www.binance.com/en/support/faq/how-to-create-api-keys-on-binance-360002502072"
-  },
-  {
-    id: "bybit",
-    name: "Bybit",
-    icon: <svg className="w-6 h-6 text-orange-500" viewBox="0 0 32 32" fill="currentColor"><path d="M16 2L2 9v7l14 7 14-7V9L16 2zm0 4l9 4.5-9 4.5-9-4.5L16 6z"/></svg>,
-    color: "from-orange-400 to-orange-600",
-    description: { en: "Real-time data feed", uk: "Потік даних в реальному часі" },
-    fields: ["apiKey", "secret"],
-    testnetUrl: "https://testnet.bybit.com/",
-    docsUrl: "https://learn.bybit.com/bybit-guide/how-to-create-bybit-api-key/"
-  },
-  {
-    id: "okx",
-    name: "OKX",
-    icon: <div className="text-xl font-black text-gray-700">OKX</div>,
-    color: "from-gray-700 to-gray-900",
-    description: { en: "Advanced data platform", uk: "Просунута платформа даних" },
-    fields: ["apiKey", "secret", "password"],
-    testnetUrl: "https://www.okx.com/docs-v5/en/",
-    docsUrl: "https://www.okx.com/support/hc/en-us/articles/360048917891"
-  },
-  {
-    id: "kraken",
-    name: "Kraken",
-    icon: <svg className="w-6 h-6 text-gray-800" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/><path d="M12 6c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6z"/></svg>,
-    color: "from-gray-600 to-gray-800",
-    description: { en: "Reliable US data source", uk: "Надійне джерело даних США" },
-    fields: ["apiKey", "secret"],
-    testnetUrl: "https://docs.kraken.com/rest/",
-    docsUrl: "https://support.kraken.com/hc/en-us/articles/360000919966"
-  },
-  {
-    id: "kucoin",
-    name: "KuCoin",
-    icon: <svg className="w-6 h-6 text-green-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>,
-    color: "from-green-400 to-emerald-600",
-    description: { en: "Comprehensive market data", uk: "Комплексні ринкові дані" },
-    fields: ["apiKey", "secret", "password"],
-    testnetUrl: "https://www.kucoin.com/docs/",
-    docsUrl: "https://www.kucoin.com/support/360015102174"
-  },
-  {
-    id: "coinbase",
-    name: "Coinbase",
-    icon: <svg className="w-6 h-6 text-gray-800" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path fill="white" d="M12 7a5 5 0 100 10 5 5 0 000-10z"/></svg>,
-    color: "from-gray-700 to-gray-900",
-    description: { en: "Leading data provider", uk: "Провідний постачальник даних" },
-    fields: ["apiKey", "secret"],
-    testnetUrl: "https://docs.cloud.coinbase.com/",
-    docsUrl: "https://help.coinbase.com/en/exchange/managing-my-account/how-to-create-an-api-key"
+// Broker/Exchange Icons
+const BrokerIcon = ({ id, className = "w-6 h-6" }) => {
+  switch (id) {
+    case "interactive_brokers":
+      return (
+        <div className={`${className} flex items-center justify-center font-black text-red-700`}>
+          <span className="text-lg">IB</span>
+        </div>
+      );
+    case "thinkorswim":
+      return (
+        <svg className={`${className} text-green-600`} viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+        </svg>
+      );
+    case "alpaca":
+      return (
+        <div className={`${className} flex items-center justify-center font-black text-yellow-600`}>
+          <span className="text-lg">🦙</span>
+        </div>
+      );
+    case "tradier":
+      return (
+        <svg className={`${className} text-purple-600`} viewBox="0 0 24 24" fill="currentColor">
+          <circle cx="12" cy="12" r="10"/>
+          <path fill="white" d="M8 8h8v2H8zM8 12h8v2H8zM8 16h5v2H8z"/>
+        </svg>
+      );
+    case "tradestation":
+      return (
+        <svg className={`${className} text-blue-700`} viewBox="0 0 24 24" fill="currentColor">
+          <rect x="3" y="3" width="18" height="18" rx="2"/>
+          <path fill="white" d="M7 7h10v2H7zM7 11h7v2H7zM7 15h10v2H7z"/>
+        </svg>
+      );
+    case "firstrade":
+      return (
+        <div className={`${className} flex items-center justify-center font-black text-orange-600`}>
+          <span className="text-lg">F</span>
+        </div>
+      );
+    // Crypto exchanges
+    case "binance":
+      return (
+        <svg className={`${className} text-yellow-500`} viewBox="0 0 126 126" fill="currentColor">
+          <path d="M63 0L78.75 25.2H47.25L63 0Z"/>
+          <path d="M63 126L47.25 100.8H78.75L63 126Z"/>
+          <path d="M31.5 37.8L0 63L31.5 88.2V63V37.8Z"/>
+          <path d="M94.5 37.8V63V88.2L126 63L94.5 37.8Z"/>
+          <path d="M31.5 63L63 37.8L94.5 63L63 88.2L31.5 63Z"/>
+        </svg>
+      );
+    case "bybit":
+      return (
+        <svg className={`${className} text-orange-500`} viewBox="0 0 32 32" fill="currentColor">
+          <path d="M16 2L2 9v7l14 7 14-7V9L16 2zm0 4l9 4.5-9 4.5-9-4.5L16 6z"/>
+        </svg>
+      );
+    case "okx":
+      return <div className={`${className} flex items-center justify-center text-xl font-black text-gray-700`}>OKX</div>;
+    case "kraken":
+      return (
+        <svg className={`${className} text-gray-800`} fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+          <path d="M12 6c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6z"/>
+        </svg>
+      );
+    case "kucoin":
+      return (
+        <svg className={`${className} text-green-500`} fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+        </svg>
+      );
+    case "coinbase":
+      return (
+        <svg className={`${className} text-gray-800`} fill="currentColor" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10"/>
+          <path fill="white" d="M12 7a5 5 0 100 10 5 5 0 000-10z"/>
+        </svg>
+      );
+    default:
+      return (
+        <svg className={`${className} text-gray-500`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z"/>
+        </svg>
+      );
   }
-];
+};
+
+// Get data sources based on mode
+const getDataSources = () => {
+  const exchanges = getExchanges();
+  return exchanges.map(ex => ({
+    ...ex,
+    icon: <BrokerIcon id={ex.id} className="w-6 h-6" />
+  }));
+};
 
 function DataSourceCard({ exchange, onConnect, onDisconnect, isConnected, t, language }) {
-  const [form, setForm] = useState({ testnet: false }); // Default: REAL money
+  const [form, setForm] = useState({ testnet: false });
   const [loading, setLoading] = useState(false);
   const [testing, setTesting] = useState(false);
   const [disconnecting, setDisconnecting] = useState(false);
@@ -85,7 +121,6 @@ function DataSourceCard({ exchange, onConnect, onDisconnect, isConnected, t, lan
   const [showSecret, setShowSecret] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  // Update showForm when isConnected changes
   useEffect(() => {
     setShowForm(!isConnected);
   }, [isConnected]);
@@ -108,6 +143,12 @@ function DataSourceCard({ exchange, onConnect, onDisconnect, isConnected, t, lan
       if (exchange.fields.includes("password") && form.password) {
         payload.password = form.password;
       }
+      if (exchange.fields.includes("accountId") && form.accountId) {
+        payload.accountId = form.accountId;
+      }
+      if (exchange.fields.includes("refreshToken") && form.refreshToken) {
+        payload.refreshToken = form.refreshToken;
+      }
       
       const result = await apiFetch("/exchange/connect", {
         method: "POST",
@@ -117,7 +158,7 @@ function DataSourceCard({ exchange, onConnect, onDisconnect, isConnected, t, lan
       if (result?.ok) {
         setStatus({ ok: true, msg: t.connectedSuccess });
         setShowForm(false);
-        setForm({ testnet: false }); // Clear sensitive data, keep real mode
+        setForm({ testnet: false });
         onConnect?.(exchange.id);
       } else {
         throw new Error(result?.message || t.connectionFailed);
@@ -178,6 +219,31 @@ function DataSourceCard({ exchange, onConnect, onDisconnect, isConnected, t, lan
     }
   };
 
+  // Get field labels based on field type
+  const getFieldLabel = (field) => {
+    switch (field) {
+      case "apiKey": return t.apiKey;
+      case "secret": return t.apiSecret;
+      case "password": return t.passphrase;
+      case "accountId": return language === "uk" ? "ID Акаунту" : "Account ID";
+      case "refreshToken": return language === "uk" ? "Refresh Token" : "Refresh Token";
+      case "username": return language === "uk" ? "Ім'я користувача" : "Username";
+      default: return field;
+    }
+  };
+
+  const getFieldPlaceholder = (field) => {
+    switch (field) {
+      case "apiKey": return t.enterApiKey;
+      case "secret": return t.enterApiSecret;
+      case "password": return t.enterPassphrase;
+      case "accountId": return language === "uk" ? "Введіть ID акаунту" : "Enter account ID";
+      case "refreshToken": return language === "uk" ? "Введіть refresh token" : "Enter refresh token";
+      case "username": return language === "uk" ? "Введіть ім'я користувача" : "Enter username";
+      default: return `Enter ${field}`;
+    }
+  };
+
   return (
     <div className={`bg-white border-2 overflow-hidden ${isConnected ? 'border-emerald-500' : 'border-gray-100 hover:border-black'} transition-all`} style={{clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))'}}>
       <div className={`h-2 bg-gradient-to-r ${exchange.color}`}></div>
@@ -201,7 +267,7 @@ function DataSourceCard({ exchange, onConnect, onDisconnect, isConnected, t, lan
             <p className="text-sm font-normal text-gray-500 truncate">{exchange.description[language]}</p>
           </div>
         </div>
-        {/* Connected state - no form, just actions */}
+        
         {isConnected && !showForm ? (
           <div className="space-y-4">
             <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-start gap-3">
@@ -260,7 +326,6 @@ function DataSourceCard({ exchange, onConnect, onDisconnect, isConnected, t, lan
             )}
           </div>
         ) : (
-          /* Form to connect/update */
           <form onSubmit={submit} className="space-y-4">
             {isConnected && (
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-sm text-yellow-700">
@@ -268,80 +333,46 @@ function DataSourceCard({ exchange, onConnect, onDisconnect, isConnected, t, lan
               </div>
             )}
             
-            <div>
-              <label className="text-sm font-medium block mb-1">{t.apiKey}</label>
-              <div className="relative">
-                <Input
-                  type={showKey ? "text" : "password"}
-                  placeholder={t.enterApiKey}
-                  value={form.apiKey || ""}
-              onChange={(e) => handle("apiKey", e.target.value)}
-                  required
-                  className="pr-10"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowKey(!showKey)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  {showKey ? "🙈" : "👁️"}
-                </button>
-              </div>
-            </div>
-            
-            <div>
-              <label className="text-sm font-medium block mb-1">{t.apiSecret}</label>
-              <div className="relative">
-                <Input
-                  type={showSecret ? "text" : "password"}
-                  placeholder={t.enterApiSecret}
-                  value={form.secret || ""}
-              onChange={(e) => handle("secret", e.target.value)}
-                  required
-                  className="pr-10"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowSecret(!showSecret)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  {showSecret ? "🙈" : "👁️"}
-                </button>
-              </div>
-            </div>
-            
-            {exchange.fields.includes("password") && (
-              <div>
-                <label className="text-sm font-medium block mb-1">{t.passphrase}</label>
+            {exchange.fields.map((field) => (
+              <div key={field}>
+                <label className="text-sm font-medium block mb-1">{getFieldLabel(field)}</label>
                 <div className="relative">
                   <Input
-                    type={showPassword ? "text" : "password"}
-                    placeholder={t.enterPassphrase}
-                    value={form.password || ""}
-              onChange={(e) => handle("password", e.target.value)}
-                    required
+                    type={field === "apiKey" ? (showKey ? "text" : "password") : 
+                          field === "secret" ? (showSecret ? "text" : "password") :
+                          field === "password" ? (showPassword ? "text" : "password") : "text"}
+                    placeholder={getFieldPlaceholder(field)}
+                    value={form[field] || ""}
+                    onChange={(e) => handle(field, e.target.value)}
+                    required={field !== "refreshToken"}
                     className="pr-10"
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                  >
-                    {showPassword ? "🙈" : "👁️"}
-                  </button>
+                  {(field === "apiKey" || field === "secret" || field === "password") && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (field === "apiKey") setShowKey(!showKey);
+                        else if (field === "secret") setShowSecret(!showSecret);
+                        else setShowPassword(!showPassword);
+                      }}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                      {(field === "apiKey" && showKey) || (field === "secret" && showSecret) || (field === "password" && showPassword) ? "🙈" : "👁️"}
+                    </button>
+                  )}
                 </div>
               </div>
-            )}
+            ))}
             
             <label className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={form.testnet}
-              onChange={(e) => handle("testnet", e.target.checked)}
+              <input
+                type="checkbox"
+                checked={form.testnet}
+                onChange={(e) => handle("testnet", e.target.checked)}
                 className="rounded"
               />
               <span>{t.useTestnet}</span>
-          </label>
+            </label>
             
             <div className="flex gap-2">
               <button type="submit" disabled={loading} className="flex-1 px-4 py-2.5 bg-black text-white font-bold hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2" style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}>
@@ -358,14 +389,14 @@ function DataSourceCard({ exchange, onConnect, onDisconnect, isConnected, t, lan
                   {t.cancel}
                 </button>
               )}
-          </div>
+            </div>
             
-          {status && (
+            {status && (
               <p className={`text-sm ${status.ok ? "text-green-600" : "text-red-600"}`}>
-              {status.msg}
-            </p>
-          )}
-        </form>
+                {status.msg}
+              </p>
+            )}
+          </form>
         )}
         
         <div className="mt-4 pt-4 border-t-2 border-gray-100 flex gap-4 text-xs">
@@ -377,7 +408,7 @@ function DataSourceCard({ exchange, onConnect, onDisconnect, isConnected, t, lan
           >
             {t.howToCreate} →
           </a>
-          {!isConnected && (
+          {!isConnected && exchange.testnetUrl && (
             <a 
               href={exchange.testnetUrl} 
               target="_blank" 
@@ -399,8 +430,9 @@ export default function ConnectPage() {
   const router = useRouter();
   const [connectedExchanges, setConnectedExchanges] = useState([]);
   const [loadingConnections, setLoadingConnections] = useState(true);
+  
+  const DATA_SOURCES = getDataSources();
 
-  // Fetch existing connections on mount
   useEffect(() => {
     if (user) {
       fetchConnectedExchanges();
@@ -412,14 +444,12 @@ export default function ConnectPage() {
   const fetchConnectedExchanges = async () => {
     try {
       const result = await apiFetch("/exchange/connections");
-      // Result is an array of connections directly
       if (Array.isArray(result)) {
         const connected = result
           .filter(c => c.isConnected || c.isActive)
           .map(c => c.exchange);
         setConnectedExchanges(connected);
       } else if (result?.connections) {
-        // Fallback for wrapped response
         const connected = result.connections
           .filter(c => c.isConnected || c.isActive)
           .map(c => c.exchange);
@@ -432,11 +462,15 @@ export default function ConnectPage() {
     }
   };
 
+  const brokerLabel = isCryptoMode() 
+    ? (language === "uk" ? "біржі" : "exchange")
+    : (language === "uk" ? "брокера" : "broker");
+
   const t = {
-    title: language === "uk" ? "Підключення джерела даних" : "Connect Data Source",
+    title: language === "uk" ? `Підключення ${brokerLabel}` : `Connect ${brokerLabel.charAt(0).toUpperCase() + brokerLabel.slice(1)}`,
     subtitle: language === "uk" 
-      ? "Підключіть джерело даних для автоматичного аналізу. Нам потрібні лише права на читання - ніколи на запис." 
-      : "Connect your data source to start automated analysis. We only need read-only permissions - never write access.",
+      ? `Підключіть ${brokerLabel} для автоматичного аналізу. Нам потрібні лише права на читання - ніколи на запис.` 
+      : `Connect your ${brokerLabel} to start automated analysis. We only need read-only permissions - never write access.`,
     securityTitle: language === "uk" ? "🔒 Безпека насамперед" : "🔒 Security First",
     securityItem1: language === "uk" ? "API ключі зберігаються зашифрованими і ніколи не передаються" : "API keys are stored encrypted and never shared",
     securityItem2: language === "uk" ? "Створюйте ключі лише з правами на читання" : "Create keys with read-only permissions",
@@ -444,8 +478,8 @@ export default function ConnectPage() {
     securityItem4: language === "uk" ? "Ви можете відкликати доступ у будь-який час від провайдера" : "You can revoke access anytime from your provider",
     ipTitle: language === "uk" ? "🌐 Білий список IP (Рекомендовано)" : "🌐 IP Whitelisting (Recommended)",
     ipText: language === "uk" 
-      ? "Для максимальної безпеки додайте IP нашого сервера у білий список у провайдера:" 
-      : "For maximum security, whitelist our server IP on your data provider:",
+      ? `Для максимальної безпеки додайте IP нашого сервера у білий список у ${brokerLabel}:` 
+      : `For maximum security, whitelist our server IP on your ${brokerLabel}:`,
     ipNote: language === "uk" 
       ? "Це гарантує, що тільки наш сервер може отримувати дані з вашими API ключами." 
       : "This ensures only our server can access data with your API keys.",
@@ -453,8 +487,8 @@ export default function ConnectPage() {
     copied: language === "uk" ? "Скопійовано!" : "Copied!",
     loginRequired: language === "uk" ? "Потрібна авторизація" : "Login Required",
     loginText: language === "uk" 
-      ? "Щоб підключити джерело даних, потрібно увійти в обліковий запис." 
-      : "You need to be logged in to connect your data source.",
+      ? `Щоб підключити ${brokerLabel}, потрібно увійти в обліковий запис.` 
+      : `You need to be logged in to connect your ${brokerLabel}.`,
     login: language === "uk" ? "Увійти / Зареєструватись" : "Login / Sign Up",
     loading: language === "uk" ? "Завантаження..." : "Loading...",
     connected: language === "uk" ? "Підключено" : "Connected",
@@ -475,12 +509,12 @@ export default function ConnectPage() {
     getTestnet: language === "uk" ? "Отримати тестовий акаунт" : "Get test account",
     connectedSuccess: language === "uk" ? "Підключено успішно!" : "Connected successfully!",
     connectionFailed: language === "uk" ? "Помилка підключення" : "Connection failed",
-    loginFirst: language === "uk" ? "Спочатку увійдіть, щоб підключити джерело даних" : "Please login first to connect your data source",
+    loginFirst: language === "uk" ? `Спочатку увійдіть, щоб підключити ${brokerLabel}` : `Please login first to connect your ${brokerLabel}`,
     invalidCredentials: language === "uk" ? "Невірний API ключ або секрет. Перевірте дані." : "Invalid API key or secret. Please check your credentials.",
     networkError: language === "uk" ? "Помилка мережі. Перевірте з'єднання і спробуйте ще раз." : "Network error. Please check your connection and try again.",
     noAssets: language === "uk" ? "Дані недоступні" : "No data available",
     balanceFetched: language === "uk" ? "Підключення успішне" : "Connection successful",
-    exchangeConnected: language === "uk" ? "Джерело даних підключено!" : "Data Source Connected!",
+    exchangeConnected: language === "uk" ? `${brokerLabel.charAt(0).toUpperCase() + brokerLabel.slice(1)} підключено!` : `${brokerLabel.charAt(0).toUpperCase() + brokerLabel.slice(1)} Connected!`,
     whatNext: language === "uk" 
       ? "Ви готові почати аналіз. Ось що можна зробити далі:" 
       : "You're ready to start analyzing. Here's what you can do next:",
@@ -491,11 +525,11 @@ export default function ConnectPage() {
     or: language === "uk" ? "або" : "or",
     contactSupport: language === "uk" ? "зв'яжіться з підтримкою" : "contact support",
     disconnect: language === "uk" ? "Відключити" : "Disconnect",
-    disconnected: language === "uk" ? "Джерело відключено" : "Data source disconnected",
+    disconnected: language === "uk" ? `${brokerLabel.charAt(0).toUpperCase() + brokerLabel.slice(1)} відключено` : `${brokerLabel.charAt(0).toUpperCase() + brokerLabel.slice(1)} disconnected`,
     updateKeys: language === "uk" ? "Оновити ключі" : "Update Keys",
     updateAndSave: language === "uk" ? "Оновити та зберегти" : "Update & Save",
     cancel: language === "uk" ? "Скасувати" : "Cancel",
-    exchangeConnectedInfo: language === "uk" ? "Джерело даних підключено та готове до аналізу" : "Data source is connected and ready for analysis",
+    exchangeConnectedInfo: language === "uk" ? `${brokerLabel.charAt(0).toUpperCase() + brokerLabel.slice(1)} підключено та готово до аналізу` : `${brokerLabel.charAt(0).toUpperCase() + brokerLabel.slice(1)} is connected and ready for analysis`,
     keysSecure: language === "uk" ? "API ключі зберігаються зашифрованими" : "API keys are stored encrypted",
     updateKeysInfo: language === "uk" ? "Введіть нові API ключі для оновлення підключення" : "Enter new API keys to update the connection",
   };

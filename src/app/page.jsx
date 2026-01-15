@@ -6,6 +6,7 @@ import HeroSection from "@/components/HeroSection";
 import { apiFetch } from "@/lib/api";
 import { useLanguage } from "@/context/LanguageContext";
 import { Star, Quote } from "lucide-react";
+import { isCryptoMode, isStocksMode, getExchanges } from "@/config/tradingMode";
 
 // Testimonial avatar with photo
 function TestimonialAvatar({ testimonial }) {
@@ -400,68 +401,149 @@ export default function Page() {
         </div>
       </section>
 
-      {/* Trusted Partners - Neutral data providers instead of crypto exchanges */}
+      {/* Trusted Partners - Brokers in stocks mode, data providers in crypto mode */}
       <section className="py-16 border-t-2 border-gray-100">
         <div className="container">
           <p className="text-center text-gray-500 mb-10 font-medium">
-            {language === "uk" 
-              ? "Інтегровано з провідними платформами та постачальниками даних" 
-              : "Integrated with leading platforms and data providers"}
+            {isStocksMode() 
+              ? (language === "uk" 
+                  ? "Інтегровано з провідними брокерами та платформами" 
+                  : "Integrated with leading brokers and platforms")
+              : (language === "uk" 
+                  ? "Інтегровано з провідними платформами та постачальниками даних" 
+                  : "Integrated with leading platforms and data providers")}
           </p>
           
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 max-w-4xl mx-auto">
-            {/* TradingView */}
-            <a 
-              href="https://www.tradingview.com" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="flex flex-col items-center justify-center p-4 bg-white border-2 border-gray-100 hover:border-black hover:shadow-lg transition-all group"
-              style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}
-            >
-              <svg className="w-8 h-8 mb-2 group-hover:scale-110 transition-transform" viewBox="0 0 36 28" fill="none">
-                <path d="M14 22V6h8v16h-8zM0 22V10h8v12H0z" fill="currentColor" className="text-black"/>
-                <path d="M28 22l8-16v16h-8z" fill="currentColor" className="text-black"/>
-              </svg>
-              <span className="text-xs font-bold text-gray-700 text-center leading-tight">TradingView</span>
-            </a>
-            
-            {/* Polygon */}
-            <a 
-              href="https://polygon.io" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="flex flex-col items-center justify-center p-4 bg-white border-2 border-gray-100 hover:border-black hover:shadow-lg transition-all group"
-              style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}
-            >
-              <svg className="w-8 h-8 mb-2 group-hover:scale-110 transition-transform" viewBox="0 0 38.4 33.5" fill="none">
-                <path d="M29 10.2c-.7-.4-1.6-.4-2.4 0L21 13.5l-3.8 2.1-5.5 3.3c-.7.4-1.6.4-2.4 0l-4.3-2.6c-.7-.4-1.2-1.2-1.2-2.1v-5c0-.8.4-1.6 1.2-2.1l4.3-2.5c.7-.4 1.6-.4 2.4 0l4.3 2.6c.7.4 1.2 1.2 1.2 2.1v3.3l3.8-2.2V7c0-.8-.4-1.6-1.2-2.1l-8-4.7c-.7-.4-1.6-.4-2.4 0L1.2 5C.4 5.4 0 6.2 0 7v9.4c0 .8.4 1.6 1.2 2.1l8.1 4.7c.7.4 1.6.4 2.4 0l5.5-3.2 3.8-2.2 5.5-3.2c.7-.4 1.6-.4 2.4 0l4.3 2.5c.7.4 1.2 1.2 1.2 2.1v5c0 .8-.4 1.6-1.2 2.1l-4.2 2.5c-.7.4-1.6.4-2.4 0l-4.3-2.5c-.7-.4-1.2-1.2-1.2-2.1v-3.2l-3.8 2.2v3.3c0 .8.4 1.6 1.2 2.1l8.1 4.7c.7.4 1.6.4 2.4 0l8.1-4.7c.7-.4 1.2-1.2 1.2-2.1V17c0-.8-.4-1.6-1.2-2.1L29 10.2z" fill="currentColor" className="text-black"/>
-              </svg>
-              <span className="text-xs font-bold text-gray-700">Polygon.io</span>
-            </a>
-            
-            {/* Alpha Vantage */}
-            <div className="flex flex-col items-center justify-center p-4 bg-white border-2 border-gray-100 hover:border-emerald-500 hover:shadow-lg transition-all group" style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}>
-              <div className="w-8 h-8 mb-2 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <span className="text-xl font-black text-emerald-600">αV</span>
-              </div>
-              <span className="text-xs font-bold text-gray-700 text-center leading-tight">Alpha<br/>Vantage</span>
-            </div>
-            
-            {/* Yahoo Finance */}
-            <div className="flex flex-col items-center justify-center p-4 bg-white border-2 border-gray-100 hover:border-black hover:shadow-lg transition-all group" style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}>
-              <div className="w-8 h-8 mb-2 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <span className="text-xl font-black text-black">Y!</span>
-              </div>
-              <span className="text-xs font-bold text-gray-700 text-center leading-tight">Yahoo<br/>Finance</span>
-            </div>
-            
-            {/* Quandl */}
-            <div className="flex flex-col items-center justify-center p-4 bg-white border-2 border-gray-100 hover:border-black hover:shadow-lg transition-all group" style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}>
-              <div className="w-8 h-8 mb-2 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <span className="text-xl font-black text-gray-800">Q</span>
-              </div>
-              <span className="text-xs font-bold text-gray-700">Quandl</span>
-            </div>
+            {isStocksMode() ? (
+              <>
+                {/* Interactive Brokers */}
+                <a 
+                  href="https://www.interactivebrokers.com" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex flex-col items-center justify-center p-4 bg-white border-2 border-gray-100 hover:border-red-600 hover:shadow-lg transition-all group"
+                  style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}
+                >
+                  <div className="w-8 h-8 mb-2 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <span className="text-xl font-black text-red-700">IB</span>
+                  </div>
+                  <span className="text-xs font-bold text-gray-700 text-center leading-tight">Interactive<br/>Brokers</span>
+                </a>
+                
+                {/* TD Ameritrade / thinkorswim */}
+                <a 
+                  href="https://www.tdameritrade.com" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex flex-col items-center justify-center p-4 bg-white border-2 border-gray-100 hover:border-green-600 hover:shadow-lg transition-all group"
+                  style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}
+                >
+                  <div className="w-8 h-8 mb-2 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <span className="text-xl font-black text-green-700">TD</span>
+                  </div>
+                  <span className="text-xs font-bold text-gray-700 text-center leading-tight">TD<br/>Ameritrade</span>
+                </a>
+                
+                {/* Alpaca */}
+                <a 
+                  href="https://alpaca.markets" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex flex-col items-center justify-center p-4 bg-white border-2 border-gray-100 hover:border-yellow-500 hover:shadow-lg transition-all group"
+                  style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}
+                >
+                  <div className="w-8 h-8 mb-2 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <span className="text-xl">🦙</span>
+                  </div>
+                  <span className="text-xs font-bold text-gray-700">Alpaca</span>
+                </a>
+                
+                {/* TradeStation */}
+                <a 
+                  href="https://www.tradestation.com" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex flex-col items-center justify-center p-4 bg-white border-2 border-gray-100 hover:border-blue-700 hover:shadow-lg transition-all group"
+                  style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}
+                >
+                  <div className="w-8 h-8 mb-2 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <span className="text-xl font-black text-blue-700">TS</span>
+                  </div>
+                  <span className="text-xs font-bold text-gray-700 text-center leading-tight">Trade<br/>Station</span>
+                </a>
+                
+                {/* TradingView */}
+                <a 
+                  href="https://www.tradingview.com" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex flex-col items-center justify-center p-4 bg-white border-2 border-gray-100 hover:border-black hover:shadow-lg transition-all group"
+                  style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}
+                >
+                  <svg className="w-8 h-8 mb-2 group-hover:scale-110 transition-transform" viewBox="0 0 36 28" fill="none">
+                    <path d="M14 22V6h8v16h-8zM0 22V10h8v12H0z" fill="currentColor" className="text-black"/>
+                    <path d="M28 22l8-16v16h-8z" fill="currentColor" className="text-black"/>
+                  </svg>
+                  <span className="text-xs font-bold text-gray-700 text-center leading-tight">TradingView</span>
+                </a>
+              </>
+            ) : (
+              <>
+                {/* TradingView */}
+                <a 
+                  href="https://www.tradingview.com" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex flex-col items-center justify-center p-4 bg-white border-2 border-gray-100 hover:border-black hover:shadow-lg transition-all group"
+                  style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}
+                >
+                  <svg className="w-8 h-8 mb-2 group-hover:scale-110 transition-transform" viewBox="0 0 36 28" fill="none">
+                    <path d="M14 22V6h8v16h-8zM0 22V10h8v12H0z" fill="currentColor" className="text-black"/>
+                    <path d="M28 22l8-16v16h-8z" fill="currentColor" className="text-black"/>
+                  </svg>
+                  <span className="text-xs font-bold text-gray-700 text-center leading-tight">TradingView</span>
+                </a>
+                
+                {/* Polygon */}
+                <a 
+                  href="https://polygon.io" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex flex-col items-center justify-center p-4 bg-white border-2 border-gray-100 hover:border-black hover:shadow-lg transition-all group"
+                  style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}
+                >
+                  <svg className="w-8 h-8 mb-2 group-hover:scale-110 transition-transform" viewBox="0 0 38.4 33.5" fill="none">
+                    <path d="M29 10.2c-.7-.4-1.6-.4-2.4 0L21 13.5l-3.8 2.1-5.5 3.3c-.7.4-1.6.4-2.4 0l-4.3-2.6c-.7-.4-1.2-1.2-1.2-2.1v-5c0-.8.4-1.6 1.2-2.1l4.3-2.5c.7-.4 1.6-.4 2.4 0l4.3 2.6c.7.4 1.2 1.2 1.2 2.1v3.3l3.8-2.2V7c0-.8-.4-1.6-1.2-2.1l-8-4.7c-.7-.4-1.6-.4-2.4 0L1.2 5C.4 5.4 0 6.2 0 7v9.4c0 .8.4 1.6 1.2 2.1l8.1 4.7c.7.4 1.6.4 2.4 0l5.5-3.2 3.8-2.2 5.5-3.2c.7-.4 1.6-.4 2.4 0l4.3 2.5c.7.4 1.2 1.2 1.2 2.1v5c0 .8-.4 1.6-1.2 2.1l-4.2 2.5c-.7.4-1.6.4-2.4 0l-4.3-2.5c-.7-.4-1.2-1.2-1.2-2.1v-3.2l-3.8 2.2v3.3c0 .8.4 1.6 1.2 2.1l8.1 4.7c.7.4 1.6.4 2.4 0l8.1-4.7c.7-.4 1.2-1.2 1.2-2.1V17c0-.8-.4-1.6-1.2-2.1L29 10.2z" fill="currentColor" className="text-black"/>
+                  </svg>
+                  <span className="text-xs font-bold text-gray-700">Polygon.io</span>
+                </a>
+                
+                {/* Alpha Vantage */}
+                <div className="flex flex-col items-center justify-center p-4 bg-white border-2 border-gray-100 hover:border-emerald-500 hover:shadow-lg transition-all group" style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}>
+                  <div className="w-8 h-8 mb-2 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <span className="text-xl font-black text-emerald-600">αV</span>
+                  </div>
+                  <span className="text-xs font-bold text-gray-700 text-center leading-tight">Alpha<br/>Vantage</span>
+                </div>
+                
+                {/* Yahoo Finance */}
+                <div className="flex flex-col items-center justify-center p-4 bg-white border-2 border-gray-100 hover:border-black hover:shadow-lg transition-all group" style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}>
+                  <div className="w-8 h-8 mb-2 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <span className="text-xl font-black text-black">Y!</span>
+                  </div>
+                  <span className="text-xs font-bold text-gray-700 text-center leading-tight">Yahoo<br/>Finance</span>
+                </div>
+                
+                {/* Quandl */}
+                <div className="flex flex-col items-center justify-center p-4 bg-white border-2 border-gray-100 hover:border-black hover:shadow-lg transition-all group" style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}>
+                  <div className="w-8 h-8 mb-2 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <span className="text-xl font-black text-gray-800">Q</span>
+                  </div>
+                  <span className="text-xs font-bold text-gray-700">Quandl</span>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </section>

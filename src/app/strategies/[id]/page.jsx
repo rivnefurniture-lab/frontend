@@ -17,6 +17,7 @@ import {
 import { useAuth } from "@/context/AuthProvider";
 import { useLanguage } from "@/context/LanguageContext";
 import { apiFetch, publicFetch } from "@/lib/api";
+import { getTradingPairs, getDefaultPair, getExchanges, isCryptoMode } from "@/config/tradingMode";
 
 // Build version: 2025-12-14-v3 - percentage fixes
 console.log("[Algotcha] Strategy page loaded - build v2026-01-14-v7");
@@ -76,10 +77,16 @@ export default function StrategyDetailPage() {
     connectNow: language === "uk" ? "Підключити зараз →" : "Connect now →",
   };
   
+  // Get config from trading mode
+  const AVAILABLE_PAIRS = getTradingPairs();
+  const DEFAULT_PAIR = getDefaultPair();
+  const EXCHANGES = getExchanges();
+  const defaultExchange = EXCHANGES[0]?.id || "interactive_brokers";
+  
   const [strategy, setStrategy] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [exchange, setExchange] = useState("binance");
-  const [symbol, setSymbol] = useState("BTC/USDT");
+  const [exchange, setExchange] = useState(defaultExchange);
+  const [symbol, setSymbol] = useState(DEFAULT_PAIR);
   const [timeframe, setTimeframe] = useState("1h");
   const [amount, setAmount] = useState(10); // $ per trade
   const [maxBudget, setMaxBudget] = useState(50); // Max loss before closing all
@@ -92,7 +99,7 @@ export default function StrategyDetailPage() {
     startDate: "2024-01-01",
     endDate: "2024-12-31",
     initialCapital: 10000,
-    pairs: ["BTC/USDT", "ETH/USDT"], // Default to 2 most liquid pairs
+    pairs: [DEFAULT_PAIR, AVAILABLE_PAIRS[1] || DEFAULT_PAIR], // Default to 2 most liquid pairs
   });
   const [runningBacktest, setRunningBacktest] = useState(false);
   const [backtestResult, setBacktestResult] = useState(null);
@@ -796,15 +803,11 @@ export default function StrategyDetailPage() {
                   />
                 </div>
 
-                {/* Trading Pairs - 15 pairs with data */}
+                {/* Trading Pairs - from config */}
                 <div>
-                  <label className="text-sm font-medium text-gray-700 block mb-2">📊 Trading Pairs</label>
+                  <label className="text-sm font-medium text-gray-700 block mb-2">📊 {isCryptoMode() ? "Trading Pairs" : (language === "uk" ? "Інструменти" : "Instruments")}</label>
                   {(() => {
-                    const availablePairs = [
-                      'BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'XRP/USDT', 'ADA/USDT', 'DOGE/USDT', 
-                      'AVAX/USDT', 'LINK/USDT', 'DOT/USDT', 'NEAR/USDT', 'LTC/USDT', 
-                      'HBAR/USDT', 'SUI/USDT', 'RENDER/USDT', 'ATOM/USDT'
-                    ];
+                    const availablePairs = AVAILABLE_PAIRS;
                     
                     return (
                       <>
@@ -1140,20 +1143,13 @@ export default function StrategyDetailPage() {
               </p>
 
               <div>
-                <label className="text-sm text-gray-600 block mb-1">{t.exchange}</label>
+                <label className="text-sm text-gray-600 block mb-1">{isCryptoMode() ? t.exchange : (language === "uk" ? "Брокер" : "Broker")}</label>
                 <select
                   className="w-full h-11 px-4 rounded-lg border border-gray-200"
                   value={exchange}
                   onChange={(e) => setExchange(e.target.value)}
                 >
-                  {[
-                    { id: "binance", name: "Binance" },
-                    { id: "bybit", name: "Bybit" },
-                    { id: "okx", name: "OKX" },
-                    { id: "kraken", name: "Kraken" },
-                    { id: "kucoin", name: "KuCoin" },
-                    { id: "coinbase", name: "Coinbase Pro" },
-                  ].map((ex) => {
+                  {EXCHANGES.map((ex) => {
                     const isConnected = connectedExchanges.some(c => c.exchange === ex.id || c === ex.id);
                     return (
                       <option key={ex.id} value={ex.id}>
@@ -1178,11 +1174,9 @@ export default function StrategyDetailPage() {
                   value={symbol}
                   onChange={(e) => setSymbol(e.target.value)}
                 >
-                  <option value="BTC/USDT">BTC/USDT</option>
-                  <option value="ETH/USDT">ETH/USDT</option>
-                  <option value="SOL/USDT">SOL/USDT</option>
-                  <option value="BNB/USDT">BNB/USDT</option>
-                  <option value="XRP/USDT">XRP/USDT</option>
+                  {AVAILABLE_PAIRS.slice(0, 10).map((pair) => (
+                    <option key={pair} value={pair}>{pair}</option>
+                  ))}
                 </select>
               </div>
 

@@ -5,12 +5,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { apiFetch } from '@/lib/api';
 import Link from 'next/link';
+import { TRADING_MODE, isCryptoMode } from '@/config/tradingMode';
 
 export default function AdminStrategiesPage() {
   const [mockEnabled, setMockEnabled] = useState(true);
   const [loading, setLoading] = useState(true);
   const [toggling, setToggling] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [currentMode, setCurrentMode] = useState(TRADING_MODE);
 
   useEffect(() => {
     fetchStatus();
@@ -140,6 +142,85 @@ export default function AdminStrategiesPage() {
                 <p className="text-gray-300">
                   <strong className="text-white">Note:</strong> This setting is stored in runtime memory and will reset to "visible" when the server restarts. For permanent changes, update the SHOW_MOCK_STRATEGIES environment variable.
                 </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Trading Mode Card */}
+        <Card className="card-geometric mt-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              Trading Mode Configuration
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="flex items-center justify-between p-4 bg-gray-50 border-2 border-gray-200" style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'}}>
+              <div>
+                <p className="font-semibold text-gray-900">Current Mode</p>
+                <p className="text-sm text-gray-500">
+                  Switch between crypto and traditional stocks/commodities
+                </p>
+              </div>
+              <div className="flex items-center gap-4">
+                <span className={`px-3 py-1 text-sm font-bold ${currentMode === 'stocks' ? 'bg-purple-500 text-white' : 'bg-yellow-500 text-white'}`} style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'}}>
+                  {currentMode === 'stocks' ? 'STOCKS & COMMODITIES' : 'CRYPTO'}
+                </span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div 
+                className={`p-4 border-2 cursor-pointer transition-all ${currentMode === 'crypto' ? 'border-yellow-500 bg-yellow-50' : 'border-gray-200 hover:border-gray-400'}`}
+                style={{clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))'}}
+                onClick={() => {
+                  // This would require a server restart or env var change
+                  alert('To switch to Crypto mode:\n\n1. Set NEXT_PUBLIC_TRADING_MODE=crypto in your .env.local file\n2. Restart the development server\n\nOr update the Vercel environment variables and redeploy.');
+                }}
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-2xl">₿</span>
+                  <span className="font-bold">Crypto Mode</span>
+                </div>
+                <p className="text-sm text-gray-600">
+                  BTC, ETH, SOL, and other cryptocurrencies with Binance, Bybit, OKX, etc.
+                </p>
+              </div>
+              
+              <div 
+                className={`p-4 border-2 cursor-pointer transition-all ${currentMode === 'stocks' ? 'border-purple-500 bg-purple-50' : 'border-gray-200 hover:border-gray-400'}`}
+                style={{clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))'}}
+                onClick={() => {
+                  // This would require a server restart or env var change
+                  alert('To switch to Stocks mode:\n\n1. Set NEXT_PUBLIC_TRADING_MODE=stocks in your .env.local file\n2. Restart the development server\n\nOr update the Vercel environment variables and redeploy.');
+                }}
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-2xl">📈</span>
+                  <span className="font-bold">Stocks Mode</span>
+                </div>
+                <p className="text-sm text-gray-600">
+                  AAPL, MSFT, SPY, and other stocks/ETFs with Interactive Brokers, Alpaca, etc.
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-gray-900 text-white p-4 text-sm" style={{clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))'}}>
+              <div className="flex items-start gap-2">
+                <svg className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div className="text-gray-300">
+                  <strong className="text-white">How to switch modes:</strong>
+                  <ol className="list-decimal list-inside mt-2 space-y-1">
+                    <li>Update <code className="bg-gray-800 px-1 rounded">NEXT_PUBLIC_TRADING_MODE</code> in Vercel Environment Variables</li>
+                    <li>Set value to <code className="bg-gray-800 px-1 rounded">crypto</code> or <code className="bg-gray-800 px-1 rounded">stocks</code></li>
+                    <li>Redeploy the application</li>
+                  </ol>
+                </div>
               </div>
             </div>
           </CardContent>
