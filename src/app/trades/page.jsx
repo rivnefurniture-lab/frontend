@@ -183,11 +183,12 @@ export default function TradesPage() {
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+              className={`px-4 py-2 text-sm font-medium transition ${
                 filter === f
-                  ? "bg-blue-600 text-white"
+                  ? "bg-black text-white"
                   : "bg-gray-100 text-gray-700 hover:bg-gray-200"
               }`}
+              style={{clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'}}
             >
               {t[f] || f}
             </button>
@@ -220,7 +221,7 @@ export default function TradesPage() {
         <CardContent className="p-0">
           {loading ? (
             <div className="py-12 text-center">
-              <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto"></div>
+              <div className="animate-spin w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full mx-auto"></div>
               <p className="mt-4 text-gray-600">{t.loading}</p>
             </div>
           ) : trades.length === 0 ? (

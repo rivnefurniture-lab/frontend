@@ -8,12 +8,12 @@ export function Button({
   ...props
 }) {
   const base =
-    "tap inline-flex items-center justify-center rounded-2xl font-medium transition focus:outline-none focus:ring-2 focus:ring-offset-2 cursor-pointer";
+    "tap inline-flex items-center justify-center font-semibold transition focus:outline-none focus:ring-2 focus:ring-offset-2 cursor-pointer [clip-path:polygon(0_0,calc(100%-6px)_0,100%_6px,100%_100%,6px_100%,0_calc(100%-6px))]";
 
   const variants = {
-    primary: "bg-brand text-white hover:bg-blue-700 focus:ring-blue-600",
+    primary: "bg-black text-white hover:bg-gray-800 focus:ring-gray-600",
     secondary:
-      "bg-white text-gray-900 border border-gray-200 hover:bg-gray-50 focus:ring-gray-300",
+      "bg-white text-gray-900 border-2 border-gray-200 hover:bg-gray-50 hover:border-black focus:ring-gray-300",
     ghost: "bg-transparent text-gray-700 hover:bg-gray-100",
     danger: "bg-red-600 text-white hover:bg-red-700 focus:ring-red-600",
   };

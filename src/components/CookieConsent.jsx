@@ -46,8 +46,8 @@ export default function CookieConsent() {
     <div className="fixed bottom-0 left-0 right-0 z-50 p-4 animate-in slide-in-from-bottom duration-500">
       <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-2xl border border-gray-200 p-6">
         <div className="flex items-start gap-4">
-          <div className="hidden sm:flex w-12 h-12 rounded-xl bg-blue-100 items-center justify-center flex-shrink-0">
-            <Cookie className="w-6 h-6 text-blue-600" />
+          <div className="hidden sm:flex w-12 h-12 bg-emerald-100 items-center justify-center flex-shrink-0" style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}>
+            <Cookie className="w-6 h-6 text-emerald-600" />
           </div>
           
           <div className="flex-1">
@@ -68,7 +68,7 @@ export default function CookieConsent() {
               {language === "uk"
                 ? "Ми використовуємо cookies для покращення вашого досвіду, аналізу трафіку та персоналізації контенту. Натискаючи «Прийняти всі», ви погоджуєтесь з нашою "
                 : "We use cookies to improve your experience, analyze traffic, and personalize content. By clicking \"Accept All\", you agree to our "}
-              <Link href="/legal#privacy" className="text-blue-600 hover:underline">
+              <Link href="/legal#privacy" className="text-emerald-600 hover:underline">
                 {language === "uk" ? "Політикою конфіденційності" : "Privacy Policy"}
               </Link>
               .

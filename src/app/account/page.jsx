@@ -44,7 +44,7 @@ const ACHIEVEMENTS = [
     description: { en: "Run your first backtest", uk: "Запусти перший бектест" },
     rule: { en: "Complete 1 backtest", uk: "Завершити 1 бектест" },
     icon: Rocket,
-    color: "from-blue-500 to-cyan-500",
+    color: "from-gray-700 to-gray-900",
     points: 50,
     bonus: { en: "+1 extra backtest/day", uk: "+1 додатковий бектест/день" },
   },
@@ -54,7 +54,7 @@ const ACHIEVEMENTS = [
     description: { en: "Save your first strategy", uk: "Збережи першу стратегію" },
     rule: { en: "Save 1 strategy from backtest", uk: "Зберегти 1 стратегію з бектесту" },
     icon: Target,
-    color: "from-purple-500 to-pink-500",
+    color: "from-gray-800 to-black",
     points: 100,
     bonus: { en: "Unlock strategy sharing", uk: "Розблокувати шерінг стратегій" },
   },
@@ -64,7 +64,7 @@ const ACHIEVEMENTS = [
     description: { en: "Run 5 backtests", uk: "Запусти 5 бектестів" },
     rule: { en: "Complete 5 backtests", uk: "Завершити 5 бектестів" },
     icon: BarChart3,
-    color: "from-indigo-500 to-violet-500",
+    color: "from-gray-600 to-gray-800",
     points: 150,
     bonus: { en: "+2 extra backtests/day", uk: "+2 додаткових бектести/день" },
   },
@@ -104,7 +104,7 @@ const ACHIEVEMENTS = [
     description: { en: "60%+ win rate", uk: "60%+ відсоток виграшу" },
     rule: { en: "Maintain 60%+ win rate over 20 trades", uk: "Тримати 60%+ виграш на 20 угодах" },
     icon: Shield,
-    color: "from-teal-500 to-cyan-500",
+    color: "from-emerald-500 to-emerald-700",
     points: 400,
     bonus: { en: "-10% trading fees", uk: "-10% комісії" },
   },
@@ -114,7 +114,7 @@ const ACHIEVEMENTS = [
     description: { en: "$1,000+ profit", uk: "$1,000+ прибутку" },
     rule: { en: "Reach $1,000 total profit", uk: "Досягти $1,000 загального прибутку" },
     icon: Crown,
-    color: "from-rose-500 to-pink-500",
+    color: "from-black to-gray-800",
     points: 1000,
     bonus: { en: "VIP support + custom strategies", uk: "VIP підтримка + кастомні стратегії" },
   },
@@ -137,18 +137,19 @@ function AchievementBadge({ achievement, unlocked, language }) {
   return (
     <div className={`relative group ${!unlocked && "opacity-50"}`}>
       <div
-        className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${
+        className={`w-20 h-20 bg-gradient-to-br ${
           unlocked ? achievement.color : "from-gray-300 to-gray-400"
         } p-0.5 transition-transform group-hover:scale-105`}
+        style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'}}
       >
-        <div className="w-full h-full bg-white rounded-[14px] flex items-center justify-center relative">
+        <div className="w-full h-full bg-white flex items-center justify-center relative" style={{clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))'}}>
           {unlocked ? (
             <Icon className="w-8 h-8 text-gray-800" />
           ) : (
             <Lock className="w-6 h-6 text-gray-400" />
           )}
           {unlocked && (
-            <div className="absolute -top-1 -right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
+            <div className="absolute -top-1 -right-1 w-5 h-5 bg-emerald-500 flex items-center justify-center" style={{clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'}}>
               <CheckCircle2 className="w-3 h-3 text-white" />
             </div>
           )}
@@ -156,11 +157,11 @@ function AchievementBadge({ achievement, unlocked, language }) {
       </div>
       
       <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-        <div className="bg-gray-900 text-white text-xs rounded-lg px-3 py-2 whitespace-nowrap min-w-[180px]">
+        <div className="bg-gray-900 text-white text-xs px-3 py-2 whitespace-nowrap min-w-[180px]" style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}>
           <p className="font-semibold">{achievement.name[language]}</p>
           <p className="text-gray-300">{achievement.description[language]}</p>
           <p className="text-amber-400 mt-1">+{achievement.points} XP</p>
-          <p className="text-green-400 text-[10px]">🎁 {achievement.bonus[language]}</p>
+          <p className="text-emerald-400 text-[10px]">🎁 {achievement.bonus[language]}</p>
         </div>
       </div>
     </div>
@@ -169,21 +170,21 @@ function AchievementBadge({ achievement, unlocked, language }) {
 
 function StatCard({ icon: Icon, label, value, subtext, color = "blue" }) {
   const colorClasses = {
-    blue: "from-blue-500 to-cyan-500",
-    green: "from-green-500 to-emerald-500",
-    purple: "from-purple-500 to-pink-500",
+    blue: "from-black to-gray-800",
+    green: "from-emerald-500 to-emerald-600",
+    purple: "from-gray-700 to-gray-900",
     amber: "from-amber-500 to-orange-500",
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 p-5 hover:shadow-lg transition-shadow">
+    <div className="bg-white border-2 border-gray-100 p-5 hover:shadow-xl hover:border-black transition-all" style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'}}>
       <div className="flex items-start justify-between">
         <div>
           <p className="text-sm text-gray-500 mb-1">{label}</p>
           <p className="text-2xl font-bold text-gray-900">{value}</p>
           {subtext && <p className="text-xs text-gray-400 mt-1">{subtext}</p>}
         </div>
-        <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${colorClasses[color]} flex items-center justify-center`}>
+        <div className={`w-10 h-10 bg-gradient-to-br ${colorClasses[color]} flex items-center justify-center`} style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'}}>
           <Icon className="w-5 h-5 text-white" />
         </div>
       </div>
@@ -477,9 +478,10 @@ function AccountPageContent() {
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       {/* Hero Section */}
       <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-black via-gray-900 to-gray-800"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-900"></div>
         <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10" style={{clipPath: 'polygon(100% 0, 100% 100%, 0 0)'}}></div>
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/5" style={{clipPath: 'polygon(0 100%, 100% 100%, 0 0)'}}></div>
+        <div className="absolute top-1/2 left-1/4 w-32 h-32 bg-emerald-500/5 rotate-45"></div>
         
         <div className="relative container py-12 md:py-16">
           <div className="flex flex-col md:flex-row items-center md:items-end gap-6">
@@ -571,39 +573,39 @@ function AccountPageContent() {
                 <h1 className="text-2xl md:text-3xl font-bold text-white">
                   {profile.name || "Trader"}
                 </h1>
-                <span className="px-2 py-0.5 bg-white/20 rounded-full text-xs text-white font-medium">
+                <span className="px-2 py-0.5 bg-white/20 text-xs text-white font-medium" style={{clipPath: 'polygon(4px 0, 100% 0, 100% 100%, 0 100%, 0 4px)'}}>
                   {title}
                 </span>
               </div>
-              <p className="text-blue-100 mb-3">{profile.email}</p>
+              <p className="text-gray-300 mb-3">{profile.email}</p>
               
               <div className="max-w-xs mx-auto md:mx-0">
-                <div className="flex items-center justify-between text-xs text-blue-100 mb-1">
+                <div className="flex items-center justify-between text-xs text-gray-300 mb-1">
                   <span>{t.level} {level}</span>
                   <span>{totalXP} / {nextLevelXP} XP</span>
                 </div>
-                <div className="h-2 bg-white/20 rounded-full overflow-hidden">
+                <div className="h-2 bg-white/20 overflow-hidden" style={{clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'}}>
                   <div
-                    className="h-full bg-gradient-to-r from-amber-400 to-orange-500 rounded-full transition-all duration-500"
+                    className="h-full bg-gradient-to-r from-emerald-400 to-emerald-500 transition-all duration-500"
                     style={{ width: `${progress}%` }}
                   ></div>
                 </div>
-                <p className="text-xs text-blue-200 mt-1">🎁 {currentBonus}</p>
+                <p className="text-xs text-gray-300 mt-1">🎁 {currentBonus}</p>
               </div>
             </div>
 
             <div className="flex gap-6 md:gap-8">
               <div className="text-center">
                 <p className="text-3xl font-bold text-white">{stats.strategiesSaved}</p>
-                <p className="text-xs text-blue-100">{language === "uk" ? "Стратегій" : "Strategies"}</p>
+                <p className="text-xs text-gray-300">{language === "uk" ? "Стратегій" : "Strategies"}</p>
               </div>
               <div className="text-center">
                 <p className="text-3xl font-bold text-white">{stats.totalTrades}</p>
-                <p className="text-xs text-blue-100">{language === "uk" ? "Угод" : "Trades"}</p>
+                <p className="text-xs text-gray-300">{language === "uk" ? "Угод" : "Trades"}</p>
               </div>
               <div className="text-center">
                 <p className="text-3xl font-bold text-white">{unlockedAchievements.length}/{ACHIEVEMENTS.length}</p>
-                <p className="text-xs text-blue-100">{language === "uk" ? "Досягнень" : "Achievements"}</p>
+                <p className="text-xs text-gray-300">{language === "uk" ? "Досягнень" : "Achievements"}</p>
               </div>
             </div>
           </div>
@@ -611,7 +613,7 @@ function AccountPageContent() {
       </div>
 
       {/* Tabs */}
-      <div className="sticky top-16 bg-white border-b border-gray-100 z-30">
+      <div className="sticky top-16 bg-white border-b-2 border-gray-100 z-30">
         <div className="container">
           <div className="flex gap-1 overflow-x-auto py-2">
             {[
@@ -623,11 +625,12 @@ function AccountPageContent() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium text-sm whitespace-nowrap transition-all ${
+                className={`flex items-center gap-2 px-4 py-2.5 font-medium text-sm whitespace-nowrap transition-all ${
                   activeTab === tab.id
-                    ? "bg-blue-50 text-blue-600"
-                    : "text-gray-600 hover:bg-gray-50"
+                    ? "bg-black text-white"
+                    : "text-gray-600 hover:bg-gray-100"
                 }`}
+                style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'}}
               >
                 <tab.icon className="w-4 h-4" />
                 {tab.label}
@@ -649,14 +652,14 @@ function AccountPageContent() {
               <StatCard icon={Trophy} label={t.winRate} value={`${stats.winRate.toFixed(1)}%`} subtext={`${stats.totalTrades} ${t.trades}`} color="amber" />
             </div>
 
-            <Card>
+            <Card className="card-geometric">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2">
-                    <Sparkles className="w-5 h-5 text-amber-500" />
+                    <Sparkles className="w-5 h-5 text-emerald-500" />
                     {t.recentAchievements}
                   </CardTitle>
-                  <button onClick={() => setActiveTab("achievements")} className="text-sm text-blue-600 hover:underline flex items-center gap-1">
+                  <button onClick={() => setActiveTab("achievements")} className="text-sm text-black font-medium hover:underline flex items-center gap-1">
                     {t.viewAll} <ChevronRight className="w-4 h-4" />
                   </button>
                 </div>
@@ -672,24 +675,24 @@ function AccountPageContent() {
 
             <div className="grid md:grid-cols-3 gap-4">
               <Link href="/backtest" className="block group">
-                <div className="bg-gradient-to-br from-blue-500 to-cyan-600 rounded-2xl p-6 text-white hover:shadow-xl transition-all hover:-translate-y-1">
+                <div className="bg-black p-6 text-white hover:shadow-xl transition-all hover:-translate-y-1" style={{clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))'}}>
                   <BarChart3 className="w-8 h-8 mb-3 opacity-80" />
                   <h3 className="font-semibold text-lg mb-1">{t.runBacktest}</h3>
-                  <p className="text-sm text-blue-100">{t.runBacktestText}</p>
+                  <p className="text-sm text-gray-300">{t.runBacktestText}</p>
                 </div>
               </Link>
               <Link href="/strategies" className="block group">
-                <div className="bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl p-6 text-white hover:shadow-xl transition-all hover:-translate-y-1">
+                <div className="bg-gray-800 p-6 text-white hover:shadow-xl transition-all hover:-translate-y-1" style={{clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))'}}>
                   <Target className="w-8 h-8 mb-3 opacity-80" />
                   <h3 className="font-semibold text-lg mb-1">{t.browseStrategies}</h3>
-                  <p className="text-sm text-purple-100">{t.browseStrategiesText}</p>
+                  <p className="text-sm text-gray-300">{t.browseStrategiesText}</p>
                 </div>
               </Link>
               <Link href="/connect" className="block group">
-                <div className="bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl p-6 text-white hover:shadow-xl transition-all hover:-translate-y-1">
+                <div className="bg-emerald-600 p-6 text-white hover:shadow-xl transition-all hover:-translate-y-1" style={{clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))'}}>
                   <Zap className="w-8 h-8 mb-3 opacity-80" />
                   <h3 className="font-semibold text-lg mb-1">{t.connectExchange}</h3>
-                  <p className="text-sm text-amber-100">{t.connectExchangeText}</p>
+                  <p className="text-sm text-emerald-100">{t.connectExchangeText}</p>
                 </div>
               </Link>
             </div>
@@ -706,32 +709,30 @@ function AccountPageContent() {
         {/* Achievements Tab */}
         {activeTab === "achievements" && (
           <div className="space-y-8">
-            <Card className="bg-gradient-to-br from-amber-50 to-orange-50 border-amber-100">
-              <CardContent className="pt-6">
-                <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-                  <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl flex items-center justify-center">
-                      <Trophy className="w-8 h-8 text-white" />
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-bold text-gray-900">
-                        {unlockedAchievements.length} / {ACHIEVEMENTS.length} {t.unlocked}
-                      </h3>
-                      <p className="text-gray-600">{totalXP} XP • {t.level} {level} ({title})</p>
-                    </div>
+            <div className="bg-gray-900 text-white p-6" style={{clipPath: 'polygon(0 0, calc(100% - 24px) 0, 100% 24px, 100% 100%, 24px 100%, 0 calc(100% - 24px))'}}>
+              <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 bg-emerald-500 flex items-center justify-center" style={{clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))'}}>
+                    <Trophy className="w-8 h-8 text-white" />
                   </div>
-                  <div className="w-full md:w-64">
-                    <div className="flex justify-between text-sm text-gray-600 mb-2">
-                      <span>{t.progress}</span>
-                      <span>{Math.round((unlockedAchievements.length / ACHIEVEMENTS.length) * 100)}%</span>
-                    </div>
-                    <div className="h-3 bg-amber-200 rounded-full overflow-hidden">
-                      <div className="h-full bg-gradient-to-r from-amber-400 to-orange-500 rounded-full" style={{ width: `${(unlockedAchievements.length / ACHIEVEMENTS.length) * 100}%` }}></div>
-                    </div>
+                  <div>
+                    <h3 className="text-xl font-bold">
+                      {unlockedAchievements.length} / {ACHIEVEMENTS.length} {t.unlocked}
+                    </h3>
+                    <p className="text-gray-300">{totalXP} XP • {t.level} {level} ({title})</p>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+                <div className="w-full md:w-64">
+                  <div className="flex justify-between text-sm text-gray-300 mb-2">
+                    <span>{t.progress}</span>
+                    <span>{Math.round((unlockedAchievements.length / ACHIEVEMENTS.length) * 100)}%</span>
+                  </div>
+                  <div className="h-3 bg-gray-700 overflow-hidden" style={{clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'}}>
+                    <div className="h-full bg-gradient-to-r from-emerald-400 to-emerald-500" style={{ width: `${(unlockedAchievements.length / ACHIEVEMENTS.length) * 100}%` }}></div>
+                  </div>
+                </div>
+              </div>
+            </div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
               {ACHIEVEMENTS.map((achievement) => {
@@ -739,17 +740,17 @@ function AccountPageContent() {
                 const isUnlocked = unlockedAchievements.includes(achievement.id);
                 
                 return (
-                  <Card key={achievement.id} className={`overflow-hidden transition-all hover:shadow-lg ${!isUnlocked && "opacity-60"}`}>
+                  <div key={achievement.id} className={`bg-white border-2 border-gray-100 overflow-hidden transition-all hover:shadow-xl hover:border-black ${!isUnlocked && "opacity-60"}`} style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'}}>
                     <div className={`h-2 bg-gradient-to-r ${isUnlocked ? achievement.color : "from-gray-300 to-gray-400"}`}></div>
-                    <CardContent className="pt-5">
+                    <div className="p-5">
                       <div className="flex items-start gap-4">
-                        <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${isUnlocked ? achievement.color : "from-gray-300 to-gray-400"} flex items-center justify-center flex-shrink-0`}>
+                        <div className={`w-12 h-12 bg-gradient-to-br ${isUnlocked ? achievement.color : "from-gray-300 to-gray-400"} flex items-center justify-center flex-shrink-0`} style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}>
                           {isUnlocked ? <Icon className="w-6 h-6 text-white" /> : <Lock className="w-5 h-5 text-white/70" />}
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
                             <h4 className="font-semibold text-gray-900 truncate">{achievement.name[language]}</h4>
-                            {isUnlocked && <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0" />}
+                            {isUnlocked && <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />}
                           </div>
                           <p className="text-sm text-gray-500 mb-1">{achievement.rule[language]}</p>
                           <div className="flex items-center gap-2">
@@ -757,11 +758,11 @@ function AccountPageContent() {
                               <Star className="w-3.5 h-3.5" /> +{achievement.points} XP
                             </span>
                           </div>
-                          <p className="text-xs text-green-600 mt-1">🎁 {achievement.bonus[language]}</p>
+                          <p className="text-xs text-emerald-600 mt-1">🎁 {achievement.bonus[language]}</p>
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </div>
                 );
               })}
             </div>
@@ -772,10 +773,10 @@ function AccountPageContent() {
         {activeTab === "rewards" && (
           <div className="space-y-8">
             {/* Active Bonuses */}
-            <Card>
+            <Card className="card-geometric">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Gift className="w-5 h-5 text-green-500" />
+                  <Gift className="w-5 h-5 text-emerald-500" />
                   {t.yourBonuses}
                 </CardTitle>
               </CardHeader>
@@ -783,19 +784,19 @@ function AccountPageContent() {
                 {activeBonuses.length > 0 ? (
                   <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
                     {activeBonuses.map((b, i) => (
-                      <div key={i} className="flex items-center gap-3 p-3 bg-green-50 border border-green-100 rounded-lg">
-                        <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
+                      <div key={i} className="flex items-center gap-3 p-3 bg-emerald-50 border-2 border-emerald-100" style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}>
+                        <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0" />
                         <div>
                           <p className="font-medium text-gray-900 text-sm">{b.name}</p>
-                          <p className="text-xs text-green-600">{b.bonus}</p>
+                          <p className="text-xs text-emerald-600">{b.bonus}</p>
                         </div>
                       </div>
                     ))}
-                    <div className="flex items-center gap-3 p-3 bg-blue-50 border border-blue-100 rounded-lg">
-                      <Star className="w-5 h-5 text-blue-500 flex-shrink-0" />
+                    <div className="flex items-center gap-3 p-3 bg-gray-100 border-2 border-gray-200" style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}>
+                      <Star className="w-5 h-5 text-black flex-shrink-0" />
                       <div>
                         <p className="font-medium text-gray-900 text-sm">{t.level} {level} {language === "uk" ? "Бонус" : "Bonus"}</p>
-                        <p className="text-xs text-blue-600">{currentBonus}</p>
+                        <p className="text-xs text-gray-600">{currentBonus}</p>
                       </div>
                     </div>
                   </div>
@@ -808,7 +809,7 @@ function AccountPageContent() {
             </Card>
 
             {/* Level Rewards */}
-            <Card>
+            <Card className="card-geometric">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Trophy className="w-5 h-5 text-amber-500" />
@@ -820,9 +821,9 @@ function AccountPageContent() {
                   {LEVEL_REWARDS.map((lvl) => {
                     const isUnlocked = level >= lvl.level;
                     return (
-                      <div key={lvl.level} className={`flex items-center justify-between p-4 rounded-xl border ${isUnlocked ? "bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200" : "bg-gray-50 border-gray-100"}`}>
+                      <div key={lvl.level} className={`flex items-center justify-between p-4 border-2 ${isUnlocked ? "bg-emerald-50 border-emerald-200" : "bg-gray-50 border-gray-100"}`} style={{clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))'}}>
                         <div className="flex items-center gap-4">
-                          <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${isUnlocked ? "bg-gradient-to-br from-amber-400 to-orange-500 text-white" : "bg-gray-200 text-gray-500"}`}>
+                          <div className={`w-10 h-10 flex items-center justify-center font-bold ${isUnlocked ? "bg-emerald-500 text-white" : "bg-gray-200 text-gray-500"}`} style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'}}>
                             {lvl.level}
                           </div>
                           <div>
@@ -831,7 +832,7 @@ function AccountPageContent() {
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className={`text-sm font-medium ${isUnlocked ? "text-green-600" : "text-gray-400"}`}>
+                          <p className={`text-sm font-medium ${isUnlocked ? "text-emerald-600" : "text-gray-400"}`}>
                             {isUnlocked ? "✓" : ""} {lvl.bonus[language]}
                           </p>
                         </div>
@@ -843,26 +844,26 @@ function AccountPageContent() {
             </Card>
 
             {/* How to Earn */}
-            <Card>
+            <Card className="card-geometric">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-purple-500" />
+                  <Sparkles className="w-5 h-5 text-emerald-500" />
                   {t.howToEarn}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid md:grid-cols-2 gap-4">
-                  <div className="p-4 bg-blue-50 rounded-xl">
-                    <h4 className="font-semibold text-blue-900 mb-2">{language === "uk" ? "Бектестування" : "Backtesting"}</h4>
-                    <ul className="text-sm text-blue-800 space-y-1">
+                  <div className="p-4 bg-gray-100 border-2 border-gray-200" style={{clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))'}}>
+                    <h4 className="font-semibold text-gray-900 mb-2">{language === "uk" ? "Бектестування" : "Backtesting"}</h4>
+                    <ul className="text-sm text-gray-700 space-y-1">
                       <li>• 1 {language === "uk" ? "бектест" : "backtest"} = 50 XP</li>
                       <li>• 5 {language === "uk" ? "бектестів" : "backtests"} = 150 XP</li>
                       <li>• 25 {language === "uk" ? "бектестів" : "backtests"} = 300 XP</li>
                     </ul>
                   </div>
-                  <div className="p-4 bg-green-50 rounded-xl">
-                    <h4 className="font-semibold text-green-900 mb-2">{language === "uk" ? "Торгівля" : "Trading"}</h4>
-                    <ul className="text-sm text-green-800 space-y-1">
+                  <div className="p-4 bg-emerald-50 border-2 border-emerald-200" style={{clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))'}}>
+                    <h4 className="font-semibold text-emerald-900 mb-2">{language === "uk" ? "Аналіз" : "Analysis"}</h4>
+                    <ul className="text-sm text-emerald-800 space-y-1">
                       <li>• {language === "uk" ? "Запустити живу стратегію" : "Start live strategy"} = 200 XP</li>
                       <li>• {language === "uk" ? "Перший прибуток" : "First profit"} = 250 XP</li>
                       <li>• 60%+ {language === "uk" ? "виграш" : "win rate"} = 400 XP</li>
@@ -877,7 +878,7 @@ function AccountPageContent() {
         {/* Settings Tab */}
         {activeTab === "settings" && (
           <div className="max-w-2xl mx-auto">
-            <Card>
+            <Card className="card-geometric">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <User className="w-5 h-5" />
@@ -898,11 +899,11 @@ function AccountPageContent() {
                     </div>
                     <div>
                       <label className="block text-xs text-gray-500 mb-1">{t.country}</label>
-                      <CountryDropdown value={profile.country} onChange={(val) => setProfile({ ...profile, country: val })} className="w-full h-11 px-4 rounded-xl border border-gray-200 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                      <CountryDropdown value={profile.country} onChange={(val) => setProfile({ ...profile, country: val })} className="w-full h-11 px-4 border-2 border-gray-200 text-gray-700 focus:outline-none focus:ring-2 focus:ring-black" style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}} />
                     </div>
                     <div>
                       <label className="block text-xs text-gray-500 mb-1">{t.phone}</label>
-                      <PhoneInput country={"ua"} value={profile.phone} onChange={(phone) => setProfile({ ...profile, phone })} inputClass="w-full! h-11! pl-12! pr-4! rounded-xl! border! border-gray-200! text-gray-900! focus:outline-none! focus:ring-2! focus:ring-blue-500!" />
+                      <PhoneInput country={"ua"} value={profile.phone} onChange={(phone) => setProfile({ ...profile, phone })} inputClass="w-full! h-11! pl-12! pr-4! border-2! border-gray-200! text-gray-900! focus:outline-none! focus:ring-2! focus:ring-black!" />
                     </div>
                   </div>
                 </div>
@@ -915,16 +916,16 @@ function AccountPageContent() {
                   </div>
                 </div>
 
-                {error && <div className="p-3 bg-red-50 border border-red-100 rounded-lg text-red-600 text-sm">{error}</div>}
-                {message && <div className="p-3 bg-green-50 border border-green-100 rounded-lg text-green-600 text-sm">{message}</div>}
+                {error && <div className="p-3 bg-red-50 border-2 border-red-200 text-red-600 text-sm" style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'}}>{error}</div>}
+                {message && <div className="p-3 bg-emerald-50 border-2 border-emerald-200 text-emerald-600 text-sm" style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'}}>{message}</div>}
 
-                <Button onClick={onSave} disabled={saving} className="w-full md:w-auto">
+                <Button onClick={onSave} disabled={saving} className="w-full md:w-auto btn-primary">
                   {saving ? t.saving : t.saveChanges}
           </Button>
         </CardContent>
       </Card>
 
-            <Card className="mt-6">
+            <Card className="mt-6 card-geometric">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Crown className="w-5 h-5 text-amber-500" />
@@ -932,13 +933,13 @@ function AccountPageContent() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl">
+                <div className="flex items-center justify-between p-4 bg-gray-100 border-2 border-gray-200" style={{clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))'}}>
                   <div>
                     <p className="font-semibold text-gray-900">{t.freePlan}</p>
                     <p className="text-sm text-gray-500">{t.freePlanText} • {currentBonus}</p>
                   </div>
                   <Link href="/pricing">
-                    <Button variant="outline" size="sm">{t.upgrade}</Button>
+                    <Button variant="outline" size="sm" className="btn-secondary">{t.upgrade}</Button>
                   </Link>
                 </div>
               </CardContent>
@@ -952,7 +953,7 @@ function AccountPageContent() {
 
 export default function AccountPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-gradient-to-b from-gray-50 to-white flex items-center justify-center"><div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full"></div></div>}>
+    <Suspense fallback={<div className="min-h-screen bg-gradient-to-b from-gray-50 to-white flex items-center justify-center"><div className="animate-spin w-8 h-8 border-4 border-black border-t-transparent" style={{clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'}}></div></div>}>
       <AccountPageContent />
     </Suspense>
   );

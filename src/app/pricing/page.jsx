@@ -47,7 +47,7 @@ function PricingContent() {
       priceYearly: 23,
       description: language === "uk" ? "Для професійних аналітиків" : "For professional analysts",
       icon: Crown,
-      color: "from-blue-500 to-indigo-600",
+      color: "from-black to-gray-800",
       popular: true,
       features: language === "uk" ? [
         "Необмежені симуляції",
@@ -282,7 +282,7 @@ export default function Pricing() {
     <Suspense
       fallback={
         <div className="container py-10 text-center">
-          <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto"></div>
+          <div className="animate-spin w-8 h-8 border-4 border-black border-t-transparent mx-auto" style={{clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'}}></div>
         </div>
       }
     >

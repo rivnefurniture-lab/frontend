@@ -44,8 +44,8 @@ const DATA_SOURCES = [
   {
     id: "kraken",
     name: "Kraken",
-    icon: <svg className="w-6 h-6 text-purple-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/><path d="M12 6c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6z"/></svg>,
-    color: "from-purple-500 to-indigo-600",
+    icon: <svg className="w-6 h-6 text-gray-800" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/><path d="M12 6c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6z"/></svg>,
+    color: "from-gray-600 to-gray-800",
     description: { en: "Reliable US data source", uk: "Надійне джерело даних США" },
     fields: ["apiKey", "secret"],
     testnetUrl: "https://docs.kraken.com/rest/",
@@ -64,8 +64,8 @@ const DATA_SOURCES = [
   {
     id: "coinbase",
     name: "Coinbase",
-    icon: <svg className="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path fill="white" d="M12 7a5 5 0 100 10 5 5 0 000-10z"/></svg>,
-    color: "from-blue-500 to-indigo-600",
+    icon: <svg className="w-6 h-6 text-gray-800" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path fill="white" d="M12 7a5 5 0 100 10 5 5 0 000-10z"/></svg>,
+    color: "from-gray-700 to-gray-900",
     description: { en: "Leading data provider", uk: "Провідний постачальник даних" },
     fields: ["apiKey", "secret"],
     testnetUrl: "https://docs.cloud.coinbase.com/",
@@ -224,29 +224,33 @@ function DataSourceCard({ exchange, onConnect, onDisconnect, isConnected, t, lan
             )}
             
             <div className="flex gap-2">
-              <Button 
+              <button 
                 type="button" 
                 onClick={testBalance}
                 disabled={testing}
-                className="flex-1"
+                className="flex-1 px-4 py-2.5 bg-emerald-500 text-white font-bold hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+                style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}
               >
+                {testing && <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>}
                 {testing ? t.testing : t.testBalance}
-              </Button>
-              <Button 
+              </button>
+              <button 
                 type="button" 
-                variant="outline"
                 onClick={() => setShowForm(true)}
+                className="px-4 py-2.5 bg-white border-2 border-gray-200 text-gray-700 font-bold hover:border-black hover:text-black transition-all"
+                style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}
               >
                 {t.updateKeys}
-              </Button>
-              <Button 
+              </button>
+              <button 
                 type="button" 
-                variant="destructive"
                 onClick={disconnect}
                 disabled={disconnecting}
+                className="px-4 py-2.5 bg-red-500 text-white font-bold hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}
               >
                 {disconnecting ? "..." : t.disconnect}
-              </Button>
+              </button>
             </div>
             
             {status && (
@@ -340,17 +344,19 @@ function DataSourceCard({ exchange, onConnect, onDisconnect, isConnected, t, lan
           </label>
             
             <div className="flex gap-2">
-              <Button type="submit" disabled={loading} className="flex-1">
+              <button type="submit" disabled={loading} className="flex-1 px-4 py-2.5 bg-black text-white font-bold hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2" style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}>
+                {loading && <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>}
                 {loading ? t.connecting : isConnected ? t.updateAndSave : t.connect}
-              </Button>
+              </button>
               {isConnected && (
-                <Button 
+                <button 
                   type="button" 
-                  variant="outline" 
                   onClick={() => setShowForm(false)}
+                  className="px-4 py-2.5 bg-white border-2 border-gray-200 text-gray-700 font-bold hover:border-black hover:text-black transition-all"
+                  style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}
                 >
                   {t.cancel}
-            </Button>
+                </button>
               )}
           </div>
             
@@ -508,20 +514,18 @@ export default function ConnectPage() {
     return (
       <div className="container py-10">
         <div className="max-w-md mx-auto text-center">
-          <Card>
-            <CardContent className="pt-6">
-              <div className="w-20 h-20 mx-auto mb-4 bg-indigo-100 rounded-2xl flex items-center justify-center">
-                <svg className="w-10 h-10 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="bg-white border-2 border-gray-100 p-8" style={{clipPath: 'polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px))'}}>
+              <div className="w-20 h-20 mx-auto mb-4 bg-black flex items-center justify-center" style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'}}>
+                <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>
               </div>
               <h2 className="text-2xl font-bold mb-2">{t.loginRequired}</h2>
               <p className="text-gray-600 mb-6">{t.loginText}</p>
               <Link href="/auth">
-                <Button className="w-full">{t.login}</Button>
+                <Button className="w-full btn-primary">{t.login}</Button>
               </Link>
-            </CardContent>
-          </Card>
+          </div>
         </div>
       </div>
     );
@@ -530,7 +534,7 @@ export default function ConnectPage() {
   if (authLoading) {
     return (
       <div className="container py-10 text-center">
-        <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto"></div>
+        <div className="animate-spin w-8 h-8 border-4 border-black border-t-transparent mx-auto" style={{clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'}}></div>
         <p className="mt-4 text-gray-600">{t.loading}</p>
       </div>
     );
@@ -544,38 +548,42 @@ export default function ConnectPage() {
           <p className="text-gray-600 max-w-xl mx-auto">{t.subtitle}</p>
         </div>
 
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8">
-          <h3 className="font-medium text-blue-800 flex items-center gap-2">{t.securityTitle}</h3>
-          <ul className="mt-2 text-sm text-blue-700 space-y-1">
-            <li>• {t.securityItem1}</li>
-            <li>• {t.securityItem2}</li>
-            <li>• {t.securityItem3}</li>
-            <li>• {t.securityItem4}</li>
+        <div className="bg-gray-900 text-white p-5 mb-8" style={{clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))'}}>
+          <h3 className="font-bold text-lg flex items-center gap-2 mb-3">
+            <svg className="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+            {t.securityTitle.replace("🔒 ", "")}
+          </h3>
+          <ul className="text-sm text-gray-300 space-y-1.5">
+            <li className="flex items-center gap-2"><span className="text-emerald-400">✓</span> {t.securityItem1}</li>
+            <li className="flex items-center gap-2"><span className="text-emerald-400">✓</span> {t.securityItem2}</li>
+            <li className="flex items-center gap-2"><span className="text-emerald-400">✓</span> {t.securityItem3}</li>
+            <li className="flex items-center gap-2"><span className="text-emerald-400">✓</span> {t.securityItem4}</li>
           </ul>
         </div>
 
-        <Card className="bg-gradient-to-br from-indigo-50 to-blue-50 border-2 border-indigo-200 mb-8">
-          <CardHeader>
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center flex-shrink-0">
+        <div className="bg-white border-2 border-gray-100 mb-8" style={{clipPath: 'polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px))'}}>
+          <div className="p-6">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 bg-black flex items-center justify-center flex-shrink-0" style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}>
                 <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
                 </svg>
               </div>
               <div className="flex-1">
-                <CardTitle className="text-indigo-900 text-lg">{t.ipTitle}</CardTitle>
-                <p className="mt-2 text-sm text-indigo-700 leading-relaxed">{t.ipText}</p>
+                <h3 className="font-bold text-lg mb-1">{t.ipTitle.replace("🌐 ", "")}</h3>
+                <p className="text-sm text-gray-600">{t.ipText}</p>
               </div>
             </div>
-          </CardHeader>
-          <CardContent>
-            <div className="bg-white rounded-xl p-4 border-2 border-indigo-200 shadow-inner">
+            
+            <div className="mt-5 bg-gray-50 p-4 border-2 border-gray-200" style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'}}>
               <div className="flex items-center justify-between gap-4 flex-wrap">
                 <div className="flex-1 min-w-[200px]">
-                  <div className="text-xs text-indigo-600 font-semibold uppercase tracking-wider mb-2">
+                  <div className="text-xs text-gray-500 font-semibold uppercase tracking-wider mb-1">
                     {language === "uk" ? "IP-адреса сервера" : "Server IP Address"}
                   </div>
-                  <code className="text-2xl font-mono font-bold text-indigo-900 tracking-wide">
+                  <code className="text-2xl font-mono font-bold text-black tracking-wide">
                     46.224.99.27
                   </code>
                 </div>
@@ -584,28 +592,30 @@ export default function ConnectPage() {
                     navigator.clipboard.writeText("46.224.99.27");
                     alert(t.copied);
                   }}
-                  className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl flex items-center gap-2"
+                  className="px-5 py-2.5 bg-black hover:bg-gray-800 text-white font-bold transition-all flex items-center gap-2"
+                  style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                   </svg>
                   {t.copy}
                 </button>
               </div>
             </div>
-            <div className="mt-4 flex items-start gap-2 text-sm text-indigo-700 bg-indigo-100/50 rounded-lg p-3">
-              <svg className="w-5 h-5 text-indigo-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            
+            <div className="mt-4 flex items-start gap-2 text-sm text-gray-600 bg-gray-100 p-3" style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'}}>
+              <svg className="w-4 h-4 text-gray-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <span>{t.ipNote}</span>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           {loadingConnections ? (
             <div className="col-span-2 text-center py-8">
-              <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto"></div>
+              <div className="animate-spin w-8 h-8 border-4 border-black border-t-transparent mx-auto" style={{clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'}}></div>
               <p className="mt-4 text-gray-600">{t.loading}</p>
             </div>
           ) : (
@@ -624,31 +634,29 @@ export default function ConnectPage() {
         </div>
 
         {connectedExchanges.length > 0 && (
-          <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200">
-            <CardContent className="pt-6">
+          <div className="bg-emerald-500 text-white p-6" style={{clipPath: 'polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px))'}}>
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-12 h-12 bg-white flex items-center justify-center" style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}>
+                  <svg className="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
-                <h3 className="font-bold text-xl text-green-800">{t.exchangeConnected}</h3>
+                <h3 className="font-bold text-xl">{t.exchangeConnected}</h3>
               </div>
-              <p className="text-green-700 mb-4">{t.whatNext}</p>
+              <p className="text-emerald-100 mb-4">{t.whatNext}</p>
               <div className="flex flex-wrap gap-3">
                 <Link href="/backtest">
-                  <Button>{t.createStrategy}</Button>
+                  <button className="px-5 py-2.5 bg-white text-emerald-600 font-bold hover:bg-gray-100 transition-all" style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}>{t.createStrategy}</button>
                 </Link>
                 <Link href="/dashboard">
-                  <Button variant="outline">{t.goToDashboard}</Button>
+                  <button className="px-5 py-2.5 bg-transparent border-2 border-white text-white font-bold hover:bg-white/10 transition-all" style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}>{t.goToDashboard}</button>
                 </Link>
               </div>
-            </CardContent>
-          </Card>
+          </div>
         )}
 
         <div className="mt-8 text-center text-sm text-gray-500">
-          <p>{t.needHelp} <Link href="/faq" className="text-blue-600 hover:underline">{t.faq}</Link> {t.or} <Link href="/support" className="text-blue-600 hover:underline">{t.contactSupport}</Link>.</p>
+          <p>{t.needHelp} <Link href="/faq" className="text-black font-medium hover:underline">{t.faq}</Link> {t.or} <Link href="/support" className="text-black font-medium hover:underline">{t.contactSupport}</Link>.</p>
         </div>
       </div>
     </div>

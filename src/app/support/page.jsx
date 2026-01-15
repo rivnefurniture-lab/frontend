@@ -84,10 +84,10 @@ export default function SupportPage() {
   return (
     <div className="min-h-screen">
       {/* Hero */}
-      <section className="bg-gradient-to-b from-blue-50 to-white py-16">
+      <section className="bg-gradient-to-b from-gray-900 to-black py-16 text-white">
         <div className="container max-w-3xl text-center">
-          <h1 className="text-4xl font-bold mb-4">{t.title}</h1>
-          <p className="text-gray-600 text-lg">{t.subtitle}</p>
+          <h1 className="text-4xl font-bold mb-4 gradient-text">{t.title}</h1>
+          <p className="text-gray-300 text-lg">{t.subtitle}</p>
         </div>
       </section>
 
@@ -95,36 +95,48 @@ export default function SupportPage() {
         <div className="grid md:grid-cols-3 gap-8">
           {/* Quick Help Options */}
           <div className="md:col-span-1 space-y-6">
-            <div className="bg-white border rounded-xl p-5">
-              <div className="text-2xl mb-2">📚</div>
+            <div className="bg-white border-2 border-gray-100 p-5 hover:border-black transition-all" style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'}}>
+              <div className="w-10 h-10 bg-black flex items-center justify-center mb-3" style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'}}>
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+              </div>
               <h3 className="font-semibold mb-2">{t.faqTitle}</h3>
               <p className="text-sm text-gray-600 mb-3">{t.faqDesc}</p>
-              <Link href="/faq" className="text-blue-600 text-sm hover:underline">
+              <Link href="/faq" className="text-black font-medium text-sm hover:underline">
                 {t.browseFaq}
               </Link>
             </div>
 
-            <div className="bg-white border rounded-xl p-5">
-              <div className="text-2xl mb-2">💬</div>
+            <div className="bg-white border-2 border-gray-100 p-5 hover:border-black transition-all" style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'}}>
+              <div className="w-10 h-10 bg-emerald-500 flex items-center justify-center mb-3" style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'}}>
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+              </div>
               <h3 className="font-semibold mb-2">{t.telegramTitle}</h3>
               <p className="text-sm text-gray-600 mb-3">{t.telegramDesc}</p>
               <a
                 href="https://t.me/algotcha"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 text-sm hover:underline"
+                className="text-black font-medium text-sm hover:underline"
               >
                 {t.joinTelegram}
               </a>
             </div>
 
-            <div className="bg-white border rounded-xl p-5">
-              <div className="text-2xl mb-2">📧</div>
+            <div className="bg-white border-2 border-gray-100 p-5 hover:border-black transition-all" style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'}}>
+              <div className="w-10 h-10 bg-gray-800 flex items-center justify-center mb-3" style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'}}>
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              </div>
               <h3 className="font-semibold mb-2">{t.emailTitle}</h3>
               <p className="text-sm text-gray-600 mb-3">{t.emailDesc}</p>
               <a
                 href="mailto:support@algotcha.com"
-                className="text-blue-600 text-sm hover:underline"
+                className="text-black font-medium text-sm hover:underline"
               >
                 support@algotcha.com
               </a>
@@ -133,15 +145,19 @@ export default function SupportPage() {
 
           {/* Contact Form */}
           <div className="md:col-span-2">
-            <div className="bg-white border rounded-xl p-6">
+            <div className="bg-white border-2 border-gray-100 p-6 shadow-xl" style={{clipPath: 'polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px))'}}>
               <h2 className="text-xl font-bold mb-6">{t.sendMessage}</h2>
 
               {status === "success" ? (
                 <div className="text-center py-8">
-                  <div className="text-4xl mb-4">✅</div>
+                  <div className="w-16 h-16 bg-emerald-500 flex items-center justify-center mx-auto mb-4" style={{clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))'}}>
+                    <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
                   <h3 className="font-semibold text-lg mb-2">{t.messageSent}</h3>
                   <p className="text-gray-600 mb-4">{t.willReply}</p>
-                  <Button onClick={() => setStatus(null)} variant="outline">
+                  <Button onClick={() => setStatus(null)} className="btn-secondary">
                     {t.sendAnother}
                   </Button>
                 </div>
@@ -168,7 +184,7 @@ export default function SupportPage() {
                     </label>
                     <select
                       id="subject"
-                      className="w-full h-11 px-4 rounded-lg border border-gray-200"
+                      className="w-full"
                       value={form.subject}
                       onChange={(e) => setForm({ ...form, subject: e.target.value })}
                       required
@@ -192,7 +208,7 @@ export default function SupportPage() {
                     </label>
                     <textarea
                       id="message"
-                      className="w-full h-40 p-4 rounded-lg border border-gray-200 resize-none"
+                      className="w-full h-40 p-4 border-2 border-gray-200 resize-none focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
                       placeholder={t.messagePlaceholder}
                       value={form.message}
                       onChange={(e) => setForm({ ...form, message: e.target.value })}
@@ -201,7 +217,7 @@ export default function SupportPage() {
                     />
                   </div>
 
-                  <Button type="submit" className="w-full" disabled={loading}>
+                  <Button type="submit" className="w-full btn-primary" disabled={loading}>
                     {loading ? t.sending : t.send}
                   </Button>
                 </form>
@@ -209,12 +225,12 @@ export default function SupportPage() {
             </div>
 
             {/* Response Time */}
-            <div className="mt-6 p-4 bg-blue-50 rounded-lg text-sm text-blue-800">
+            <div className="mt-6 p-4 bg-gray-900 text-white text-sm" style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}>
               {t.responseTime.split("FAQ").map((part, i, arr) =>
                 i < arr.length - 1 ? (
                   <span key={i}>
                     {part}
-                    <Link href="/faq" className="underline">
+                    <Link href="/faq" className="underline text-emerald-400">
                       FAQ
                     </Link>
                   </span>

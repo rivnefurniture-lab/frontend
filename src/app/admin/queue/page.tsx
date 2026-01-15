@@ -266,7 +266,7 @@ export default function QueueAdminPage() {
           onClick={() => setActiveTab('queue')}
           className={`px-4 py-2 font-medium transition-colors ${
             activeTab === 'queue'
-              ? 'border-b-2 border-blue-600 text-blue-600'
+              ? 'border-b-2 border-emerald-600 text-emerald-600'
               : 'text-gray-600 hover:text-gray-900'
           }`}
         >
@@ -276,7 +276,7 @@ export default function QueueAdminPage() {
           onClick={() => setActiveTab('analytics')}
           className={`px-4 py-2 font-medium transition-colors ${
             activeTab === 'analytics'
-              ? 'border-b-2 border-blue-600 text-blue-600'
+              ? 'border-b-2 border-emerald-600 text-emerald-600'
               : 'text-gray-600 hover:text-gray-900'
           }`}
         >
@@ -286,7 +286,7 @@ export default function QueueAdminPage() {
           onClick={() => setActiveTab('activity')}
           className={`px-4 py-2 font-medium transition-colors ${
             activeTab === 'activity'
-              ? 'border-b-2 border-blue-600 text-blue-600'
+              ? 'border-b-2 border-emerald-600 text-emerald-600'
               : 'text-gray-600 hover:text-gray-900'
           }`}
         >
@@ -313,7 +313,7 @@ export default function QueueAdminPage() {
                 <CardTitle className="text-sm font-medium">Processing</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-blue-600">{stats?.processing || 0}</div>
+                <div className="text-3xl font-bold text-emerald-600">{stats?.processing || 0}</div>
               </CardContent>
             </Card>
 
@@ -392,7 +392,7 @@ export default function QueueAdminPage() {
                                 <div className="flex items-center gap-2">
                                   <div className="w-24 bg-gray-200 rounded-full h-2">
                                     <div
-                                      className="bg-blue-600 h-2 rounded-full transition-all"
+                                      className="bg-emerald-600 h-2 transition-all" style={{clipPath: 'polygon(0 0, calc(100% - 2px) 0, 100% 2px, 100% 100%, 2px 100%, 0 calc(100% - 2px))'}}
                                       style={{ width: `${item.progress}%` }}
                                     />
                                   </div>
@@ -496,13 +496,13 @@ export default function QueueAdminPage() {
           <div className="mb-8">
             <h2 className="text-2xl font-bold mb-4">User Statistics</h2>
             <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-              <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white">
+              <Card className="bg-gradient-to-br from-gray-900 to-black text-white">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm">Total Users</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-4xl font-bold">{analytics.users.total}</div>
-                  <div className="text-sm mt-2 text-blue-100">
+                  <div className="text-sm mt-2 text-gray-300">
                     +{analytics.users.recentSignups} last 7 days
                   </div>
                 </CardContent>
@@ -591,7 +591,7 @@ export default function QueueAdminPage() {
                   <CardTitle className="text-sm">Last 24 Hours</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold text-blue-600">{analytics.backtests.last24h}</div>
+                  <div className="text-3xl font-bold text-emerald-600">{analytics.backtests.last24h}</div>
                 </CardContent>
               </Card>
               <Card>

@@ -264,7 +264,7 @@ function PayContent() {
                   </p>
                   <div className="flex justify-center gap-3 opacity-60">
                     {/* Visa */}
-                    <div className="w-12 h-8 bg-white rounded border flex items-center justify-center text-blue-900 font-bold text-xs">
+                    <div className="w-12 h-8 bg-white border flex items-center justify-center text-gray-900 font-bold text-xs" style={{clipPath: 'polygon(0 0, calc(100% - 3px) 0, 100% 3px, 100% 100%, 3px 100%, 0 calc(100% - 3px))'}}>
                       VISA
                     </div>
                     {/* Mastercard */}
@@ -327,7 +327,7 @@ export default function Pay() {
   return (
     <Suspense fallback={
       <div className="container py-10 max-w-xl text-center">
-        <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto"></div>
+        <div className="animate-spin w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full mx-auto"></div>
       </div>
     }>
       <PayContent />

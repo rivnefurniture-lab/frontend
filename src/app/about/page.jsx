@@ -195,19 +195,19 @@ export default function AboutPage() {
       </section>
 
       {/* CTA */}
-      <section className="bg-blue-600 py-16">
+      <section className="bg-black py-16">
         <div className="container text-center text-white">
           <h2 className="text-3xl font-bold mb-4">
             {language === "uk" ? "Готові почати?" : "Ready to Get Started?"}
           </h2>
-          <p className="text-blue-100 mb-8 max-w-xl mx-auto">
+          <p className="text-gray-300 mb-8 max-w-xl mx-auto">
             {language === "uk"
               ? "Приєднуйтесь до аналітиків, які довіряють Algotcha для автоматизованого, прозорого та безпечного аналізу ринку."
               : "Join analysts who trust Algotcha for automated, transparent, and secure market analysis."}
           </p>
           <div className="flex gap-4 justify-center flex-wrap">
             <Link href="/auth?mode=signup">
-              <Button className="bg-white text-blue-600 hover:bg-blue-50">
+              <Button className="bg-white text-black hover:bg-gray-100 font-bold" style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}>
                 {language === "uk" ? "Створити безкоштовний акаунт" : "Create Free Account"}
               </Button>
             </Link>

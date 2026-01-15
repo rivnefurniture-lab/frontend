@@ -46,7 +46,7 @@ export default function Hero() {
         className="text-4xl md:text-5xl font-bold leading-tight"
       >
         {t("hero.title")}{" "}
-        <span className="text-blue-600">{t("hero.titleHighlight")}</span>
+        <span className="text-emerald-500">{t("hero.titleHighlight")}</span>
       </motion.h1>
       <p className="mt-4 text-gray-600 max-w-xl">
         {t("hero.subtitle")}

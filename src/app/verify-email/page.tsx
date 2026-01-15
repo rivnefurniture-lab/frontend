@@ -70,7 +70,8 @@ function VerifyEmailContent() {
               {status === "success" && (
                 <Link
                   href="/auth?mode=login"
-                  className="inline-block mt-4 px-6 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition"
+                  className="inline-block mt-4 px-6 py-2 bg-black text-white hover:bg-gray-800 transition"
+                  style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'}}
                 >
                   Go to Login
                 </Link>
@@ -87,7 +88,7 @@ export default function VerifyEmailPage() {
   return (
     <Suspense fallback={
       <div className="container py-10 max-w-md mx-auto text-center">
-        <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto"></div>
+        <div className="animate-spin w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full mx-auto"></div>
       </div>
     }>
       <VerifyEmailContent />

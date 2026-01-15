@@ -240,7 +240,7 @@ export default function Dashboard() {
                   {t.runningStrategies}
                 </span>
                 <span className="text-sm font-normal text-gray-500">
-                  {runningStrategies.length} active
+                  {runningStrategies.length} {language === "uk" ? "активних" : "active"}
                 </span>
               </CardTitle>
             </CardHeader>
@@ -263,7 +263,7 @@ export default function Dashboard() {
                         <div>
                           <h4 className="font-medium">{run.strategy?.name || 'Strategy'}</h4>
                           <p className="text-sm text-gray-500">
-                            {run.pairs?.length || 0} pairs • Started {new Date(run.startedAt).toLocaleDateString()}
+                            {run.pairs?.length || 0} {language === "uk" ? "пар" : "pairs"} • {language === "uk" ? "Запущено" : "Started"} {new Date(run.startedAt).toLocaleDateString()}
                           </p>
                         </div>
                         <div className="flex items-center gap-2">
@@ -282,28 +282,28 @@ export default function Dashboard() {
                             variant="outline"
                             onClick={() => stopStrategy(run.id)}
                           >
-                            Stop
+                            {t.stop}
                           </Button>
                         </div>
                       </div>
                       
-                      <div className="grid grid-cols-4 gap-4 text-sm">
+                        <div className="grid grid-cols-4 gap-4 text-sm">
                         <div>
-                          <p className="text-gray-500">Balance</p>
+                          <p className="text-gray-500">{language === "uk" ? "Баланс" : "Balance"}</p>
                           <p className="font-medium">${run.currentBalance?.toFixed(2) || run.initialBalance}</p>
                         </div>
                         <div>
-                          <p className="text-gray-500">Profit</p>
+                          <p className="text-gray-500">{t.profit}</p>
                           <p className={`font-medium ${(run.totalProfit || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                             ${(run.totalProfit || 0).toFixed(2)}
                           </p>
                         </div>
                         <div>
-                          <p className="text-gray-500">Trades</p>
+                          <p className="text-gray-500">{t.trades}</p>
                           <p className="font-medium">{run.totalTrades || 0}</p>
                         </div>
                         <div>
-                          <p className="text-gray-500">Win Rate</p>
+                          <p className="text-gray-500">{language === "uk" ? "Виграш" : "Win Rate"}</p>
                           <p className="font-medium">
                             {run.totalTrades > 0 
                               ? ((run.winningTrades / run.totalTrades) * 100).toFixed(0) 
@@ -315,7 +315,7 @@ export default function Dashboard() {
                       {/* Recent trades */}
                       {run.trades?.length > 0 && (
                         <div className="mt-4 pt-4 border-t">
-                          <p className="text-xs text-gray-500 mb-2">Recent Trades</p>
+                          <p className="text-xs text-gray-500 mb-2">{language === "uk" ? "Останні угоди" : "Recent Trades"}</p>
                           <div className="space-y-2">
                             {run.trades.slice(0, 3).map((trade, i) => {
                               const baseAsset = trade.symbol?.split('/')[0] || 'BTC';
@@ -329,9 +329,9 @@ export default function Dashboard() {
                                     </span>
                                     <span className="font-medium">{trade.symbol}</span>
                                   </div>
-                                  <div className="flex items-center gap-3 text-right">
+                                    <div className="flex items-center gap-3 text-right">
                                     <div>
-                                      <div className="text-gray-500">Price</div>
+                                      <div className="text-gray-500">{language === "uk" ? "Ціна" : "Price"}</div>
                                       <div className="font-medium">${trade.price?.toLocaleString(undefined, {maximumFractionDigits: 2})}</div>
                                     </div>
                                     <div>
@@ -363,15 +363,15 @@ export default function Dashboard() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Folder className="h-5 w-5 text-blue-600" />
-                Saved Strategies
+                <Folder className="h-5 w-5 text-gray-700" />
+                {t.savedStrategies}
               </CardTitle>
             </CardHeader>
             <CardContent>
               {strategies.length === 0 ? (
                 <div className="text-center py-6 text-gray-500">
-                  <p>No saved strategies yet</p>
-                  <p className="text-sm">Run a backtest and save it as a strategy</p>
+                  <p>{t.noStrategies}</p>
+                  <p className="text-sm">{language === "uk" ? "Запустіть бектест і збережіть його як стратегію" : "Run a backtest and save it as a strategy"}</p>
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -390,14 +390,14 @@ export default function Dashboard() {
                       <div className="flex gap-2">
                         {strategy.isActive ? (
                           <span className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs">
-                            Running
+                            {t.running}
                           </span>
                         ) : (
                           <Button 
                             size="sm"
                             onClick={() => startStrategy(strategy.id)}
                           >
-                            Start
+                            {t.start}
                           </Button>
                         )}
                         <Button 
@@ -405,7 +405,7 @@ export default function Dashboard() {
                           variant="outline"
                           onClick={() => deleteStrategy(strategy.id)}
                         >
-                          Delete
+                          {t.delete}
                         </Button>
                       </div>
                     </div>
@@ -422,20 +422,20 @@ export default function Dashboard() {
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <span className="flex items-center gap-2">
-                  <BarChart3 className="h-5 w-5 text-blue-600" />
-                  Recent Backtests
+                  <BarChart3 className="h-5 w-5 text-gray-700" />
+                  {t.recentBacktests}
                 </span>
-                <Link href="/backtest" className="text-sm text-blue-600 hover:underline">
-                  Run New
+                <Link href="/backtest" className="text-sm text-black font-medium hover:underline">
+                  {language === "uk" ? "Новий" : "Run New"}
                 </Link>
               </CardTitle>
             </CardHeader>
             <CardContent>
               {backtestResults.length === 0 ? (
                 <div className="text-center py-6 text-gray-500">
-                  <p>No backtests yet</p>
+                  <p>{t.noBacktests}</p>
                   <Link href="/backtest">
-                    <Button size="sm" className="mt-2">Run Backtest</Button>
+                    <Button size="sm" className="mt-2">{language === "uk" ? "Запустити бектест" : "Run Backtest"}</Button>
                   </Link>
                 </div>
               ) : (
@@ -446,7 +446,7 @@ export default function Dashboard() {
                       href={`/strategies/backtest-${result.id}`}
                       className="block"
                     >
-                      <div className="p-3 border rounded-lg hover:bg-gray-50 hover:border-blue-300 transition cursor-pointer">
+                      <div className="p-3 border-2 border-gray-100 hover:bg-gray-50 hover:border-black transition cursor-pointer" style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}>
                         <div className="flex justify-between items-start mb-2">
                           <h4 className="font-medium text-sm">{result.strategy_name || result.name}</h4>
                           <span className={`text-sm font-medium ${
@@ -457,15 +457,15 @@ export default function Dashboard() {
                         </div>
                         <div className="grid grid-cols-3 gap-2 text-xs text-gray-500">
                           <div>
-                            <span className="block">Sharpe</span>
+                            <span className="block">{t.sharpe}</span>
                             <span className="text-gray-900">{result.sharpe_ratio?.toFixed(2)}</span>
                           </div>
                           <div>
-                            <span className="block">Max DD</span>
+                            <span className="block">{language === "uk" ? "Макс. просадка" : "Max DD"}</span>
                             <span className="text-gray-900">{(result.max_drawdown * 100)?.toFixed(1)}%</span>
                           </div>
                           <div>
-                            <span className="block">Win Rate</span>
+                            <span className="block">{language === "uk" ? "Виграш" : "Win Rate"}</span>
                             <span className="text-gray-900">{(result.win_rate * 100)?.toFixed(0)}%</span>
                           </div>
                         </div>
@@ -484,33 +484,33 @@ export default function Dashboard() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Zap className="h-5 w-5 text-blue-600" />
-                Quick Actions
+                <Zap className="h-5 w-5 text-emerald-600" />
+                {t.quickActions}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <Link href="/backtest" className="block">
                 <Button className="w-full justify-start" variant="outline">
                   <BarChart3 className="h-4 w-4 mr-2" />
-                  Create New Strategy
+                  {language === "uk" ? "Створити нову стратегію" : "Create New Strategy"}
                 </Button>
               </Link>
               <Link href="/connect" className="block">
                 <Button className="w-full justify-start" variant="outline">
                   <Link2 className="h-4 w-4 mr-2" />
-                  Connect Exchange
+                  {t.connectExchange}
                 </Button>
               </Link>
               <Link href="/strategies" className="block">
                 <Button className="w-full justify-start" variant="outline">
                   <BookOpen className="h-4 w-4 mr-2" />
-                  Browse Strategies
+                  {t.browseStrategies}
                 </Button>
               </Link>
               <Link href="/pricing" className="block">
                 <Button className="w-full justify-start" variant="outline">
                   <Sparkles className="h-4 w-4 mr-2" />
-                  Upgrade Plan
+                  {language === "uk" ? "Оновити план" : "Upgrade Plan"}
                 </Button>
               </Link>
             </CardContent>

@@ -69,11 +69,11 @@ export default function Page() {
               min="10"
             />
             {s && (
-              <div className="p-3 bg-blue-50 rounded-lg text-sm">
-                <p className="text-blue-800">
+              <div className="p-3 bg-emerald-50 border-2 border-emerald-100 text-sm" style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'}}>
+                <p className="text-gray-800">
                   <strong>{s.name}</strong> - {s.category}
                 </p>
-                <p className="text-blue-600">
+                <p className="text-emerald-600">
                   Expected yearly return: <strong>+{s.cagr?.toFixed(1) || 0}%</strong>
                 </p>
               </div>

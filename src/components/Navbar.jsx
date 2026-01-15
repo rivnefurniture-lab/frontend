@@ -199,19 +199,19 @@ function LanguageSwitcher() {
           <button
             onClick={() => { setLang("uk"); setIsOpen(false); }}
             className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-3 ${
-              language === "uk" ? "text-blue-600 font-medium bg-blue-50" : "text-gray-700"
+              language === "uk" ? "text-black font-medium bg-gray-100" : "text-gray-700"
             }`}
           >
-            <span className="w-6 h-6 rounded flex items-center justify-center bg-blue-500 text-white text-xs font-bold">UA</span>
+            <span className="w-6 h-6 flex items-center justify-center bg-black text-white text-xs font-bold" style={{clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'}}>UA</span>
             <span>Українська</span>
           </button>
           <button
             onClick={() => { setLang("en"); setIsOpen(false); }}
             className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-3 ${
-              language === "en" ? "text-blue-600 font-medium bg-blue-50" : "text-gray-700"
+              language === "en" ? "text-black font-medium bg-gray-100" : "text-gray-700"
             }`}
           >
-            <span className="w-6 h-6 rounded flex items-center justify-center bg-gray-700 text-white text-xs font-bold">EN</span>
+            <span className="w-6 h-6 flex items-center justify-center bg-gray-700 text-white text-xs font-bold" style={{clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'}}>EN</span>
             <span>English</span>
           </button>
         </div>
@@ -310,7 +310,7 @@ function UserDropdown({ user, onLogout }) {
               onClick={() => setIsOpen(false)}
               className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors"
             >
-              <BarChart3 className="w-4 h-4 text-blue-500" />
+              <BarChart3 className="w-4 h-4 text-gray-700" />
               <span>{t("nav.dashboard")}</span>
             </Link>
             <Link
@@ -318,7 +318,7 @@ function UserDropdown({ user, onLogout }) {
               onClick={() => setIsOpen(false)}
               className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors"
             >
-              <BarChart3 className="w-4 h-4 text-green-500" />
+              <BarChart3 className="w-4 h-4 text-emerald-600" />
               <span>{language === "uk" ? "Історія угод" : "Trade History"}</span>
             </Link>
             <Link
@@ -326,7 +326,7 @@ function UserDropdown({ user, onLogout }) {
               onClick={() => setIsOpen(false)}
               className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors"
             >
-              <Target className="w-4 h-4 text-purple-500" />
+              <Target className="w-4 h-4 text-gray-700" />
               <span>{t("nav.myStrategies")}</span>
             </Link>
           </div>
@@ -339,7 +339,7 @@ function UserDropdown({ user, onLogout }) {
               onClick={() => setIsOpen(false)}
               className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors"
             >
-              <Zap className="w-4 h-4 text-green-500" />
+              <Zap className="w-4 h-4 text-emerald-600" />
               <span>{t("nav.connectExchange")}</span>
             </Link>
             <Link
@@ -347,7 +347,7 @@ function UserDropdown({ user, onLogout }) {
               onClick={() => setIsOpen(false)}
               className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors"
             >
-              <CreditCard className="w-4 h-4 text-indigo-500" />
+              <CreditCard className="w-4 h-4 text-gray-700" />
               <span>{t("nav.upgradePlan")}</span>
             </Link>
             <Link
@@ -401,7 +401,7 @@ export default function Navbar() {
     <header className="bg-white/95 backdrop-blur-md supports-[backdrop-filter]:bg-white/80 border-b-2 border-gray-100 sticky top-0 z-40">
       <div className="container h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 group">
-          <img src="/logo.svg" alt="Algotcha" className="h-7 transition-transform group-hover:scale-105" />
+          <img src="/logo.svg" alt="Algotcha" className="h-11 transition-transform group-hover:scale-105" />
         </Link>
 
         {/* Desktop nav */}

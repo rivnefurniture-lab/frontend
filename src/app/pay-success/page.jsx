@@ -29,7 +29,7 @@ export default function PaySuccess() {
   return (
     <Suspense fallback={
       <div className="container py-16">
-        <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto"></div>
+        <div className="animate-spin w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full mx-auto"></div>
       </div>
     }>
       <PaySuccessContent />

@@ -134,7 +134,7 @@ export function PageLoading({ message }) {
   return (
     <div className="min-h-[60vh] flex flex-col items-center justify-center">
       <div className="relative">
-        <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
+        <div className="w-12 h-12 border-4 border-gray-200 border-t-emerald-600 animate-spin" style={{clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'}} />
       </div>
       {message && (
         <p className="mt-4 text-gray-500 text-sm">{message}</p>
@@ -159,7 +159,8 @@ export function ErrorState({ message, onRetry, language = "en" }) {
       {onRetry && (
         <button
           onClick={onRetry}
-          className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition"
+          className="px-6 py-2 bg-black hover:bg-gray-800 text-white transition"
+          style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'}}
         >
           {language === "uk" ? "Спробувати знову" : "Try Again"}
         </button>

@@ -97,7 +97,7 @@ function AuthForm() {
   if (loading) {
     return (
       <div className="container py-16 max-w-md text-center">
-        <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto"></div>
+        <div className="animate-spin w-8 h-8 border-4 border-black border-t-transparent mx-auto" style={{clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'}}></div>
         <p className="mt-4 text-gray-600">Loading...</p>
       </div>
     );
@@ -306,7 +306,7 @@ export default function AuthPage() {
   return (
     <Suspense fallback={
       <div className="container py-16 max-w-md text-center">
-        <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto"></div>
+        <div className="animate-spin w-8 h-8 border-4 border-black border-t-transparent mx-auto" style={{clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'}}></div>
         <p className="mt-4 text-gray-600">Loading...</p>
       </div>
     }>

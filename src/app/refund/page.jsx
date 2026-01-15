@@ -99,122 +99,134 @@ export default function RefundPage() {
   };
 
   return (
-    <div className="container py-10 max-w-4xl">
-      <div className="text-center mb-10">
-        <h1 className="text-4xl font-bold mb-4">{t.title}</h1>
-        <p className="text-xl text-gray-600">{t.subtitle}</p>
-      </div>
+    <div className="min-h-screen">
+      {/* Hero */}
+      <section className="bg-gradient-to-b from-gray-900 to-black py-16 text-white">
+        <div className="container max-w-4xl text-center">
+          <h1 className="text-4xl font-bold mb-4 gradient-text">{t.title}</h1>
+          <p className="text-xl text-gray-300">{t.subtitle}</p>
+        </div>
+      </section>
 
-      {/* Policy Cards */}
-      <div className="grid md:grid-cols-3 gap-6 mb-12">
-        <Card className="text-center">
-          <CardContent className="pt-6">
-            <div className="text-4xl mb-4">💯</div>
+      <div className="container py-10 max-w-4xl">
+        {/* Policy Cards */}
+        <div className="grid md:grid-cols-3 gap-6 mb-12">
+          <div className="bg-white border-2 border-gray-100 text-center p-6 hover:border-black transition-all" style={{clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))'}}>
+            <div className="w-14 h-14 bg-emerald-500 flex items-center justify-center mx-auto mb-4" style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}>
+              <span className="text-white text-2xl">💯</span>
+            </div>
             <h3 className="font-bold text-lg mb-2">{t.guaranteeTitle.replace("💯 ", "")}</h3>
             <p className="text-gray-600 text-sm">{t.guaranteeText}</p>
-          </CardContent>
-        </Card>
-        
-        <Card className="text-center">
-          <CardContent className="pt-6">
-            <div className="text-4xl mb-4">⏰</div>
+          </div>
+          
+          <div className="bg-white border-2 border-gray-100 text-center p-6 hover:border-black transition-all" style={{clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))'}}>
+            <div className="w-14 h-14 bg-black flex items-center justify-center mx-auto mb-4" style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}>
+              <span className="text-white text-2xl">⏰</span>
+            </div>
             <h3 className="font-bold text-lg mb-2">{t.periodTitle.replace("⏰ ", "")}</h3>
             <p className="text-gray-600 text-sm">{t.periodText}</p>
-          </CardContent>
-        </Card>
-        
-        <Card className="text-center">
-          <CardContent className="pt-6">
-            <div className="text-4xl mb-4">⚡</div>
+          </div>
+          
+          <div className="bg-white border-2 border-gray-100 text-center p-6 hover:border-black transition-all" style={{clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))'}}>
+            <div className="w-14 h-14 bg-gray-800 flex items-center justify-center mx-auto mb-4" style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}>
+              <span className="text-white text-2xl">⚡</span>
+            </div>
             <h3 className="font-bold text-lg mb-2">{t.processTitle.replace("⚡ ", "")}</h3>
             <p className="text-gray-600 text-sm">{t.processText}</p>
+          </div>
+        </div>
+
+        {/* Eligibility */}
+        <Card className="mb-8 card-geometric">
+          <CardHeader>
+            <CardTitle>{t.eligibilityTitle}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-2">
+              {t.eligibilityItems.map((item, i) => (
+                <li key={i} className="flex items-center gap-2">
+                  <span className="w-5 h-5 bg-emerald-500 flex items-center justify-center text-white text-xs" style={{clipPath: 'polygon(0 0, calc(100% - 3px) 0, 100% 3px, 100% 100%, 3px 100%, 0 calc(100% - 3px))'}}>✓</span>
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+
+        {/* Refund Request Form */}
+        <Card className="mb-8 card-geometric">
+          <CardHeader>
+            <CardTitle>{t.requestTitle}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {!user ? (
+              <div className="text-center py-8">
+                <div className="w-16 h-16 bg-gray-100 flex items-center justify-center mx-auto mb-4" style={{clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))'}}>
+                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                </div>
+                <p className="text-gray-600 mb-4">{t.loginRequired}</p>
+                <Link href="/auth">
+                  <Button className="btn-primary">{t.loginButton}</Button>
+                </Link>
+              </div>
+            ) : submitted ? (
+              <div className="text-center py-8">
+                <div className="w-16 h-16 bg-emerald-500 flex items-center justify-center mx-auto mb-4" style={{clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))'}}>
+                  <span className="text-white text-3xl">✓</span>
+                </div>
+                <h3 className="text-xl font-bold mb-2">{t.successTitle}</h3>
+                <p className="text-gray-600">{t.successText}</p>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">{t.reasonLabel}</label>
+                  <textarea
+                    value={reason}
+                    onChange={(e) => setReason(e.target.value)}
+                    placeholder={t.reasonPlaceholder}
+                    className="w-full p-3 border-2 border-gray-200 min-h-[120px] resize-none focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                    required
+                  />
+                </div>
+                
+                {error && (
+                  <p className="text-red-600 text-sm p-3 bg-red-50 border-2 border-red-200" style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'}}>{error}</p>
+                )}
+                
+                <Button type="submit" className="w-full btn-primary" disabled={submitting}>
+                  {submitting ? t.submitting : t.submitButton}
+                </Button>
+              </form>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Fairness Note */}
+        <div className="bg-emerald-50 border-2 border-emerald-200 p-6 text-center mb-8" style={{clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))'}}>
+          <p className="text-emerald-800 font-medium">{t.fairnessNote}</p>
+        </div>
+
+        {/* Contact */}
+        <Card className="card-geometric">
+          <CardHeader>
+            <CardTitle>{t.contactTitle}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-gray-600 mb-4">{t.contactText}</p>
+            <div className="flex flex-wrap gap-4">
+              <a href="mailto:support@algotcha.com" className="flex items-center gap-2 text-black font-medium hover:underline">
+                📧 support@algotcha.com
+              </a>
+              <a href="https://t.me/algotcha_support" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-black font-medium hover:underline">
+                💬 Telegram Support
+              </a>
+            </div>
           </CardContent>
         </Card>
       </div>
-
-      {/* Eligibility */}
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle>{t.eligibilityTitle}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ul className="space-y-2">
-            {t.eligibilityItems.map((item, i) => (
-              <li key={i} className="flex items-center gap-2">
-                <span className="text-green-500">✓</span>
-                {item}
-              </li>
-            ))}
-          </ul>
-        </CardContent>
-      </Card>
-
-      {/* Refund Request Form */}
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle>{t.requestTitle}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {!user ? (
-            <div className="text-center py-8">
-              <p className="text-gray-600 mb-4">{t.loginRequired}</p>
-              <Link href="/auth">
-                <Button>{t.loginButton}</Button>
-              </Link>
-            </div>
-          ) : submitted ? (
-            <div className="text-center py-8">
-              <div className="text-6xl mb-4">✅</div>
-              <h3 className="text-xl font-bold mb-2">{t.successTitle}</h3>
-              <p className="text-gray-600">{t.successText}</p>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">{t.reasonLabel}</label>
-                <textarea
-                  value={reason}
-                  onChange={(e) => setReason(e.target.value)}
-                  placeholder={t.reasonPlaceholder}
-                  className="w-full p-3 border rounded-lg min-h-[120px] resize-none"
-                  required
-                />
-              </div>
-              
-              {error && (
-                <p className="text-red-600 text-sm">{error}</p>
-              )}
-              
-              <Button type="submit" className="w-full" disabled={submitting}>
-                {submitting ? t.submitting : t.submitButton}
-              </Button>
-            </form>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Fairness Note */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 text-center mb-8">
-        <p className="text-blue-800 font-medium">{t.fairnessNote}</p>
-      </div>
-
-      {/* Contact */}
-      <Card>
-        <CardHeader>
-          <CardTitle>{t.contactTitle}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-gray-600 mb-4">{t.contactText}</p>
-          <div className="flex flex-wrap gap-4">
-            <a href="mailto:support@algotcha.com" className="flex items-center gap-2 text-blue-600 hover:underline">
-              📧 support@algotcha.com
-            </a>
-            <a href="https://t.me/algotcha_support" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-blue-600 hover:underline">
-              💬 Telegram Support
-            </a>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }

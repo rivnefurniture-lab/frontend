@@ -47,7 +47,7 @@ export default function Page() {
       role: language === "uk" ? "Бізнес-аналітик" : "Business Analyst",
       initials: "ОК",
       photo: "/testimonials/oleg.jpeg",
-      gradient: "from-blue-500 to-cyan-500",
+      gradient: "from-gray-700 to-gray-900",
       rating: 5,
       text: t("testimonialContent.oleg"),
     },

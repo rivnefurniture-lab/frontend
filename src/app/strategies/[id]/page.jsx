@@ -15,15 +15,66 @@ import {
   CartesianGrid,
 } from "recharts";
 import { useAuth } from "@/context/AuthProvider";
+import { useLanguage } from "@/context/LanguageContext";
 import { apiFetch, publicFetch } from "@/lib/api";
 
 // Build version: 2025-12-14-v3 - percentage fixes
-console.log("[Algotcha] Strategy page loaded - build v2026-01-14-v6");
+console.log("[Algotcha] Strategy page loaded - build v2026-01-14-v7");
 
 export default function StrategyDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { user } = useAuth();
+  const { language } = useLanguage();
+  
+  // Translations
+  const t = {
+    back: language === "uk" ? "Назад" : "Back",
+    yearlyReturn: language === "uk" ? "Річна дохідність" : "Yearly Return",
+    winRate: language === "uk" ? "Відсоток виграшу" : "Win Rate",
+    sharpeRatio: language === "uk" ? "Коеф. Шарпа" : "Sharpe Ratio",
+    maxDrawdown: language === "uk" ? "Макс. просадка" : "Max Drawdown",
+    returnsBreakdown: language === "uk" ? "Розбивка дохідності" : "Returns Breakdown",
+    daily: language === "uk" ? "День" : "Daily",
+    weekly: language === "uk" ? "Тиждень" : "Weekly",
+    monthly: language === "uk" ? "Місяць" : "Monthly",
+    yearly: language === "uk" ? "Рік" : "Yearly",
+    historicalPerformance: language === "uk" ? "Історичні річні показники" : "Historical Yearly Performance",
+    overview: language === "uk" ? "Огляд" : "Overview",
+    trades: language === "uk" ? "Угоди" : "Trades",
+    conditions: language === "uk" ? "Умови" : "Conditions",
+    rerun: language === "uk" ? "Перезапуск" : "Rerun",
+    performanceChart: language === "uk" ? "Графік показників" : "Performance Chart",
+    totalTrades: language === "uk" ? "Всього угод" : "Total Trades",
+    profitFactor: language === "uk" ? "Фактор прибутку" : "Profit Factor",
+    minInvestment: language === "uk" ? "Мін. інвестиція" : "Min Investment",
+    backtestTrades: language === "uk" ? "Угоди бектесту" : "Backtest Trades",
+    tradingConditions: language === "uk" ? "Торгові умови" : "Trading Conditions",
+    startLiveTrading: language === "uk" ? "Почати живу торгівлю" : "Start Live Trading",
+    connectFirst: language === "uk" ? "Спочатку підключіть джерело даних на" : "Connect your exchange on the",
+    connectPage: language === "uk" ? "сторінці підключення" : "Connect page",
+    exchange: language === "uk" ? "Платформа" : "Exchange",
+    tradingPair: language === "uk" ? "Торгова пара" : "Trading Pair",
+    timeframe: language === "uk" ? "Таймфрейм" : "Timeframe",
+    orderSize: language === "uk" ? "Розмір ордера ($)" : "Order Size ($)",
+    maxRisk: language === "uk" ? "Макс. ризик ($)" : "Max Risk ($)",
+    perTrade: language === "uk" ? "$ за угоду" : "$ per trade",
+    closesIfLoss: language === "uk" ? "Закриває всі при перевищенні втрат" : "Closes all if loss exceeds",
+    riskWarning: language === "uk" ? "Попередження про ризик" : "Risk Warning",
+    riskWarningText: language === "uk" ? "Це торгівля РЕАЛЬНИМИ грошима. Якщо нереалізований збиток досягне" : "This trades REAL money. If unrealized loss reaches",
+    allPositionsClose: language === "uk" ? ", всі позиції закриються автоматично." : ", all positions close automatically.",
+    starting: language === "uk" ? "Запуск..." : "Starting...",
+    startLive: language === "uk" ? "🚀 Почати живу торгівлю" : "🚀 Start Live Trading",
+    tradingRisk: language === "uk" ? "Торгівля пов'язана з ризиком. Торгуйте лише тими коштами, які можете дозволити собі втратити." : "Trading involves risk. Only trade with money you can afford to lose.",
+    quickStats: language === "uk" ? "Швидка статистика" : "Quick Stats",
+    loading: language === "uk" ? "Завантаження стратегії..." : "Loading strategy...",
+    notFound: language === "uk" ? "Стратегію не знайдено" : "Strategy Not Found",
+    notFoundDesc: language === "uk" ? "Стратегія, яку ви шукаєте, не існує." : "The strategy you're looking for doesn't exist.",
+    backToStrategies: language === "uk" ? "← Назад до стратегій" : "← Back to Strategies",
+    connected: language === "uk" ? "Підключено" : "Connected",
+    notConnected: language === "uk" ? "Не підключено." : "Not connected.",
+    connectNow: language === "uk" ? "Підключити зараз →" : "Connect now →",
+  };
   
   const [strategy, setStrategy] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -206,8 +257,8 @@ export default function StrategyDetailPage() {
   if (loading) {
     return (
       <div className="container py-16 text-center">
-        <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto"></div>
-        <p className="mt-4 text-gray-600">Loading strategy...</p>
+        <div className="animate-spin w-8 h-8 border-4 border-black border-t-transparent rounded-full mx-auto"></div>
+        <p className="mt-4 text-gray-600">{t.loading}</p>
       </div>
     );
   }
@@ -217,10 +268,10 @@ export default function StrategyDetailPage() {
       <div className="container py-10">
         <Card>
           <CardContent className="p-8 text-center">
-            <h2 className="text-2xl font-bold mb-2">Strategy Not Found</h2>
-            <p className="text-gray-600 mb-4">The strategy you&apos;re looking for doesn&apos;t exist.</p>
+            <h2 className="text-2xl font-bold mb-2">{t.notFound}</h2>
+            <p className="text-gray-600 mb-4">{t.notFoundDesc}</p>
             <Link href="/strategies">
-              <Button>← Back to Strategies</Button>
+              <Button>{t.backToStrategies}</Button>
             </Link>
           </CardContent>
         </Card>
@@ -300,7 +351,7 @@ export default function StrategyDetailPage() {
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
-          Back
+          {t.back}
         </Link>
         <div className="flex-1">
           <h1 className="text-3xl font-bold">{strategy.name}</h1>
@@ -320,21 +371,21 @@ export default function StrategyDetailPage() {
         <div className="lg:col-span-2 space-y-6">
           {/* Key Metrics */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <MetricCard label="Yearly Return" value={formatValue(strategy.returns?.yearly || strategy.cagr || strategy.yearlyReturn, "%")} color="emerald" />
-            <MetricCard label="Win Rate" value={formatValue(strategy.winRate, "%")} color="black" />
-            <MetricCard label="Sharpe Ratio" value={formatValue(strategy.sharpe || strategy.sharpeRatio, "", 2)} color="gray" />
-            <MetricCard label="Max Drawdown" value={formatValue(strategy.maxDD || strategy.maxDrawdown, "%")} color="red" />
+            <MetricCard label={t.yearlyReturn} value={formatValue(strategy.returns?.yearly || strategy.cagr || strategy.yearlyReturn, "%")} color="emerald" />
+            <MetricCard label={t.winRate} value={formatValue(strategy.winRate, "%")} color="black" />
+            <MetricCard label={t.sharpeRatio} value={formatValue(strategy.sharpe || strategy.sharpeRatio, "", 2)} color="gray" />
+            <MetricCard label={t.maxDrawdown} value={formatValue(strategy.maxDD || strategy.maxDrawdown, "%")} color="red" />
           </div>
 
           {/* Returns Breakdown */}
           <div className="bg-white border-2 border-gray-100 p-6" style={{clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))'}}>
-            <h3 className="text-lg font-bold mb-4">Returns Breakdown</h3>
+            <h3 className="text-lg font-bold mb-4">{t.returnsBreakdown}</h3>
             <div className="grid grid-cols-4 gap-4 text-center mb-6">
               {[
-                { label: "Daily", val: strategy.returns?.daily },
-                { label: "Weekly", val: strategy.returns?.weekly },
-                { label: "Monthly", val: strategy.returns?.monthly },
-                { label: "Yearly", val: strategy.returns?.yearly || strategy.cagr },
+                { label: t.daily, val: strategy.returns?.daily },
+                { label: t.weekly, val: strategy.returns?.weekly },
+                { label: t.monthly, val: strategy.returns?.monthly },
+                { label: t.yearly, val: strategy.returns?.yearly || strategy.cagr },
               ].map((item) => (
                 <div key={item.label} className="p-4 bg-gray-50" style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}>
                   <div className="text-2xl font-bold text-emerald-600">
@@ -353,7 +404,7 @@ export default function StrategyDetailPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                 </div>
-                <h4 className="font-bold text-gray-700">Historical Yearly Performance</h4>
+                <h4 className="font-bold text-gray-700">{t.historicalPerformance}</h4>
               </div>
               <div className="grid grid-cols-3 gap-3">
                 {[2023, 2024, 2025].map((year) => {
@@ -384,32 +435,39 @@ export default function StrategyDetailPage() {
                 })}
               </div>
               <p className="text-xs text-gray-500 mt-3">
-                Awaiting updated yearly breakdown from the latest backtest. Past performance does not guarantee future results.
+                {language === "uk" 
+                  ? "Очікується оновлена річна розбивка з останнього бектесту. Минулі результати не гарантують майбутніх." 
+                  : "Awaiting updated yearly breakdown from the latest backtest. Past performance does not guarantee future results."}
               </p>
             </div>
           </div>
 
           {/* Tabs */}
           <div className="flex gap-1 border-b-2 border-gray-100">
-            {["overview", "trades", "conditions", "backtest"].map((tab) => (
+            {[
+              { key: "overview", label: t.overview },
+              { key: "trades", label: t.trades },
+              { key: "conditions", label: t.conditions },
+              { key: "backtest", label: t.rerun },
+            ].map((tab) => (
               <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`px-4 py-3 font-bold capitalize transition-all ${
-                  activeTab === tab
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className={`px-4 py-3 font-bold transition-all ${
+                  activeTab === tab.key
                     ? "bg-black text-white"
                     : "text-gray-500 hover:text-black hover:bg-gray-50"
                 }`}
-                style={activeTab === tab ? {clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)'} : {}}
+                style={activeTab === tab.key ? {clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)'} : {}}
               >
-                {tab === "backtest" ? (
+                {tab.key === "backtest" ? (
                   <span className="flex items-center gap-1.5">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                     </svg>
-                    Rerun
+                    {tab.label}
                   </span>
-                ) : tab}
+                ) : tab.label}
               </button>
             ))}
           </div>
@@ -418,7 +476,7 @@ export default function StrategyDetailPage() {
           {activeTab === "overview" && (
             <Card>
               <CardHeader>
-                <CardTitle>Performance Chart</CardTitle>
+                <CardTitle>{t.performanceChart}</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600 mb-4">{strategy.description}</p>
@@ -464,15 +522,15 @@ export default function StrategyDetailPage() {
                 <div className="grid grid-cols-3 gap-4 mt-6 text-center">
                   <div>
                     <div className="text-lg font-semibold">{strategy.totalTrades}</div>
-                    <div className="text-sm text-gray-500">Total Trades</div>
+                    <div className="text-sm text-gray-500">{t.totalTrades}</div>
                   </div>
                   <div>
                     <div className="text-lg font-semibold">{strategy.profitFactor}x</div>
-                    <div className="text-sm text-gray-500">Profit Factor</div>
+                    <div className="text-sm text-gray-500">{t.profitFactor}</div>
                   </div>
                   <div>
                     <div className="text-lg font-semibold">${strategy.minInvestment}</div>
-                    <div className="text-sm text-gray-500">Min Investment</div>
+                    <div className="text-sm text-gray-500">{t.minInvestment}</div>
                   </div>
                 </div>
               </CardContent>
@@ -482,7 +540,7 @@ export default function StrategyDetailPage() {
           {activeTab === "trades" && (
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>Backtest Trades</CardTitle>
+                <CardTitle>{t.backtestTrades}</CardTitle>
                 <div className="flex items-center gap-3">
                   <span className="text-sm text-gray-500">
                     {strategy.recentTrades?.length || 0} of {strategy.totalBacktestTrades || 0} trades
@@ -513,7 +571,7 @@ export default function StrategyDetailPage() {
                           }
                         }
                       }}
-                      className="text-sm text-blue-600 hover:underline font-medium"
+                      className="text-sm text-emerald-600 hover:underline font-medium"
                       disabled={loadingAllTrades}
                     >
                       {loadingAllTrades ? 'Loading...' : showAllStrategyTrades ? 'Show Less' : 'Show All Trades'}
@@ -539,7 +597,7 @@ export default function StrategyDetailPage() {
                     </thead>
                     <tbody>
                       {strategy.recentTrades?.map((trade, i) => (
-                        <tr key={i} className="border-b last:border-0 hover:bg-blue-50/50 transition">
+                        <tr key={i} className="border-b last:border-0 hover:bg-gray-50 transition">
                           <td className="px-4 py-3">{trade.date}</td>
                           <td className="px-4 py-3 text-gray-500">{trade.time}</td>
                           <td className="px-4 py-3 font-medium">{trade.pair}</td>
@@ -590,7 +648,7 @@ export default function StrategyDetailPage() {
           {activeTab === "conditions" && (
             <Card>
               <CardHeader>
-                <CardTitle>Trading Conditions</CardTitle>
+                <CardTitle>{t.tradingConditions}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
                 {strategy.config?.bullish_entry_conditions && (
@@ -620,7 +678,7 @@ export default function StrategyDetailPage() {
               <CardHeader>
                 <CardTitle>🔄 Rerun Backtest</CardTitle>
                 <p className="text-sm text-gray-500">Test this strategy with different parameters and time periods</p>
-                <div className="flex items-center gap-1.5 text-xs text-blue-600 mt-1 bg-blue-50 px-2 py-1 rounded inline-flex">
+                <div className="flex items-center gap-1.5 text-xs text-emerald-600 mt-1 bg-emerald-50 px-2 py-1 inline-flex" style={{clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'}}>
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
@@ -677,11 +735,12 @@ export default function StrategyDetailPage() {
                       <button
                         key={preset.label}
                         onClick={() => setBacktestConfig({ ...backtestConfig, startDate: preset.start, endDate: preset.end })}
-                        className={`px-3 py-1.5 rounded-full text-sm transition ${
+                        className={`px-3 py-1.5 text-sm transition ${
                           backtestConfig.startDate === preset.start && backtestConfig.endDate === preset.end
-                            ? "bg-blue-600 text-white"
+                            ? "bg-black text-white"
                             : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                         }`}
+                        style={{clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'}}
                       >
                         {preset.label}
                       </button>
@@ -776,7 +835,7 @@ export default function StrategyDetailPage() {
                         <div className="flex gap-2 mt-2">
                           <button
                             onClick={() => setBacktestConfig({ ...backtestConfig, pairs: availablePairs })}
-                            className="text-xs text-blue-600 hover:underline"
+                            className="text-xs text-emerald-600 hover:underline"
                           >
                             Select All
                           </button>
@@ -906,35 +965,35 @@ export default function StrategyDetailPage() {
 
                 {/* Progress Indicator */}
                 {runningBacktest && backtestProgress && (
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="bg-gray-50 border-2 border-gray-200 p-4" style={{clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))'}}>
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-blue-800">{backtestProgress.stage || backtestProgress.msg}</span>
-                      <span className="text-sm text-blue-600">{backtestProgress.percent || backtestProgress.pct}%</span>
+                      <span className="text-sm font-medium text-gray-800">{backtestProgress.stage || backtestProgress.msg}</span>
+                      <span className="text-sm text-emerald-600 font-bold">{backtestProgress.percent || backtestProgress.pct}%</span>
                     </div>
-                    <div className="w-full bg-blue-200 rounded-full h-2">
+                    <div className="w-full bg-gray-200 h-2" style={{clipPath: 'polygon(0 0, calc(100% - 2px) 0, 100% 2px, 100% 100%, 2px 100%, 0 calc(100% - 2px))'}}>
                       <div 
-                        className="bg-blue-600 h-2 rounded-full transition-all duration-500"
-                        style={{ width: `${backtestProgress.percent || backtestProgress.pct}%` }}
+                        className="bg-emerald-500 h-2 transition-all duration-500"
+                        style={{ width: `${backtestProgress.percent || backtestProgress.pct}%`, clipPath: 'polygon(0 0, calc(100% - 2px) 0, 100% 2px, 100% 100%, 2px 100%, 0 calc(100% - 2px))' }}
                       />
                     </div>
-                    <p className="text-xs text-blue-600 mt-2">
-                      ⏱️ Backtests typically take 30-120 seconds depending on date range and pairs selected
+                    <p className="text-xs text-gray-500 mt-2">
+                      Backtests typically take 30-120 seconds depending on date range and pairs selected
                     </p>
                   </div>
                 )}
 
                 {/* Results */}
                 {backtestResult && (
-                  <div className={`p-4 rounded-lg ${
+                  <div className={`p-4 ${
                     backtestResult.status === 'success' 
-                      ? 'bg-green-50 border border-green-200' 
+                      ? 'bg-emerald-50 border-2 border-emerald-200' 
                       : backtestResult.status === 'error'
-                      ? 'bg-red-50 border border-red-200'
-                      : 'bg-blue-50 border border-blue-200'
-                  }`}>
+                      ? 'bg-red-50 border-2 border-red-200'
+                      : 'bg-gray-50 border-2 border-gray-200'
+                  }`} style={{clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))'}}>
                     <h4 className={`font-bold mb-2 ${
-                      backtestResult.status === 'success' ? 'text-green-800' : 
-                      backtestResult.status === 'error' ? 'text-red-800' : 'text-blue-800'
+                      backtestResult.status === 'success' ? 'text-emerald-800' : 
+                      backtestResult.status === 'error' ? 'text-red-800' : 'text-gray-800'
                     }`}>
                       {backtestResult.status === 'success' ? '✅ Backtest Complete' : 
                        backtestResult.status === 'error' ? '❌ Error' : '📊 Results'}
@@ -1009,7 +1068,7 @@ export default function StrategyDetailPage() {
                             {backtestResult.trades.length > 20 && (
                               <button
                                 onClick={() => setShowAllTrades(!showAllTrades)}
-                                className="text-sm text-blue-600 hover:underline"
+                                className="text-sm text-emerald-600 hover:underline"
                               >
                                 {showAllTrades ? 'Show Less' : 'Show All'}
                               </button>
@@ -1069,19 +1128,19 @@ export default function StrategyDetailPage() {
         <div className="space-y-6">
           <Card className="sticky top-6">
             <CardHeader>
-              <CardTitle>Start Live Trading</CardTitle>
+              <CardTitle>{t.startLiveTrading}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-sm text-gray-500">
-                Connect your exchange on the{" "}
-                <Link href="/connect" className="text-blue-600 underline">
-                  Connect page
-                </Link>{" "}
-                first.
+                {t.connectFirst}{" "}
+                <Link href="/connect" className="text-emerald-600 underline">
+                  {t.connectPage}
+                </Link>
+                {language === "uk" ? "." : " first."}
               </p>
 
               <div>
-                <label className="text-sm text-gray-600 block mb-1">Exchange</label>
+                <label className="text-sm text-gray-600 block mb-1">{t.exchange}</label>
                 <select
                   className="w-full h-11 px-4 rounded-lg border border-gray-200"
                   value={exchange}
@@ -1098,7 +1157,7 @@ export default function StrategyDetailPage() {
                     const isConnected = connectedExchanges.some(c => c.exchange === ex.id || c === ex.id);
                     return (
                       <option key={ex.id} value={ex.id}>
-                        {ex.name} {isConnected ? "✓ Connected" : ""}
+                        {ex.name} {isConnected ? `✓ ${t.connected}` : ""}
                       </option>
                     );
                   })}
@@ -1106,14 +1165,14 @@ export default function StrategyDetailPage() {
                 {!connectedExchanges.some(c => c.exchange === exchange || c === exchange) && (
                   <p className="text-xs text-amber-600 mt-1 flex items-center gap-1">
                     <span>⚠️</span>
-                    <span>Not connected.</span>
-                    <Link href="/connect" className="text-blue-600 hover:underline">Connect now →</Link>
+                    <span>{t.notConnected}</span>
+                    <Link href="/connect" className="text-emerald-600 hover:underline">{t.connectNow}</Link>
                   </p>
                 )}
               </div>
 
               <div>
-                <label className="text-sm text-gray-600 block mb-1">Trading Pair</label>
+                <label className="text-sm text-gray-600 block mb-1">{t.tradingPair}</label>
                 <select
                   className="w-full h-11 px-4 rounded-lg border border-gray-200"
                   value={symbol}
@@ -1128,7 +1187,7 @@ export default function StrategyDetailPage() {
               </div>
 
               <div>
-                <label className="text-sm text-gray-600 block mb-1">Timeframe</label>
+                <label className="text-sm text-gray-600 block mb-1">{t.timeframe}</label>
                 <select
                   className="w-full h-11 px-4 rounded-lg border border-gray-200"
                   value={timeframe}
@@ -1144,44 +1203,44 @@ export default function StrategyDetailPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-sm text-gray-600 block mb-1">Order Size ($)</label>
+                  <label className="text-sm text-gray-600 block mb-1">{t.orderSize}</label>
                   <input
                     type="number"
                     className="w-full h-11 px-4 rounded-lg border border-gray-200"
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
                     min="1"
-                    placeholder="$ per trade"
+                    placeholder={t.perTrade}
                   />
-                  <span className="text-xs text-gray-400">$ per trade</span>
+                  <span className="text-xs text-gray-400">{t.perTrade}</span>
                 </div>
                 <div>
-                  <label className="text-sm text-gray-600 block mb-1">Max Risk ($)</label>
+                  <label className="text-sm text-gray-600 block mb-1">{t.maxRisk}</label>
                   <input
                     type="number"
                     className="w-full h-11 px-4 rounded-lg border border-gray-200"
                     value={maxBudget}
                     onChange={(e) => setMaxBudget(e.target.value)}
                     min="1"
-                    placeholder="Max loss allowed"
+                    placeholder={language === "uk" ? "Макс. втрата" : "Max loss allowed"}
                   />
-                  <span className="text-xs text-gray-400">Closes all if loss exceeds</span>
+                  <span className="text-xs text-gray-400">{t.closesIfLoss}</span>
                 </div>
               </div>
 
               <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm">
-                <p className="font-medium text-yellow-800">⚠️ Risk Warning</p>
+                <p className="font-medium text-yellow-800">⚠️ {t.riskWarning}</p>
                 <p className="text-yellow-700 text-xs mt-1">
-                  This trades REAL money. If unrealized loss reaches ${maxBudget || 0}, all positions close automatically.
+                  {t.riskWarningText} ${maxBudget || 0}{t.allPositionsClose}
                 </p>
               </div>
 
               <Button className="w-full" disabled={starting} onClick={startLive}>
-                {starting ? "Starting..." : "🚀 Start Live Trading"}
+                {starting ? t.starting : t.startLive}
               </Button>
 
               <p className="text-xs text-gray-400 text-center">
-                Trading involves risk. Only trade with money you can afford to lose.
+                {t.tradingRisk}
               </p>
             </CardContent>
           </Card>
@@ -1189,23 +1248,23 @@ export default function StrategyDetailPage() {
           {/* Quick Stats */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Quick Stats</CardTitle>
+              <CardTitle className="text-base">{t.quickStats}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3 text-sm">
               <div className="flex justify-between">
-                <span className="text-gray-500">Win Rate</span>
+                <span className="text-gray-500">{t.winRate}</span>
                 <span className="font-medium">{(strategy.winRate || 0).toFixed(1)}%</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-500">Total Trades</span>
+                <span className="text-gray-500">{t.totalTrades}</span>
                 <span className="font-medium">{strategy.totalTrades || 0}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-500">Profit Factor</span>
+                <span className="text-gray-500">{t.profitFactor}</span>
                 <span className="font-medium">{(strategy.profitFactor || 0).toFixed(2)}x</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-500">Max Drawdown</span>
+                <span className="text-gray-500">{t.maxDrawdown}</span>
                 <span className="font-medium text-red-600">-{(strategy.maxDD || strategy.maxDrawdown || 0).toFixed(1)}%</span>
               </div>
             </CardContent>

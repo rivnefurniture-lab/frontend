@@ -44,7 +44,7 @@ export function TooltipLabel({ label, tooltip, className = "" }) {
       onMouseEnter={() => setIsVisible(true)}
       onMouseLeave={() => setIsVisible(false)}
     >
-      <span className="border-b border-dashed border-blue-400 cursor-help hover:border-blue-600 transition-colors">
+      <span className="border-b border-dashed border-emerald-400 cursor-help hover:border-emerald-600 transition-colors">
         {label}
       </span>
       {isVisible && (

@@ -127,7 +127,7 @@ export function BacktestMonitor({ user }) {
   if (backtests.length === 0 && !completedBacktest) return null;
 
   const getStatusColor = (status) => {
-    if (status === 'processing') return 'bg-blue-500';
+    if (status === 'processing') return 'bg-emerald-500';
     if (status === 'queued') return 'bg-yellow-500';
     return 'bg-gray-500';
   };
@@ -166,7 +166,7 @@ export function BacktestMonitor({ user }) {
     >
       <div className="bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden w-[380px]">
         {/* Header */}
-        <div className="monitor-header bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 flex items-center justify-between cursor-grab active:cursor-grabbing">
+        <div className="monitor-header bg-gradient-to-r from-gray-900 to-black px-4 py-3 flex items-center justify-between cursor-grab active:cursor-grabbing">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
             <h3 className="text-white font-semibold text-sm">
@@ -228,7 +228,7 @@ export function BacktestMonitor({ user }) {
                   <div className="mb-2">
                     <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
                       <div
-                        className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all duration-1000 ease-out"
+                        className="bg-gradient-to-r from-emerald-500 to-emerald-600 h-2 transition-all duration-1000 ease-out"
                         style={{ width: `${Math.max(5, backtest.progress || 0)}%` }}
                       ></div>
                     </div>
@@ -261,7 +261,7 @@ export function BacktestMonitor({ user }) {
                     </div>
                     <div className="flex justify-between">
                       <span>Expected completion:</span>
-                      <span className="font-medium text-blue-600">
+                      <span className="font-medium text-emerald-600">
                         {formatCompletionTime(backtest.estimatedCompletion)}
                       </span>
                     </div>
@@ -349,7 +349,7 @@ export function BacktestMonitor({ user }) {
             {/* Action Buttons */}
             <div className="flex gap-3">
               <Link href={`/strategies/backtest-${completedBacktest.id}`} className="flex-1">
-                <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-4 rounded-lg transition flex items-center justify-center gap-2">
+                <button className="w-full bg-black hover:bg-gray-800 text-white font-medium py-2.5 px-4 transition flex items-center justify-center gap-2" style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'}}>
                   <Eye size={18} />
                   View Details
                 </button>

@@ -691,7 +691,7 @@ export default function BacktestPage() {
   if (authLoading) {
     return (
       <div className="container py-16 text-center">
-        <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto"></div>
+        <div className="animate-spin w-8 h-8 border-4 border-black border-t-transparent mx-auto" style={{clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'}}></div>
         <p className="mt-4 text-gray-600">{language === "uk" ? "Завантаження..." : "Loading..."}</p>
       </div>
     );
@@ -1013,9 +1013,10 @@ export default function BacktestPage() {
                 />
                 <button
                   onClick={() => setSafetyOrderToggle(!safetyOrderToggle)}
-                  className={`w-12 h-6 rounded-full transition ${
-                    safetyOrderToggle ? "bg-blue-600" : "bg-gray-300"
+                  className={`w-12 h-6 transition ${
+                    safetyOrderToggle ? "bg-black" : "bg-gray-300"
                   }`}
+                  style={{clipPath: 'polygon(3px 0, calc(100% - 3px) 0, 100% 3px, 100% calc(100% - 3px), calc(100% - 3px) 100%, 3px 100%, 0 calc(100% - 3px), 0 3px)'}}
                 >
                   <div
                     className={`w-5 h-5 bg-white rounded-full shadow transform transition ${
@@ -1221,9 +1222,10 @@ export default function BacktestPage() {
                 </div>
                 <button
                   onClick={() => setConditionsActive(!conditionsActive)}
-                  className={`w-12 h-6 rounded-full transition ${
-                    conditionsActive ? "bg-blue-600" : "bg-gray-300"
+                  className={`w-12 h-6 transition ${
+                    conditionsActive ? "bg-black" : "bg-gray-300"
                   }`}
+                  style={{clipPath: 'polygon(3px 0, calc(100% - 3px) 0, 100% 3px, 100% calc(100% - 3px), calc(100% - 3px) 100%, 3px 100%, 0 calc(100% - 3px), 0 3px)'}}
                 >
                   <div
                     className={`w-5 h-5 bg-white rounded-full shadow transform transition ${
@@ -1296,26 +1298,42 @@ export default function BacktestPage() {
           )}
 
           {/* Run Button */}
-          <Button
-            size="lg"
-            className="w-full bg-blue-600 hover:bg-blue-700"
+          <button
+            className="w-full py-4 bg-gradient-to-r from-black via-gray-900 to-black text-white font-bold text-lg relative overflow-hidden group disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'}}
             onClick={runBacktest}
             disabled={loading}
           >
-            {loading ? (
-              <>
-                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                {t("backtest.runningBacktest")}
-              </>
-            ) : (
-              <>
-                🚀 {t("backtest.runBacktest")}
-              </>
-            )}
-          </Button>
+            <div className="absolute inset-0 bg-gradient-to-r from-emerald-600/20 via-transparent to-emerald-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-emerald-400 to-transparent opacity-50"></div>
+            <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-emerald-400 to-transparent opacity-50"></div>
+            <div className="relative flex items-center justify-center gap-3">
+              {loading ? (
+                <>
+                  <svg className="animate-spin h-5 w-5 text-emerald-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <span>{t("backtest.runningBacktest")}</span>
+                  <div className="flex gap-1">
+                    <div className="w-1.5 h-1.5 bg-emerald-400 animate-pulse"></div>
+                    <div className="w-1.5 h-1.5 bg-emerald-400 animate-pulse delay-100"></div>
+                    <div className="w-1.5 h-1.5 bg-emerald-400 animate-pulse delay-200"></div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <svg className="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                  <span>{t("backtest.runBacktest")}</span>
+                  <svg className="w-4 h-4 text-gray-400 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </>
+              )}
+            </div>
+          </button>
 
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
@@ -1330,18 +1348,18 @@ export default function BacktestPage() {
             <>
               {/* Queue Status */}
               {results.status === 'queued' && (
-                <Card className="bg-blue-50 border-blue-200">
+                <Card className="bg-gray-50 border-2 border-gray-200" style={{clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))'}}>
                   <CardContent className="pt-6">
                     <div className="text-center">
-                      <div className="text-4xl mb-3">⏳</div>
-                      <h3 className="font-bold text-lg text-blue-800">Backtest Queued</h3>
-                      <p className="text-blue-600 mt-2">{results.message}</p>
+                      <div className="w-12 h-12 bg-black flex items-center justify-center mx-auto mb-3" style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}><svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>
+                      <h3 className="font-bold text-lg text-gray-900">Backtest Queued</h3>
+                      <p className="text-gray-600 mt-2">{results.message}</p>
                       {results.estimatedWait && (
-                        <p className="text-sm text-blue-500 mt-2">
+                        <p className="text-sm text-gray-500 mt-2">
                           Estimated wait: ~{results.estimatedWait} minutes
                         </p>
                       )}
-                      <p className="text-xs text-blue-400 mt-4">
+                      <p className="text-xs text-gray-400 mt-4">
                         Check the floating monitor in the corner for live updates!
                       </p>
                     </div>
@@ -1352,23 +1370,24 @@ export default function BacktestPage() {
               {/* Performance Metrics */}
               {results.metrics && (
                 <>
-                  <Card className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
-                    <CardContent className="pt-6">
+                  <div className="bg-black text-white" style={{clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))'}}>
+                    <div className="p-6">
                       <div className="flex items-center justify-between">
                         <div>
                           <h3 className="font-bold text-lg">{t("backtest.likeResults")}</h3>
-                          <p className="text-blue-100 text-sm">{t("backtest.saveToRunLive")}</p>
+                          <p className="text-gray-300 text-sm">{t("backtest.saveToRunLive")}</p>
                         </div>
                         <Button
                           onClick={saveStrategy}
                           disabled={saving || saved}
-                          className="bg-white text-blue-600 hover:bg-blue-50"
+                          className="bg-white text-black hover:bg-gray-100 font-bold"
+                          style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}
                         >
                           {saving ? t("backtest.saving") : saved ? t("backtest.saved") : t("backtest.saveStrategy")}
                         </Button>
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </div>
 
                   <Card>
                     <CardHeader>
@@ -1376,30 +1395,30 @@ export default function BacktestPage() {
                     </CardHeader>
                     <CardContent>
                       <div className="grid grid-cols-2 gap-4">
-                        <div className="bg-green-50 rounded-lg p-3">
-                          <p className="text-xs text-green-600 font-medium">{t("backtest.netProfit")}</p>
-                          <p className="text-xl font-bold text-green-700">{(results.metrics?.net_profit * 100).toFixed(1)}%</p>
-                          <p className="text-sm text-green-600">{results.metrics?.net_profit_usd}</p>
+                        <div className="bg-emerald-50 p-3" style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'}}>
+                          <p className="text-xs text-emerald-600 font-medium">{t("backtest.netProfit")}</p>
+                          <p className="text-xl font-bold text-emerald-700">{(results.metrics?.net_profit * 100).toFixed(1)}%</p>
+                          <p className="text-sm text-emerald-600">{results.metrics?.net_profit_usd}</p>
                         </div>
-                        <div className="bg-red-50 rounded-lg p-3">
+                        <div className="bg-red-50 p-3" style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'}}>
                           <p className="text-xs text-red-600 font-medium">{t("backtest.maxDrawdown")}</p>
                           <p className="text-xl font-bold text-red-700">{(results.metrics?.max_drawdown * 100).toFixed(1)}%</p>
                         </div>
-                        <div className="bg-blue-50 rounded-lg p-3">
-                          <p className="text-xs text-blue-600 font-medium">{t("strategies.sharpeRatio")}</p>
-                          <p className="text-xl font-bold text-blue-700">{results.metrics?.sharpe_ratio?.toFixed(2)}</p>
+                        <div className="bg-gray-100 p-3" style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'}}>
+                          <p className="text-xs text-gray-600 font-medium">{t("strategies.sharpeRatio")}</p>
+                          <p className="text-xl font-bold text-gray-900">{results.metrics?.sharpe_ratio?.toFixed(2)}</p>
                         </div>
-                        <div className="bg-purple-50 rounded-lg p-3">
-                          <p className="text-xs text-purple-600 font-medium">{t("strategies.winRate")}</p>
-                          <p className="text-xl font-bold text-purple-700">{(results.metrics?.win_rate * 100).toFixed(0)}%</p>
+                        <div className="bg-emerald-50 p-3" style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'}}>
+                          <p className="text-xs text-emerald-600 font-medium">{t("strategies.winRate")}</p>
+                          <p className="text-xl font-bold text-emerald-700">{(results.metrics?.win_rate * 100).toFixed(0)}%</p>
                         </div>
-                        <div className="bg-gray-50 rounded-lg p-3">
+                        <div className="bg-gray-50 p-3" style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'}}>
                           <p className="text-xs text-gray-600 font-medium">{t("backtest.totalTrades")}</p>
                           <p className="text-xl font-bold">{results.metrics?.total_trades}</p>
                         </div>
-                        <div className="bg-yellow-50 rounded-lg p-3">
-                          <p className="text-xs text-yellow-600 font-medium">{t("backtest.profitFactor")}</p>
-                          <p className="text-xl font-bold text-yellow-700">{results.metrics?.profit_factor}</p>
+                        <div className="bg-gray-100 p-3" style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'}}>
+                          <p className="text-xs text-gray-600 font-medium">{t("backtest.profitFactor")}</p>
+                          <p className="text-xl font-bold text-gray-900">{results.metrics?.profit_factor}</p>
                         </div>
                       </div>
                     </CardContent>
@@ -1429,9 +1448,9 @@ export default function BacktestPage() {
                           <Area
                             type="monotone"
                             dataKey="balance"
-                            stroke="#2563eb"
-                            fill="#3b82f6"
-                            fillOpacity={0.3}
+                            stroke="#10b981"
+                            fill="#10b981"
+                            fillOpacity={0.2}
                           />
                         </AreaChart>
                       </ResponsiveContainer>
@@ -1441,15 +1460,27 @@ export default function BacktestPage() {
               )}
             </>
           ) : (
-            <Card>
-              <CardContent className="py-12 text-center">
-                <div className="text-6xl mb-4">📋</div>
-                <h3 className="font-medium text-lg mb-2">{t("backtest.noResultsYet")}</h3>
-                <p className="text-gray-500 text-sm">
+            <div className="bg-gradient-to-br from-gray-50 to-white border-2 border-gray-100 relative overflow-hidden" style={{clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))'}}>
+              <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5" style={{clipPath: 'polygon(100% 0, 100% 100%, 0 0)'}}></div>
+              <div className="absolute bottom-0 left-0 w-24 h-24 bg-black/5" style={{clipPath: 'polygon(0 100%, 100% 100%, 0 0)'}}></div>
+              <div className="p-8 text-center relative">
+                <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center mx-auto mb-4" style={{clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))'}}>
+                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                <h3 className="font-bold text-lg mb-2 text-gray-900">{t("backtest.noResultsYet")}</h3>
+                <p className="text-gray-500 text-sm max-w-xs mx-auto">
                   {t("backtest.configureToSee")}
                 </p>
-              </CardContent>
-            </Card>
+                <div className="mt-6 flex items-center justify-center gap-4 text-xs text-gray-400">
+                  <div className="flex items-center gap-1">
+                    <div className="w-2 h-2 bg-emerald-400"></div>
+                    <span>{language === "uk" ? "Готово до запуску" : "Ready to run"}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           )}
         </div>
       </div>
