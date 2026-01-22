@@ -16,9 +16,50 @@ import Link from "next/link";
 import { apiFetch, publicFetch } from "@/lib/api";
 import { useAuth } from "@/context/AuthProvider";
 import { useLanguage } from "@/context/LanguageContext";
+import { getCurrentTradingMode, getTradingPairs, isCryptoMode } from "@/config/tradingMode";
+import ConfirmModal from "@/components/ConfirmModal";
+import { showToast } from "@/components/Toast";
 
-// Build version: 2026-01-14-v6 - geometric design
-console.log("[Algotcha] Strategies list page loaded - build v2026-01-14-v6");
+// Build version: 2026-01-19-v1 - added backtest duration display
+console.log("[Algotcha] Strategies list page loaded - build v2026-01-19-v1");
+
+// Format duration in seconds to human readable
+const formatDuration = (seconds) => {
+  if (!seconds || seconds <= 0) return '';
+  if (seconds < 60) return `${Math.round(seconds)}s`;
+  const minutes = Math.floor(seconds / 60);
+  const secs = Math.round(seconds % 60);
+  if (minutes < 60) return secs > 0 ? `${minutes}m ${secs}s` : `${minutes}m`;
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
+};
+
+// Map crypto pairs to stocks equivalents for display
+const CRYPTO_TO_STOCKS_MAP = {
+  'BTC/USDT': 'SPY',
+  'ETH/USDT': 'QQQ',
+  'SOL/USDT': 'AAPL',
+  'AVAX/USDT': 'MSFT',
+  'LINK/USDT': 'GOOGL',
+  'DOT/USDT': 'AMZN',
+  'ADA/USDT': 'NVDA',
+  'DOGE/USDT': 'TSLA',
+  'BNB/USDT': 'META',
+  'XRP/USDT': 'JPM',
+  'SHIB/USDT': 'V',
+  'ATOM/USDT': 'GLD',
+  'NEAR/USDT': 'DIA',
+  'LTC/USDT': 'IWM',
+  'HBAR/USDT': 'USO',
+  'TRX/USDT': 'SLV',
+};
+
+// Transform pairs based on trading mode
+const transformPairs = (pairs) => {
+  if (isCryptoMode()) return pairs;
+  return pairs?.map(p => CRYPTO_TO_STOCKS_MAP[p] || p.replace('/USDT', '')) || [];
+};
 
 // Helper to format returns properly (no +- issue)
 const formatReturn = (value) => {
@@ -37,6 +78,9 @@ export default function StrategiesPage() {
   const [backtestResults, setBacktestResults] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  // Delete confirmation modal state
+  const [deleteModal, setDeleteModal] = useState({ open: false, type: null, id: null, loading: false });
 
   // Translations
   const t = {
@@ -76,8 +120,8 @@ export default function StrategiesPage() {
     viewDetails: language === "uk" ? "Детальніше" : "View Details",
     noResults: language === "uk" ? "Стратегій за вашим запитом не знайдено." : "No strategies found matching your search.",
     realDataBanner: language === "uk" 
-      ? "Реальні дані: Всі метрики розраховані на основі історичних цін з Binance і оновлюються автоматично щогодини. Минулі результати не гарантують майбутніх." 
-      : "Real Performance Data: All metrics are calculated from actual historical price data from Binance and updated automatically every hour. Past performance does not guarantee future results.",
+      ? "Реальні дані: Всі метрики розраховані на основі історичних ринкових даних і оновлюються автоматично щогодини. Минулі результати не гарантують майбутніх." 
+      : "Real Performance Data: All metrics are calculated from actual historical market data and updated automatically every hour. Past performance does not guarantee future results.",
     loading: language === "uk" ? "Завантаження стратегій з реальними даними..." : "Loading strategies with real performance data...",
     retry: language === "uk" ? "Повторити" : "Retry",
   };
@@ -119,10 +163,12 @@ export default function StrategiesPage() {
       }
 
       // Use real history data if available, otherwise generate from CAGR
+      // Transform pairs based on trading mode (crypto vs stocks)
       const withChartData = (publicStrategies || []).map(s => ({
         ...s,
         history: s.history && s.history.length > 0 ? s.history : generateChartData(s.cagr || 0),
-        tags: s.pairs?.slice(0, 3) || ["Crypto"],
+        pairs: transformPairs(s.pairs),
+        tags: transformPairs(s.pairs)?.slice(0, 3) || (isCryptoMode() ? ["BTC", "ETH"] : ["SPY", "QQQ"]),
       }));
 
       setStrategies(withChartData);
@@ -137,19 +183,30 @@ export default function StrategiesPage() {
   };
 
   const deleteStrategy = async (strategyId) => {
-    const confirmMsg = language === "uk" 
-      ? "Ви впевнені, що хочете видалити цю стратегію? Всі пов'язані дані будуть видалені." 
-      : "Are you sure you want to delete this strategy? All related data will be deleted.";
-    
-    if (!confirm(confirmMsg)) return;
+    setDeleteModal({ open: true, type: "strategy", id: strategyId, loading: false });
+  };
+
+  const deleteBacktestResult = async (resultId) => {
+    setDeleteModal({ open: true, type: "backtest", id: resultId, loading: false });
+  };
+
+  const confirmDelete = async () => {
+    setDeleteModal(prev => ({ ...prev, loading: true }));
     
     try {
-      await apiFetch(`/strategies/${strategyId}`, { method: "DELETE" });
-      // Remove from local state
-      setUserStrategies(prev => prev.filter(s => s.id !== strategyId));
-      alert(language === "uk" ? "Стратегію видалено" : "Strategy deleted");
+      if (deleteModal.type === "strategy") {
+        await apiFetch(`/strategies/${deleteModal.id}`, { method: "DELETE" });
+        setUserStrategies(prev => prev.filter(s => s.id !== deleteModal.id));
+        showToast(language === "uk" ? "Стратегію видалено" : "Strategy deleted", "success");
+      } else if (deleteModal.type === "backtest") {
+        await apiFetch(`/backtest/results/${deleteModal.id}`, { method: "DELETE" });
+        setBacktestResults(prev => prev.filter(r => r.id !== deleteModal.id));
+        showToast(language === "uk" ? "Результат видалено" : "Result deleted", "success");
+      }
     } catch (err) {
-      alert(language === "uk" ? "Не вдалося видалити стратегію" : "Failed to delete strategy");
+      showToast(language === "uk" ? "Помилка видалення" : "Failed to delete", "error");
+    } finally {
+      setDeleteModal({ open: false, type: null, id: null, loading: false });
     }
   };
 
@@ -196,6 +253,25 @@ export default function StrategiesPage() {
 
   return (
     <div className="container py-8">
+      {/* Delete Confirmation Modal */}
+      <ConfirmModal
+        open={deleteModal.open}
+        onClose={() => setDeleteModal({ open: false, type: null, id: null, loading: false })}
+        onConfirm={confirmDelete}
+        title={deleteModal.type === "strategy" 
+          ? (language === "uk" ? "Видалити стратегію?" : "Delete Strategy?")
+          : (language === "uk" ? "Видалити результат?" : "Delete Result?")
+        }
+        message={deleteModal.type === "strategy"
+          ? (language === "uk" ? "Всі пов'язані дані будуть видалені безповоротно." : "All related data will be permanently deleted.")
+          : (language === "uk" ? "Цей результат бектесту буде видалено." : "This backtest result will be deleted.")
+        }
+        confirmText={language === "uk" ? "Видалити" : "Delete"}
+        cancelText={language === "uk" ? "Скасувати" : "Cancel"}
+        variant="danger"
+        loading={deleteModal.loading}
+      />
+
       {/* Header */}
       <div className="flex flex-col md:flex-row gap-4 md:items-center md:justify-between mb-8">
         <div>
@@ -384,7 +460,14 @@ export default function StrategiesPage() {
                 </div>
                 <div className="text-xs text-gray-500 flex items-center justify-between mb-3 font-medium">
                   <span>{(result.totalTrades || result.total_trades || 0)} trades</span>
-                  <span>{new Date(result.createdAt || result.timestamp_run).toLocaleDateString()}</span>
+                  <div className="flex items-center gap-2">
+                    {(result.duration_seconds || result.durationSeconds) && (
+                      <span className="text-gray-400" title={language === "uk" ? "Час виконання" : "Execution time"}>
+                        ⏱️ {formatDuration(result.duration_seconds || result.durationSeconds)}
+                      </span>
+                    )}
+                    <span>{new Date(result.createdAt || result.timestamp_run).toLocaleDateString()}</span>
+                  </div>
                 </div>
                 <div className="flex gap-2">
                   <Link href={`/strategies/backtest-${result.id}`} className="flex-1">
@@ -398,17 +481,7 @@ export default function StrategiesPage() {
                     onClick={async (e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      const confirmMsg = language === "uk" 
-                        ? "Видалити цей результат бектесту?" 
-                        : "Delete this backtest result?";
-                      if (confirm(confirmMsg)) {
-                        try {
-                          await apiFetch(`/backtest/results/${result.id}`, { method: 'DELETE' });
-                          setBacktestResults(prev => prev.filter(r => r.id !== result.id));
-                        } catch (e) {
-                          alert(language === "uk" ? "Помилка видалення" : "Failed to delete");
-                        }
-                      }
+                      deleteBacktestResult(result.id);
                     }}
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

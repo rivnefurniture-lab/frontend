@@ -1,32 +1,49 @@
-import { createClient } from '@supabase/supabase-js';
+import { createServerClient } from '@supabase/ssr';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export async function GET(request: NextRequest) {
-  const { searchParams, origin } = new URL(request.url);
-  const code = searchParams.get('code');
-  const next = searchParams.get('next') ?? '/dashboard';
+  const requestUrl = new URL(request.url);
+  const code = requestUrl.searchParams.get('code');
+  const error_param = requestUrl.searchParams.get('error');
+  const error_description = requestUrl.searchParams.get('error_description');
+  const next = requestUrl.searchParams.get('next') ?? '/dashboard';
+  const origin = requestUrl.origin;
+
+  // If there's an error from the OAuth provider
+  if (error_param) {
+    return NextResponse.redirect(`${origin}/auth?error=${error_param}&message=${encodeURIComponent(error_description || '')}`);
+  }
 
   if (code) {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+    // Create response object first so we can set cookies on it
+    const response = NextResponse.redirect(`${origin}${next}`);
     
-    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-      auth: {
-        flowType: 'pkce',
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return request.cookies.getAll();
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value, options }) => {
+              response.cookies.set(name, value, options);
+            });
+          },
+        },
       }
-    });
+    );
 
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     
     if (!error) {
-      return NextResponse.redirect(`${origin}${next}`);
+      return response;
     }
     
-    console.error('Auth callback error:', error);
+    return NextResponse.redirect(`${origin}/auth?error=exchange_failed&message=${encodeURIComponent(error.message)}`);
   }
 
-  // Return to auth page with error
-  return NextResponse.redirect(`${origin}/auth?error=auth_failed`);
+  return NextResponse.redirect(`${origin}/auth?error=no_code`);
 }
-

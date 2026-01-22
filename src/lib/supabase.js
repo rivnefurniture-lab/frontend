@@ -1,10 +1,7 @@
-import { createClient } from "@supabase/supabase-js";
+import { createBrowserClient } from "@supabase/ssr";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
-
-// Check if we're in a build environment without env vars
-const isBuildTime = typeof window === 'undefined' && (!supabaseUrl || !supabaseAnonKey);
 
 // Debug logging (only in development, client-side)
 if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
@@ -22,24 +19,12 @@ if (typeof window !== 'undefined') {
   }
 }
 
-// Create client with proper configuration
-// Use dummy values during build to prevent errors
-export const supabase = createClient(
+// Create browser client using @supabase/ssr
+// This stores auth tokens in cookies instead of localStorage
+// which is required for PKCE flow with Next.js SSR
+export const supabase = createBrowserClient(
   supabaseUrl || "https://placeholder.supabase.co",
-  supabaseAnonKey || "placeholder-key",
-  {
-    auth: {
-      autoRefreshToken: true,
-      persistSession: typeof window !== 'undefined',
-      detectSessionInUrl: true,
-      flowType: 'pkce',
-    },
-    global: {
-      headers: {
-        'X-Client-Info': 'algotcha-web',
-      },
-    },
-  }
+  supabaseAnonKey || "placeholder-key"
 );
 
 // Helper to check if Supabase is configured

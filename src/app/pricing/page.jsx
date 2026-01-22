@@ -8,12 +8,25 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Check, Zap, Crown, Building2 } from "lucide-react";
 import Link from "next/link";
 
+// Exchange rate: 1 USD = ~41 UAH (approximate)
+const USD_TO_UAH = 41;
+
 function PricingContent() {
   const { t, language } = useLanguage();
   const router = useRouter();
   const params = useSearchParams();
   const redirect = params.get("redirect") || "/";
   const [billing, setBilling] = useState("monthly");
+  const [currency, setCurrency] = useState(language === "uk" ? "UAH" : "USD");
+
+  // Format price based on currency
+  const formatPrice = (usdPrice) => {
+    if (usdPrice === 0) return currency === "UAH" ? "0 ₴" : "$0";
+    if (currency === "UAH") {
+      return `${Math.round(usdPrice * USD_TO_UAH)} ₴`;
+    }
+    return `$${usdPrice}`;
+  };
 
   const plans = [
     {
@@ -21,21 +34,27 @@ function PricingContent() {
       name: language === "uk" ? "Безкоштовний" : "Free",
       price: 0,
       priceYearly: 0,
-      description: language === "uk" ? "Почніть з базових функцій" : "Get started with basic features",
+      // Service name and description for payment compliance
+      serviceName: language === "uk" 
+        ? "Algotcha Free - Базовий доступ до платформи" 
+        : "Algotcha Free - Basic Platform Access",
+      description: language === "uk" 
+        ? "Безкоштовний план для ознайомлення з платформою. Включає базові функції бектестування та обмежений доступ до історичних даних." 
+        : "Free plan to explore the platform. Includes basic backtesting features and limited historical data access.",
       icon: Zap,
       color: "from-gray-400 to-gray-500",
       features: language === "uk" ? [
-        "3 симуляції на день",
-        "1 активна модель",
+        "3 бектести на день",
         "Базові індикатори (RSI, MACD, MA)",
+        "1 рік історичних даних",
         "Підтримка спільноти",
-        "Доступ до публічних моделей",
+        "Збереження до 3 моделей",
       ] : [
-        "3 simulations per day",
-        "1 active model",
+        "3 backtests per day",
         "Basic indicators (RSI, MACD, MA)",
+        "1 year historical data",
         "Community support",
-        "Access to public models",
+        "Save up to 3 models",
       ],
       buttonText: language === "uk" ? "Поточний план" : "Current Plan",
       isCurrent: true,
@@ -45,26 +64,32 @@ function PricingContent() {
       name: "Pro",
       price: 29,
       priceYearly: 23,
-      description: language === "uk" ? "Для професійних аналітиків" : "For professional analysts",
+      // Service name and description for payment compliance
+      serviceName: language === "uk" 
+        ? "Algotcha Pro - Професійна підписка на SaaS платформу" 
+        : "Algotcha Pro - Professional SaaS Platform Subscription",
+      description: language === "uk" 
+        ? "Професійний план для аналітиків. Необмежений доступ до бектестування, всі технічні індикатори, 5 років історичних даних, експорт звітів та пріоритетна підтримка." 
+        : "Professional plan for analysts. Unlimited backtesting access, all technical indicators, 5 years of historical data, report export, and priority support.",
       icon: Crown,
       color: "from-black to-gray-800",
       popular: true,
       features: language === "uk" ? [
-        "Необмежені симуляції",
-        "5 активних моделей",
+        "Необмежені бектести",
         "Всі 20+ індикаторів",
+        "5 років історичних даних",
         "Пріоритетна підтримка",
-        "Розширене управління ризиками",
+        "Збереження необмежених моделей",
         "Експорт звітів PDF/CSV",
-        "Сповіщення Telegram/Email",
+        "Сповіщення Email",
       ] : [
-        "Unlimited simulations",
-        "5 active models",
+        "Unlimited backtests",
         "All 20+ indicators",
+        "5 years historical data",
         "Priority support",
-        "Advanced risk management",
+        "Save unlimited models",
         "PDF/CSV report export",
-        "Telegram/Email notifications",
+        "Email notifications",
       ],
       buttonText: language === "uk" ? "Почати Pro" : "Start Pro",
     },
@@ -73,25 +98,31 @@ function PricingContent() {
       name: "Enterprise",
       price: 99,
       priceYearly: 79,
-      description: language === "uk" ? "Для дослідницьких команд" : "For research teams",
+      // Service name and description for payment compliance
+      serviceName: language === "uk" 
+        ? "Algotcha Enterprise - Корпоративна підписка на SaaS платформу" 
+        : "Algotcha Enterprise - Corporate SaaS Platform Subscription",
+      description: language === "uk" 
+        ? "Корпоративний план для дослідницьких команд. Включає всі функції Pro, виділений сервер обробки, кастомні індикатори, API доступ, персонального менеджера та white-label опції." 
+        : "Corporate plan for research teams. Includes all Pro features, dedicated processing server, custom indicators, API access, personal account manager, and white-label options.",
       icon: Building2,
       color: "from-purple-500 to-pink-500",
       features: language === "uk" ? [
         "Все з Pro",
-        "Необмежені моделі",
         "Виділений сервер обробки",
         "Кастомні індикатори",
         "Персональний менеджер",
         "API доступ",
         "White-label опції",
+        "Пріоритетна черга бектестів",
       ] : [
         "Everything in Pro",
-        "Unlimited models",
         "Dedicated processing server",
         "Custom indicators",
         "Personal account manager",
         "API access",
         "White-label options",
+        "Priority backtest queue",
       ],
       buttonText: language === "uk" ? "Зв'язатися" : "Contact Us",
     },
@@ -103,7 +134,7 @@ function PricingContent() {
       router.push("/support");
       return;
     }
-    router.push(`/pay?plan=${planId}&redirect=${encodeURIComponent(redirect)}`);
+    router.push(`/pay?plan=${planId}&billing=${billing}&currency=${currency}&redirect=${encodeURIComponent(redirect)}`);
   };
 
   return (
@@ -125,7 +156,7 @@ function PricingContent() {
           </p>
           
           {/* Billing toggle */}
-          <div className="flex items-center justify-center gap-2 mb-8">
+          <div className="flex items-center justify-center gap-2 mb-4">
             <button
               onClick={() => setBilling("monthly")}
               className={`px-5 py-2.5 font-bold transition ${
@@ -150,6 +181,35 @@ function PricingContent() {
               <span className="text-xs bg-emerald-500 text-white px-2 py-0.5 font-bold" style={{clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'}}>
                 -20%
               </span>
+            </button>
+          </div>
+          
+          {/* Currency toggle */}
+          <div className="flex items-center justify-center gap-2 mb-8">
+            <span className="text-sm text-gray-500 mr-2">
+              {language === "uk" ? "Валюта:" : "Currency:"}
+            </span>
+            <button
+              onClick={() => setCurrency("USD")}
+              className={`px-4 py-1.5 text-sm font-bold transition ${
+                currency === "USD"
+                  ? "bg-emerald-500 text-white"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              }`}
+              style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'}}
+            >
+              USD ($)
+            </button>
+            <button
+              onClick={() => setCurrency("UAH")}
+              className={`px-4 py-1.5 text-sm font-bold transition ${
+                currency === "UAH"
+                  ? "bg-emerald-500 text-white"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              }`}
+              style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'}}
+            >
+              UAH (₴)
             </button>
           </div>
         </div>
@@ -180,11 +240,12 @@ function PricingContent() {
                     <Icon className="w-6 h-6 text-white" />
                   </div>
                   <h3 className="text-xl font-bold">{plan.name}</h3>
-                  <p className="text-sm text-gray-500">{plan.description}</p>
+                  <p className="text-sm text-gray-600 font-medium">{plan.serviceName}</p>
+                  <p className="text-xs text-gray-500 mt-1">{plan.description}</p>
                 </div>
                 <div>
                   <div className="mb-6">
-                    <span className="text-4xl font-bold">${price}</span>
+                    <span className="text-4xl font-bold">{formatPrice(price)}</span>
                     {price > 0 && (
                       <span className="text-gray-500">
                         /{language === "uk" ? "міс" : "mo"}
@@ -192,9 +253,14 @@ function PricingContent() {
                     )}
                     {billing === "yearly" && price > 0 && (
                       <p className="text-sm text-emerald-600 mt-1 font-medium">
-                        {language === "uk" 
-                          ? `Економія $${(plan.price - plan.priceYearly) * 12}/рік`
-                          : `Save $${(plan.price - plan.priceYearly) * 12}/year`}
+                        {currency === "UAH" 
+                          ? (language === "uk" 
+                              ? `Економія ${Math.round((plan.price - plan.priceYearly) * 12 * USD_TO_UAH)} ₴/рік`
+                              : `Save ${Math.round((plan.price - plan.priceYearly) * 12 * USD_TO_UAH)} ₴/year`)
+                          : (language === "uk" 
+                              ? `Економія $${(plan.price - plan.priceYearly) * 12}/рік`
+                              : `Save $${(plan.price - plan.priceYearly) * 12}/year`)
+                        }
                       </p>
                     )}
                   </div>

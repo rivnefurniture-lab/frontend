@@ -18,12 +18,15 @@ import {
   Line,
 } from "recharts";
 import Link from "next/link";
-import { Zap, BarChart3, Link2, BookOpen, Sparkles, Folder } from "lucide-react";
+import { Zap, BarChart3, Link2, BookOpen, Sparkles, Folder, Crown } from "lucide-react";
+import { isCryptoMode } from "@/config/tradingMode";
+import { useSubscription } from "@/context/SubscriptionContext";
 
 export default function Dashboard() {
   const { user, loading: authLoading } = useAuth();
   const { language } = useLanguage();
   const router = useRouter();
+  const { subscription, plan, isPro, backtestsRemaining, strategiesRemaining, loading: subLoading } = useSubscription();
   
   // Translations
   const t = {
@@ -245,6 +248,24 @@ export default function Dashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
+              {/* Coming Soon notice for stocks mode */}
+              {!isCryptoMode() && (
+                <div className="mb-4 bg-amber-50 border-2 border-amber-200 p-4" style={{clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))'}}>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="px-2 py-0.5 bg-amber-500 text-white text-xs font-bold" style={{clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'}}>
+                      {language === "uk" ? "НЕЗАБАРОМ" : "COMING SOON"}
+                    </span>
+                  </div>
+                  <p className="text-amber-800 text-sm font-medium">
+                    {language === "uk" ? "Жива торгівля акціями в розробці" : "Live stock trading is in development"}
+                  </p>
+                  <p className="text-amber-700 text-xs mt-1">
+                    {language === "uk" 
+                      ? "Поки що використовуйте бектестинг для аналізу стратегій на акціях." 
+                      : "Use backtesting to analyze stock strategies for now."}
+                  </p>
+                </div>
+              )}
               {runningStrategies.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">
                   <p className="mb-4">{t.noRunning}</p>
@@ -480,6 +501,61 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
+          {/* Subscription Status */}
+          <Card className={isPro ? "border-emerald-200 bg-emerald-50/50" : "border-gray-200"}>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Crown className={`h-5 w-5 ${isPro ? 'text-emerald-600' : 'text-gray-400'}`} />
+                {language === "uk" ? "Ваш план" : "Your Plan"}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">{language === "uk" ? "План" : "Plan"}</span>
+                  <span className={`font-bold ${isPro ? 'text-emerald-600' : 'text-gray-900'}`}>
+                    {plan?.toUpperCase() || 'FREE'}
+                  </span>
+                </div>
+                {!isPro && (
+                  <>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">{language === "uk" ? "Бектестів сьогодні" : "Backtests today"}</span>
+                      <span className={`font-bold ${backtestsRemaining === 0 ? 'text-red-600' : 'text-gray-900'}`}>
+                        {backtestsRemaining === "unlimited" ? "∞" : `${backtestsRemaining}/3`}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">{language === "uk" ? "Збережених стратегій" : "Saved strategies"}</span>
+                      <span className={`font-bold ${strategiesRemaining === 0 ? 'text-red-600' : 'text-gray-900'}`}>
+                        {strategiesRemaining === "unlimited" ? "∞" : `${3 - strategiesRemaining}/3`}
+                      </span>
+                    </div>
+                    <Link href="/pricing" className="block mt-4">
+                      <Button className="w-full bg-black hover:bg-gray-800">
+                        <Sparkles className="h-4 w-4 mr-2" />
+                        {language === "uk" ? "Оновити до Pro" : "Upgrade to Pro"}
+                      </Button>
+                    </Link>
+                  </>
+                )}
+                {isPro && subscription?.expiresAt && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">{language === "uk" ? "Активний до" : "Active until"}</span>
+                    <span className="font-bold text-emerald-600">
+                      {new Date(subscription.expiresAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                )}
+                {isPro && (
+                  <p className="text-xs text-emerald-600 text-center mt-2">
+                    ✓ {language === "uk" ? "Необмежені бектести та стратегії" : "Unlimited backtests & strategies"}
+                  </p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Quick Actions */}
           <Card>
             <CardHeader>
@@ -505,12 +581,6 @@ export default function Dashboard() {
                 <Button className="w-full justify-start" variant="outline">
                   <BookOpen className="h-4 w-4 mr-2" />
                   {t.browseStrategies}
-                </Button>
-              </Link>
-              <Link href="/pricing" className="block">
-                <Button className="w-full justify-start" variant="outline">
-                  <Sparkles className="h-4 w-4 mr-2" />
-                  {language === "uk" ? "Оновити план" : "Upgrade Plan"}
                 </Button>
               </Link>
             </CardContent>

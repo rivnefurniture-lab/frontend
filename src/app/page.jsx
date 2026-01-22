@@ -40,14 +40,13 @@ export default function Page() {
   const [strategies, setStrategies] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Testimonials data with photos - rebranded roles
+  // Testimonials data - rebranded roles (photos removed for privacy)
   const testimonials = [
     {
       id: 1,
       name: "Олег К.",
       role: language === "uk" ? "Бізнес-аналітик" : "Business Analyst",
       initials: "ОК",
-      photo: "/testimonials/oleg.jpeg",
       gradient: "from-gray-700 to-gray-900",
       rating: 5,
       text: t("testimonialContent.oleg"),
@@ -57,7 +56,6 @@ export default function Page() {
       name: "Назар Г.",
       role: language === "uk" ? "Фінансовий аналітик" : "Financial Analyst",
       initials: "НГ",
-      photo: "/testimonials/nazar.jpeg",
       gradient: "from-purple-500 to-pink-500",
       rating: 5,
       text: t("testimonialContent.nazar"),

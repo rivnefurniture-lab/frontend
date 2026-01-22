@@ -10,6 +10,7 @@ import { useAuth } from "@/context/AuthProvider";
 import { useLanguage } from "@/context/LanguageContext";
 import Link from "next/link";
 import { TRADING_MODE, getExchanges, isCryptoMode } from "@/config/tradingMode";
+import { showToast } from "@/components/Toast";
 
 // Broker/Exchange Icons
 const BrokerIcon = ({ id, className = "w-6 h-6" }) => {
@@ -244,18 +245,28 @@ function DataSourceCard({ exchange, onConnect, onDisconnect, isConnected, t, lan
     }
   };
 
+  // Check if this broker is coming soon
+  const isComingSoon = exchange.comingSoon === true;
+
   return (
-    <div className={`bg-white border-2 overflow-hidden ${isConnected ? 'border-emerald-500' : 'border-gray-100 hover:border-black'} transition-all`} style={{clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))'}}>
-      <div className={`h-2 bg-gradient-to-r ${exchange.color}`}></div>
+    <div className={`bg-white border-2 overflow-hidden ${isComingSoon ? 'border-gray-200 opacity-75' : isConnected ? 'border-emerald-500' : 'border-gray-100 hover:border-black'} transition-all relative`} style={{clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))'}}>
+      {isComingSoon && (
+        <div className="absolute top-4 right-4 z-10">
+          <span className="px-3 py-1 bg-amber-500 text-white text-xs font-bold" style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'}}>
+            {language === "uk" ? "НЕЗАБАРОМ" : "COMING SOON"}
+          </span>
+        </div>
+      )}
+      <div className={`h-2 bg-gradient-to-r ${exchange.color} ${isComingSoon ? 'opacity-50' : ''}`}></div>
       <div className="p-6">
         <div className="flex items-center gap-3 mb-4">
-          <div className={`w-12 h-12 bg-gradient-to-br ${exchange.color} flex items-center justify-center flex-shrink-0`} style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}>
+          <div className={`w-12 h-12 bg-gradient-to-br ${exchange.color} flex items-center justify-center flex-shrink-0 ${isComingSoon ? 'opacity-50' : ''}`} style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}>
             {exchange.icon}
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="font-bold">{exchange.name}</span>
-              {isConnected && (
+              <span className={`font-bold ${isComingSoon ? 'text-gray-500' : ''}`}>{exchange.name}</span>
+              {isConnected && !isComingSoon && (
                 <span className="px-2 py-0.5 bg-emerald-500 text-white text-xs font-bold flex items-center gap-1" style={{clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'}}>
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -268,7 +279,38 @@ function DataSourceCard({ exchange, onConnect, onDisconnect, isConnected, t, lan
           </div>
         </div>
         
-        {isConnected && !showForm ? (
+        {/* Coming Soon Message */}
+        {isComingSoon ? (
+          <div className="space-y-4">
+            <div className="bg-amber-50 border-2 border-amber-200 p-4" style={{clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))'}}>
+              <div className="flex items-start gap-3">
+                <svg className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div>
+                  <p className="text-amber-800 font-medium text-sm">
+                    {language === "uk" ? "Інтеграція в розробці" : "Integration in Development"}
+                  </p>
+                  <p className="text-amber-700 text-xs mt-1">
+                    {language === "uk" 
+                      ? "Підключення брокера буде доступне найближчим часом. Поки що ви можете використовувати бектестинг з історичними даними." 
+                      : "Broker connection will be available soon. In the meantime, you can use backtesting with historical data."}
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex gap-2">
+              <a 
+                href="/backtest" 
+                className="flex-1 px-4 py-2.5 bg-black text-white font-bold hover:bg-gray-800 transition-all text-center"
+                style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}
+              >
+                {language === "uk" ? "Спробувати бектест" : "Try Backtesting"}
+              </a>
+            </div>
+          </div>
+        ) : isConnected && !showForm ? (
           <div className="space-y-4">
             <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-start gap-3">
               <svg className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -348,31 +390,31 @@ function DataSourceCard({ exchange, onConnect, onDisconnect, isConnected, t, lan
                     className="pr-10"
                   />
                   {(field === "apiKey" || field === "secret" || field === "password") && (
-                    <button
-                      type="button"
+                  <button
+                    type="button"
                       onClick={() => {
                         if (field === "apiKey") setShowKey(!showKey);
                         else if (field === "secret") setShowSecret(!showSecret);
                         else setShowPassword(!showPassword);
                       }}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                    >
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
                       {(field === "apiKey" && showKey) || (field === "secret" && showSecret) || (field === "password" && showPassword) ? "🙈" : "👁️"}
-                    </button>
+                  </button>
                   )}
                 </div>
               </div>
             ))}
             
             <label className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                checked={form.testnet}
-                onChange={(e) => handle("testnet", e.target.checked)}
+            <input
+              type="checkbox"
+              checked={form.testnet}
+              onChange={(e) => handle("testnet", e.target.checked)}
                 className="rounded"
               />
               <span>{t.useTestnet}</span>
-            </label>
+          </label>
             
             <div className="flex gap-2">
               <button type="submit" disabled={loading} className="flex-1 px-4 py-2.5 bg-black text-white font-bold hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2" style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}>
@@ -389,16 +431,18 @@ function DataSourceCard({ exchange, onConnect, onDisconnect, isConnected, t, lan
                   {t.cancel}
                 </button>
               )}
-            </div>
+          </div>
             
-            {status && (
+          {status && (
               <p className={`text-sm ${status.ok ? "text-green-600" : "text-red-600"}`}>
-                {status.msg}
-              </p>
-            )}
-          </form>
+              {status.msg}
+            </p>
+          )}
+        </form>
         )}
         
+        {/* Footer links - hide for coming soon */}
+        {!isComingSoon && (
         <div className="mt-4 pt-4 border-t-2 border-gray-100 flex gap-4 text-xs">
           <a 
             href={exchange.docsUrl} 
@@ -419,6 +463,7 @@ function DataSourceCard({ exchange, onConnect, onDisconnect, isConnected, t, lan
             </a>
           )}
         </div>
+        )}
       </div>
     </div>
   );
@@ -430,7 +475,7 @@ export default function ConnectPage() {
   const router = useRouter();
   const [connectedExchanges, setConnectedExchanges] = useState([]);
   const [loadingConnections, setLoadingConnections] = useState(true);
-  
+
   const DATA_SOURCES = getDataSources();
 
   useEffect(() => {
@@ -624,7 +669,7 @@ export default function ConnectPage() {
                 <button 
                   onClick={() => {
                     navigator.clipboard.writeText("46.224.99.27");
-                    alert(t.copied);
+                    showToast(t.copied, "success");
                   }}
                   className="px-5 py-2.5 bg-black hover:bg-gray-800 text-white font-bold transition-all flex items-center gap-2"
                   style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}

@@ -126,35 +126,37 @@ export const CRYPTO_CONFIG = {
 // ============================================
 // STOCKS/COMMODITIES MODE CONFIGURATION
 // ============================================
+// NOTE: Only include symbols that we actually have data for via Yahoo Finance
+// Removed: BRK.B (special chars), Index futures (ES, NQ, YM, RTY - need special handling)
+// Removed: Forex pairs (need different data source)
+// Commodities use Yahoo's =F suffix internally but displayed without it
 export const STOCKS_CONFIG = {
-  // Trading Symbols - Popular Stocks, ETFs, Commodities, Indexes
+  // Trading Symbols - Only those with confirmed Yahoo Finance data
   pairs: [
-    // US Stocks
-    "AAPL", "MSFT", "GOOGL", "AMZN", "NVDA", "META", "TSLA", "BRK.B",
-    "JPM", "V", "JNJ", "WMT", "PG", "MA", "HD", "DIS", "NFLX", "PYPL",
-    // ETFs
-    "SPY", "QQQ", "IWM", "DIA", "VTI", "VOO", "EEM", "GLD", "SLV", "USO",
-    // Indexes (CFD style)
-    "ES", "NQ", "YM", "RTY",
-    // Commodities
-    "GC", "SI", "CL", "NG", "HG",
-    // Forex Majors
-    "EUR/USD", "GBP/USD", "USD/JPY", "USD/CHF", "AUD/USD", "USD/CAD"
+    // US Stocks - Tech (all verified)
+    "AAPL", "MSFT", "GOOGL", "AMZN", "NVDA", "META", "TSLA",
+    // US Stocks - Finance (verified)
+    "JPM", "V", "MA",
+    // US Stocks - Other (verified)
+    "JNJ", "WMT", "PG", "HD", "DIS", "NFLX", "PYPL",
+    // ETFs (all verified)
+    "SPY", "QQQ", "IWM", "DIA", "VTI", "VOO", "EEM",
+    // Commodity ETFs (verified)
+    "GLD", "SLV", "USO",
   ],
   
   // Categorized pairs for better UI
   categories: {
-    "US Stocks": ["AAPL", "MSFT", "GOOGL", "AMZN", "NVDA", "META", "TSLA", "BRK.B", "JPM", "V", "JNJ", "WMT", "PG", "MA", "HD", "DIS", "NFLX", "PYPL"],
-    "ETFs": ["SPY", "QQQ", "IWM", "DIA", "VTI", "VOO", "EEM", "GLD", "SLV", "USO"],
-    "Index Futures": ["ES", "NQ", "YM", "RTY"],
-    "Commodities": ["GC", "SI", "CL", "NG", "HG"],
-    "Forex": ["EUR/USD", "GBP/USD", "USD/JPY", "USD/CHF", "AUD/USD", "USD/CAD"]
+    "US Stocks": ["AAPL", "MSFT", "GOOGL", "AMZN", "NVDA", "META", "TSLA", "JPM", "V", "MA", "JNJ", "WMT", "PG", "HD", "DIS", "NFLX", "PYPL"],
+    "ETFs": ["SPY", "QQQ", "IWM", "DIA", "VTI", "VOO", "EEM"],
+    "Commodities": ["GLD", "SLV", "USO"],
   },
   
   // Default pair
   defaultPair: "SPY",
   
   // Brokers with API support for algorithmic trading
+  // All marked as comingSoon since live trading is not yet available for stocks
   exchanges: [
     {
       id: "interactive_brokers",
@@ -164,7 +166,8 @@ export const STOCKS_CONFIG = {
       description: { en: "Professional trading platform", uk: "Професійна торгова платформа" },
       fields: ["apiKey", "secret", "accountId"],
       testnetUrl: "https://www.interactivebrokers.com/en/trading/ib-api.php",
-      docsUrl: "https://www.interactivebrokers.com/campus/ibkr-api-page/"
+      docsUrl: "https://www.interactivebrokers.com/campus/ibkr-api-page/",
+      comingSoon: true
     },
     {
       id: "thinkorswim",
@@ -174,17 +177,19 @@ export const STOCKS_CONFIG = {
       description: { en: "Advanced charting & analysis", uk: "Розширені графіки та аналіз" },
       fields: ["apiKey", "secret", "refreshToken"],
       testnetUrl: "https://developer.tdameritrade.com/",
-      docsUrl: "https://developer.tdameritrade.com/content/getting-started"
+      docsUrl: "https://developer.tdameritrade.com/content/getting-started",
+      comingSoon: true
     },
     {
       id: "alpaca",
       name: "Alpaca",
       icon: "alpaca",
       color: "from-yellow-500 to-yellow-700",
-      description: { en: "Commission-free API trading", uk: "Торгівля через API без комісій" },
+      description: { en: "Commission-free API trading (US only)", uk: "Торгівля через API без комісій (тільки США)" },
       fields: ["apiKey", "secret"],
       testnetUrl: "https://app.alpaca.markets/paper/dashboard/overview",
-      docsUrl: "https://alpaca.markets/docs/api-documentation/"
+      docsUrl: "https://alpaca.markets/docs/api-documentation/",
+      comingSoon: true
     },
     {
       id: "tradier",
@@ -194,7 +199,8 @@ export const STOCKS_CONFIG = {
       description: { en: "Brokerage API platform", uk: "Брокерська API платформа" },
       fields: ["apiKey", "accountId"],
       testnetUrl: "https://developer.tradier.com/",
-      docsUrl: "https://documentation.tradier.com/"
+      docsUrl: "https://documentation.tradier.com/",
+      comingSoon: true
     },
     {
       id: "tradestation",
@@ -204,7 +210,8 @@ export const STOCKS_CONFIG = {
       description: { en: "Award-winning platform", uk: "Нагороджена платформа" },
       fields: ["apiKey", "secret", "refreshToken"],
       testnetUrl: "https://www.tradestation.com/",
-      docsUrl: "https://api.tradestation.com/docs/"
+      docsUrl: "https://api.tradestation.com/docs/",
+      comingSoon: true
     },
     {
       id: "firstrade",
@@ -214,7 +221,8 @@ export const STOCKS_CONFIG = {
       description: { en: "Zero commission broker", uk: "Брокер без комісій" },
       fields: ["username", "password"],
       testnetUrl: "https://www.firstrade.com/",
-      docsUrl: "https://www.firstrade.com/content/en-us/education"
+      docsUrl: "https://www.firstrade.com/content/en-us/education",
+      comingSoon: true
     }
   ],
   

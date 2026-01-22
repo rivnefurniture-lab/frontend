@@ -29,6 +29,10 @@ export function BacktestMonitor({ user }) {
     }
   }, []);
 
+  // Track last shown completion to avoid duplicates
+  const [lastShownCompletionId, setLastShownCompletionId] = useState(null);
+  const [lastResultsCheck, setLastResultsCheck] = useState(0);
+
   // Fetch user's active backtests with time estimates
   useEffect(() => {
     if (!user) return;
@@ -41,21 +45,47 @@ export function BacktestMonitor({ user }) {
         
         // Check for newly completed backtests (was in previous list, not in current)
         const currentIds = new Set(currentActive.map(b => b.id));
+        let shouldCheckResults = false;
+        
         for (const prevId of previousBacktestIds) {
           if (!currentIds.has(prevId)) {
-            // A backtest was removed (likely completed) - fetch its result
-            try {
-              const results = await apiFetch('/backtest/results');
-              // Find the most recently completed one
-              if (results && results.length > 0) {
-                const latest = results[0]; // Most recent
+            // A backtest was removed (likely completed)
+            shouldCheckResults = true;
+            break;
+          }
+        }
+        
+        // Also check if any backtest just reached 100% progress
+        for (const bt of currentActive) {
+          if (bt.status === 'completed' || bt.progress >= 100) {
+            shouldCheckResults = true;
+            break;
+          }
+        }
+        
+        // Fetch latest results if we think one completed
+        // Also periodically check every 30 seconds in case we missed something
+        const now = Date.now();
+        if (shouldCheckResults || (now - lastResultsCheck > 30000 && previousBacktestIds.size > 0)) {
+          setLastResultsCheck(now);
+          try {
+            const results = await apiFetch('/backtest/results');
+            // Find the most recently completed one that we haven't shown yet
+            if (results && results.length > 0) {
+              const latest = results[0]; // Most recent
+              // Only show if it's new (created in the last 2 minutes) and we haven't shown it
+              const latestTime = new Date(latest.timestamp_run || latest.createdAt).getTime();
+              const isRecent = (now - latestTime) < 120000; // Within 2 minutes
+              
+              if (isRecent && latest.id !== lastShownCompletionId) {
                 setCompletedBacktest(latest);
+                setLastShownCompletionId(latest.id);
                 // Auto-hide after 15 seconds
                 setTimeout(() => setCompletedBacktest(null), 15000);
               }
-            } catch (e) {
-              console.log('Could not fetch completed backtest');
             }
+          } catch (e) {
+            console.log('Could not fetch completed backtest');
           }
         }
         
@@ -67,9 +97,9 @@ export function BacktestMonitor({ user }) {
     };
 
     fetchBacktests();
-    const interval = setInterval(fetchBacktests, 10000); // Update every 10 seconds to reduce DB load
+    const interval = setInterval(fetchBacktests, 5000); // Check every 5 seconds for better responsiveness
     return () => clearInterval(interval);
-  }, [user, previousBacktestIds]);
+  }, [user, previousBacktestIds, lastShownCompletionId, lastResultsCheck]);
 
   // Handle dragging
   const handleMouseDown = (e) => {
@@ -317,7 +347,7 @@ export function BacktestMonitor({ user }) {
             </div>
             
             {/* Results Summary */}
-            <div className="grid grid-cols-2 gap-3 mb-5">
+            <div className="grid grid-cols-2 gap-3 mb-4">
               <div className="bg-gray-50 rounded-lg p-3 text-center">
                 <div className={`text-xl font-bold ${
                   (completedBacktest.net_profit || completedBacktest.netProfit) >= 0 ? 'text-green-600' : 'text-red-600'
@@ -345,6 +375,13 @@ export function BacktestMonitor({ user }) {
                 <div className="text-xs text-gray-500">Max DD</div>
               </div>
             </div>
+            
+            {/* Duration info */}
+            {(completedBacktest.duration_seconds || completedBacktest.durationSeconds) && (
+              <div className="text-center text-sm text-gray-500 mb-4">
+                ⏱️ Completed in {formatTime(completedBacktest.duration_seconds || completedBacktest.durationSeconds)}
+              </div>
+            )}
             
             {/* Action Buttons */}
             <div className="flex gap-3">

@@ -29,6 +29,22 @@ const nextConfig = {
   
   // Disable x-powered-by header
   poweredByHeader: false,
+  
+  // URL redirects for legacy/alternative paths
+  async redirects() {
+    return [
+      {
+        source: '/login',
+        destination: '/auth',
+        permanent: true,
+      },
+      {
+        source: '/simulator',
+        destination: '/backtest',
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

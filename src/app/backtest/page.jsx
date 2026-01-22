@@ -10,6 +10,7 @@ import { TooltipLabel } from "@/components/ui/tooltip";
 import { apiFetch } from "@/lib/api";
 import { useLanguage } from "@/context/LanguageContext";
 import { useAuth } from "@/context/AuthProvider";
+import { useSubscription } from "@/context/SubscriptionContext";
 import Link from "next/link";
 import {
   ResponsiveContainer,
@@ -23,6 +24,7 @@ import {
   Area,
 } from "recharts";
 import { getTradingPairs, getDefaultPair, isCryptoMode, STOCKS_CONFIG } from "@/config/tradingMode";
+import SuccessModal from "@/components/SuccessModal";
 
 // INDICATORS matching backtest2.py exactly
 const INDICATORS = [
@@ -36,9 +38,11 @@ const INDICATORS = [
   { id: "HeikenAshi", name: "Heiken Ashi" },
 ];
 
-// All timeframes available (data has all indicators for each)
-const TIMEFRAMES = ["1m", "5m", "15m", "1h", "4h", "1d"];
-const RSI_LENGTHS = [7, 14, 21, 28]; // Only these are pre-calculated in parquet
+// All timeframes available - different for crypto vs stocks
+const CRYPTO_TIMEFRAMES = ["1m", "5m", "15m", "1h", "4h", "1d"];
+const STOCKS_TIMEFRAMES = ["1h", "4h", "1d"]; // Stocks data is hourly-based from Yahoo Finance
+const TIMEFRAMES = isCryptoMode() ? CRYPTO_TIMEFRAMES : STOCKS_TIMEFRAMES;
+const RSI_LENGTHS = [7, 14, 21]; // Only these are pre-calculated in parquet
 const CONDITIONS = ["Less Than", "Greater Than", "Crossing Up", "Crossing Down"];
 const MACD_PRESETS = [
   { value: "12,26,9", label: "12, 26, 9 (Standard)" },
@@ -66,6 +70,18 @@ const TRADINGVIEW_SIGNALS = ["Buy", "Strong Buy", "Sell", "Strong Sell", "Neutra
 const PAIRS = getTradingPairs();
 const DEFAULT_PAIR = getDefaultPair();
 
+// Get first 5 pairs as default selection
+const DEFAULT_SELECTED_PAIRS = PAIRS.slice(0, 5);
+
+// Quick period presets
+const PERIOD_PRESETS = [
+  { label: "1M", labelUk: "1М", months: 1 },
+  { label: "3M", labelUk: "3М", months: 3 },
+  { label: "6M", labelUk: "6М", months: 6 },
+  { label: "1Y", labelUk: "1Р", months: 12 },
+  { label: "3Y", labelUk: "3Р", months: 36 },
+];
+
 function ConditionBuilder({ condition, onChange, onRemove }) {
   const handleChange = (key, value) => {
     onChange({
@@ -75,13 +91,13 @@ function ConditionBuilder({ condition, onChange, onRemove }) {
   };
 
   return (
-    <div className="bg-gray-50 p-4 border-2 border-gray-100" style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'}}>
+    <div className="bg-gray-50 p-4 border-2 border-gray-100" style={{ clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))' }}>
       <div className="flex justify-between items-center mb-3">
         <select
           value={condition.indicator}
-          onChange={(e) => onChange({ ...condition, indicator: e.target.value, subfields: { Timeframe: "1m" } })}
+          onChange={(e) => onChange({ ...condition, indicator: e.target.value, subfields: { Timeframe: TIMEFRAMES[0] } })}
           className="font-bold bg-white border-2 border-gray-200 px-3 py-2"
-          style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'}}
+          style={{ clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))' }}
         >
           {INDICATORS.map((ind) => (
             <option key={ind.id} value={ind.id}>{ind.name}</option>
@@ -96,7 +112,7 @@ function ConditionBuilder({ condition, onChange, onRemove }) {
         <div>
           <label className="text-xs text-gray-500 block mb-1">Timeframe</label>
           <select
-            value={condition.subfields?.Timeframe || "1m"}
+            value={condition.subfields?.Timeframe || TIMEFRAMES[0]}
             onChange={(e) => handleChange("Timeframe", e.target.value)}
             className="w-full border rounded px-2 py-1.5 text-sm"
           >
@@ -423,19 +439,73 @@ function ConditionBuilder({ condition, onChange, onRemove }) {
   );
 }
 
+// Subscription Status Bar Component
+function SubscriptionStatusBar() {
+  const { language } = useLanguage();
+  const { subscription, plan, backtestsRemaining, isPro, loading } = useSubscription();
+
+  if (loading || !subscription) return null;
+
+  // Don't show for Pro/Enterprise users with unlimited backtests
+  if (isPro) return null;
+
+  const remaining = typeof backtestsRemaining === 'number' ? backtestsRemaining : 0;
+  const isLimitReached = remaining <= 0;
+
+  return (
+    <div className={`mb-6 border-2 p-4 ${isLimitReached ? 'bg-red-50 border-red-200' : 'bg-gray-50 border-gray-200'}`} style={{ clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))' }}>
+      <div className="flex items-center justify-between flex-wrap gap-4">
+        <div className="flex items-center gap-3">
+          <div className={`w-10 h-10 ${isLimitReached ? 'bg-red-500' : 'bg-gray-800'} flex items-center justify-center`} style={{ clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))' }}>
+            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+          </div>
+          <div>
+            <p className={`font-bold ${isLimitReached ? 'text-red-800' : 'text-gray-800'}`}>
+              {language === "uk" ? "Безкоштовний план" : "Free Plan"}
+              <span className="ml-2 text-sm font-normal">
+                {isLimitReached
+                  ? (language === "uk" ? "• Ліміт вичерпано" : "• Limit reached")
+                  : `• ${remaining} ${language === "uk" ? "бектестів залишилось сьогодні" : "backtests remaining today"}`
+                }
+              </span>
+            </p>
+            <p className={`text-sm ${isLimitReached ? 'text-red-600' : 'text-gray-600'}`}>
+              {isLimitReached
+                ? (language === "uk"
+                  ? "Оновіть до Pro для необмежених бектестів та 5 років історичних даних"
+                  : "Upgrade to Pro for unlimited backtests and 5 years of historical data")
+                : (language === "uk"
+                  ? "Оновіть план для необмежених бектестів"
+                  : "Upgrade your plan for unlimited backtests")
+              }
+            </p>
+          </div>
+        </div>
+        <Link href="/pricing">
+          <button className="px-4 py-2 bg-black text-white text-sm font-bold hover:bg-gray-800 transition-all" style={{ clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))' }}>
+            {language === "uk" ? "Оновити план" : "Upgrade Plan"}
+          </button>
+        </Link>
+      </div>
+    </div>
+  );
+}
+
 export default function BacktestPage() {
   const { t, language } = useLanguage();
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const [strategyName, setStrategyName] = useState("My Strategy");
-  const [selectedPairs, setSelectedPairs] = useState([DEFAULT_PAIR]);
+  const [selectedPairs, setSelectedPairs] = useState(DEFAULT_SELECTED_PAIRS);
   const [maxActiveDeals, setMaxActiveDeals] = useState(1);
   const [initialBalance, setInitialBalance] = useState(10000);
-  
+
   // Base order size is auto-calculated: initialBalance / maxActiveDeals
   const baseOrderSize = Math.floor(initialBalance / maxActiveDeals);
   const [tradingFee, setTradingFee] = useState(0.1); // 0.1%
-  
+
   // Default to last 6 months
   const [startDate, setStartDate] = useState(() => {
     const date = new Date();
@@ -456,10 +526,10 @@ export default function BacktestPage() {
   // === STOP LOSS SETTINGS (matching backtest2.py) ===
   const [stopLossToggle, setStopLossToggle] = useState(true); // stop_loss_toggle
   const [stopLossValue, setStopLossValue] = useState(3); // stop_loss_value %
-  const [stopLossTimeout, setStopLossTimeout] = useState(0); // stop_loss_timeout (minutes)
+  const [stopLossType, setStopLossType] = useState("percentage-base"); // percentage-base or percentage-total
 
   // === EXIT CONDITIONS (matching backtest2.py) ===
-  const [conditionsActive, setConditionsActive] = useState(false); // conditions_active
+  const [conditionsActive, setConditionsActive] = useState(true); // conditions_active - default ON
 
   // === MINIMUM PROFIT (matching backtest2.py) ===
   const [minprofToggle, setMinprofToggle] = useState(false); // minprof_toggle
@@ -474,8 +544,7 @@ export default function BacktestPage() {
   const [safetyOrderStepScale, setSafetyOrderStepScale] = useState(1.0); // safety_order_step_scale
 
   // === OTHER SETTINGS (matching backtest2.py) ===
-  const [reinvestProfit, setReinvestProfit] = useState(0); // reinvest_profit %
-  const [riskReduction, setRiskReduction] = useState(0); // risk_reduction %
+  const [reinvestToggle, setReinvestToggle] = useState(false); // reinvest profits toggle
   const [minDailyVolume, setMinDailyVolume] = useState(0); // min_daily_volume
   const [cooldownBetweenDeals, setCooldownBetweenDeals] = useState(0); // cooldown_between_deals (minutes)
   const [closeDealAfterTimeout, setCloseDealAfterTimeout] = useState(0); // close_deal_after_timeout (minutes)
@@ -483,12 +552,13 @@ export default function BacktestPage() {
   // Market state mode
   const [useMarketState, setUseMarketState] = useState(false);
 
-  // Conditions
+  // Conditions - use first available timeframe as default
+  const defaultTimeframe = TIMEFRAMES[0];
   const [entryConditions, setEntryConditions] = useState([
-    { indicator: "RSI", subfields: { Timeframe: "1m", Condition: "Less Than", "Signal Value": 30, "RSI Length": 14 } }
+    { indicator: "RSI", subfields: { Timeframe: defaultTimeframe, Condition: "Less Than", "Signal Value": 30, "RSI Length": 14 } }
   ]);
   const [exitConditions, setExitConditions] = useState([
-    { indicator: "RSI", subfields: { Timeframe: "1m", Condition: "Greater Than", "Signal Value": 70, "RSI Length": 14 } }
+    { indicator: "RSI", subfields: { Timeframe: defaultTimeframe, Condition: "Greater Than", "Signal Value": 70, "RSI Length": 14 } }
   ]);
   const [safetyConditions, setSafetyConditions] = useState([]);
   const [bullishEntryConditions, setBullishEntryConditions] = useState([]);
@@ -503,10 +573,29 @@ export default function BacktestPage() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
+  // Success modal state
+  const [successModal, setSuccessModal] = useState({ open: false, position: 1, wait: 10 });
+
+  // Selected period for quick buttons
+  const [selectedPeriod, setSelectedPeriod] = useState(6); // default 6 months
+
+  // Tab navigation for configuration sections
+  const [activeConfigTab, setActiveConfigTab] = useState("settings"); // settings, conditions, advanced
+
+  // Helper to set date range from period preset
+  const setDatePeriod = (months) => {
+    const end = new Date();
+    const start = new Date();
+    start.setMonth(start.getMonth() - months);
+    setStartDate(start.toISOString().split('T')[0]);
+    setEndDate(end.toISOString().split('T')[0]);
+    setSelectedPeriod(months);
+  };
+
   const addCondition = (type) => {
     const newCondition = {
       indicator: "RSI",
-      subfields: { Timeframe: "1m", Condition: "Less Than", "Signal Value": 30, "RSI Length": 14 }
+      subfields: { Timeframe: TIMEFRAMES[0], Condition: "Less Than", "Signal Value": 30, "RSI Length": 14 }
     };
     switch (type) {
       case "entry":
@@ -577,7 +666,7 @@ export default function BacktestPage() {
           },
         },
       });
-      
+
       if (response?.success) {
         setSaved(true);
         alert(`✓ Strategy "${strategyName}" saved successfully!\n\nView it on the Strategies page or Dashboard.`);
@@ -599,6 +688,77 @@ export default function BacktestPage() {
     setLoading(true);
     setError(null);
     setSaved(false);
+
+    // ========== VALIDATION ==========
+    const validationErrors = [];
+
+    // 1. Check if pairs are selected
+    if (!selectedPairs || selectedPairs.length === 0) {
+      validationErrors.push(language === "uk"
+        ? "Оберіть хоча б один актив для бектесту"
+        : "Select at least one asset for backtesting");
+    }
+
+    // 2. Check if entry conditions exist (required for backtest to make trades)
+    const hasEntryConditions = entryConditions.length > 0 ||
+      (useMarketState && (bullishEntryConditions.length > 0 || bearishEntryConditions.length > 0));
+    if (!hasEntryConditions) {
+      validationErrors.push(language === "uk"
+        ? "Додайте хоча б одну умову входу. Без умов входу бектест не зможе відкрити жодної угоди."
+        : "Add at least one entry condition. Without entry conditions, the backtest cannot open any trades.");
+    }
+
+    // 3. Check date range
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const now = new Date();
+
+    if (start >= end) {
+      validationErrors.push(language === "uk"
+        ? "Дата початку повинна бути раніше дати закінчення"
+        : "Start date must be before end date");
+    }
+
+    if (end > now) {
+      validationErrors.push(language === "uk"
+        ? "Дата закінчення не може бути в майбутньому"
+        : "End date cannot be in the future");
+    }
+
+    // 4. Check data availability based on mode
+    const isCrypto = isCryptoMode();
+    const minDataDate = isCrypto
+      ? new Date('2020-01-01') // Crypto data from 2020
+      : new Date('2022-01-01'); // Stocks data from 2022 (Yahoo 2y limit for hourly)
+
+    if (start < minDataDate) {
+      validationErrors.push(language === "uk"
+        ? `Дані доступні тільки з ${minDataDate.toLocaleDateString()}. Оберіть пізнішу дату початку.`
+        : `Data is only available from ${minDataDate.toLocaleDateString()}. Please select a later start date.`);
+    }
+
+    // 5. Check initial balance
+    if (initialBalance < 100) {
+      validationErrors.push(language === "uk"
+        ? "Початковий баланс повинен бути не менше $100"
+        : "Initial balance must be at least $100");
+    }
+
+    // 6. Check if date range is too short (less than 1 day)
+    const daysDiff = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+    if (daysDiff < 1) {
+      validationErrors.push(language === "uk"
+        ? "Період бектесту повинен бути не менше 1 дня"
+        : "Backtest period must be at least 1 day");
+    }
+
+    // If validation errors, show them and stop
+    if (validationErrors.length > 0) {
+      setError(validationErrors.join('\n'));
+      setLoading(false);
+      return;
+    }
+
     try {
       // Build payload matching backtest2.py EXACTLY
       const payload = {
@@ -610,7 +770,7 @@ export default function BacktestPage() {
         trading_fee: tradingFee,
         start_date: startDate,
         end_date: endDate,
-        
+
         // Entry/Exit conditions
         entry_conditions: useMarketState ? [] : entryConditions,
         exit_conditions: useMarketState ? [] : exitConditions,
@@ -619,26 +779,27 @@ export default function BacktestPage() {
         bearish_entry_conditions: useMarketState ? bearishEntryConditions : [],
         bullish_exit_conditions: useMarketState ? bullishExitConditions : [],
         bearish_exit_conditions: useMarketState ? bearishExitConditions : [],
-        
+
         // Take Profit settings (backtest2.py names)
         price_change_active: priceChangeActive,
         target_profit: targetProfit,
         take_profit_type: takeProfitType,
         trailing_toggle: trailingToggle,
         trailing_deviation: trailingDeviation,
-        
+
         // Exit condition toggle
         conditions_active: conditionsActive,
-        
+
         // Minimum profit
         minprof_toggle: minprofToggle,
         minimal_profit: minimalProfit,
-        
+
         // Stop Loss settings (backtest2.py names)
         stop_loss_toggle: stopLossToggle,
         stop_loss_value: stopLossValue,
-        stop_loss_timeout: stopLossTimeout,
-        
+        stop_loss_type: stopLossType,
+        stop_loss_timeout: 0, // Removed from UI, always 0
+
         // Safety Orders / DCA (backtest2.py names)
         safety_order_toggle: safetyOrderToggle,
         safety_order_size: safetyOrderSize,
@@ -646,10 +807,10 @@ export default function BacktestPage() {
         max_safety_orders_count: maxSafetyOrdersCount,
         safety_order_volume_scale: safetyOrderVolumeScale,
         safety_order_step_scale: safetyOrderStepScale,
-        
+
         // Other settings (backtest2.py names)
-        reinvest_profit: reinvestProfit,
-        risk_reduction: riskReduction,
+        reinvest_profit: reinvestToggle ? 100 : 0, // Either reinvest 100% or 0%
+        risk_reduction: 0, // Removed from UI
         min_daily_volume: minDailyVolume,
         cooldown_between_deals: cooldownBetweenDeals,
         close_deal_after_timeout: closeDealAfterTimeout,
@@ -665,6 +826,25 @@ export default function BacktestPage() {
         },
       });
 
+      // Check for subscription limit error
+      if (queueResponse.error) {
+        if (queueResponse.limitReached) {
+          setError(
+            language === "uk"
+              ? `${queueResponse.error} Оновіть план для необмежених бектестів.`
+              : `${queueResponse.error}`
+          );
+          setResults({
+            status: 'limit_reached',
+            message: queueResponse.error,
+            upgrade: queueResponse.upgrade,
+          });
+        } else {
+          setError(queueResponse.error);
+        }
+        return;
+      }
+
       // Show success message and queue info
       setResults({
         status: 'queued',
@@ -672,9 +852,14 @@ export default function BacktestPage() {
         queueId: queueResponse.queueId,
         estimatedWait: queueResponse.estimatedWaitMinutes,
       });
-      
-      alert(`✅ Backtest queued!\n\nPosition: #${queueResponse.queuePosition || 1}\nEstimated wait: ${queueResponse.estimatedWaitMinutes || 10} minutes\n\nYou'll receive an email when it's complete. Watch the floating monitor for live progress!`);
-      
+
+      // Show success modal
+      setSuccessModal({
+        open: true,
+        position: queueResponse.queuePosition || 1,
+        wait: queueResponse.estimatedWaitMinutes || 10,
+      });
+
     } catch (e) {
       setError(e.message);
     } finally {
@@ -690,7 +875,7 @@ export default function BacktestPage() {
   if (authLoading) {
     return (
       <div className="container py-16 text-center">
-        <div className="animate-spin w-8 h-8 border-4 border-black border-t-transparent mx-auto" style={{clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'}}></div>
+        <div className="animate-spin w-8 h-8 border-4 border-black border-t-transparent mx-auto" style={{ clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))' }}></div>
         <p className="mt-4 text-gray-600">{language === "uk" ? "Завантаження..." : "Loading..."}</p>
       </div>
     );
@@ -699,8 +884,8 @@ export default function BacktestPage() {
   if (!user) {
     return (
       <div className="container py-16">
-        <div className="max-w-md mx-auto bg-white border-2 border-gray-100 p-8 text-center" style={{clipPath: 'polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px))'}}>
-          <div className="w-16 h-16 bg-black flex items-center justify-center mx-auto mb-4" style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}>
+        <div className="max-w-md mx-auto bg-white border-2 border-gray-100 p-8 text-center" style={{ clipPath: 'polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px))' }}>
+          <div className="w-16 h-16 bg-black flex items-center justify-center mx-auto mb-4" style={{ clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))' }}>
             <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
             </svg>
@@ -709,12 +894,12 @@ export default function BacktestPage() {
             {language === "uk" ? "Потрібна авторизація" : "Login Required"}
           </h2>
           <p className="text-gray-600 mb-6">
-            {language === "uk" 
-              ? "Увійдіть, щоб створювати та тестувати моделі" 
+            {language === "uk"
+              ? "Увійдіть, щоб створювати та тестувати моделі"
               : "Please log in to create and test models"}
           </p>
           <Link href="/auth">
-            <button className="w-full px-4 py-3 bg-black text-white font-bold hover:bg-gray-800 transition-all" style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}>
+            <button className="w-full px-4 py-3 bg-black text-white font-bold hover:bg-gray-800 transition-all" style={{ clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))' }}>
               {language === "uk" ? "Увійти / Зареєструватися" : "Login / Sign Up"}
             </button>
           </Link>
@@ -725,6 +910,32 @@ export default function BacktestPage() {
 
   return (
     <div className="container py-8">
+      {/* Success Modal */}
+      <SuccessModal
+        open={successModal.open}
+        onClose={() => setSuccessModal({ ...successModal, open: false })}
+        title={language === "uk" ? "Бектест в черзі!" : "Backtest Queued!"}
+        subtitle={language === "uk"
+          ? "Ваш бектест додано до черги обробки"
+          : "Your backtest has been added to the processing queue"
+        }
+        icon="queue"
+        details={[
+          {
+            label: language === "uk" ? "Позиція в черзі" : "Queue Position",
+            value: `#${successModal.position}`
+          },
+          {
+            label: language === "uk" ? "Очікуваний час" : "Estimated Wait",
+            value: `~${successModal.wait} ${language === "uk" ? "хв" : "min"}`
+          },
+        ]}
+        footer={language === "uk"
+          ? "Ви отримаєте email коли бектест завершиться. Слідкуйте за прогресом у плаваючому моніторі!"
+          : "You'll receive an email when complete. Watch the floating monitor for live progress!"
+        }
+      />
+
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-3xl font-bold">{t("backtest.title")}</h1>
@@ -732,574 +943,601 @@ export default function BacktestPage() {
         </div>
       </div>
 
+      {/* Subscription Status Bar */}
+      <SubscriptionStatusBar />
+
+      {/* Stocks Mode Notice */}
+      {!isCryptoMode() && (
+        <div className="mb-6 bg-emerald-50 border-2 border-emerald-200 p-4" style={{ clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))' }}>
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 bg-emerald-500 flex items-center justify-center flex-shrink-0" style={{ clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))' }}>
+              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+            </div>
+            <div>
+              <p className="text-emerald-800 font-bold">
+                {language === "uk" ? "Режим аналізу акцій" : "Stock Analysis Mode"}
+              </p>
+              <p className="text-emerald-700 text-sm mt-1">
+                {language === "uk"
+                  ? "Бектестинг використовує реальні історичні дані Yahoo Finance. Жива торгівля акціями буде доступна незабаром."
+                  : "Backtesting uses real Yahoo Finance historical data. Live stock trading will be available soon."}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Configuration Panel */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Basic Settings */}
-          <Card>
-            <CardHeader>
-              <CardTitle>{t("backtest.strategySettings")}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium block mb-1">
-                    <TooltipLabel 
-                      label={t("backtest.strategyName")}
-                      tooltip="Give your strategy a unique name to identify it later in your dashboard and strategy list."
-                    />
-                  </label>
-                  <Input
-                    value={strategyName}
-                    onChange={(e) => setStrategyName(e.target.value)}
-                    placeholder="My Strategy"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium block mb-1">
-                    <TooltipLabel 
-                      label={t("backtest.maxActiveDeals")}
-                      tooltip="Maximum positions held at once. More deals = more diversification but capital is split across them."
-                    />
-                  </label>
-                  <Input
-                    type="number"
-                    value={maxActiveDeals}
-                    onChange={(e) => setMaxActiveDeals(parseInt(e.target.value))}
-                    min={1}
-                    max={20}
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium block mb-1">
-                    <TooltipLabel 
-                      label={t("backtest.initialBalance")}
-                      tooltip="Starting capital for the backtest. Results scale proportionally to this amount."
-                    />
-                  </label>
-                  <Input
-                    type="number"
-                    value={initialBalance}
-                    onChange={(e) => setInitialBalance(parseFloat(e.target.value))}
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium block mb-1">
-                    <TooltipLabel 
-                      label={t("backtest.baseOrderSize")}
-                      tooltip="Auto-calculated as Initial Balance ÷ Max Active Deals. This ensures you have enough capital for all positions."
-                    />
-                  </label>
-                  <Input
-                    type="number"
-                    value={baseOrderSize}
-                    readOnly
-                    className="bg-gray-50"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">= ${initialBalance.toLocaleString()} ÷ {maxActiveDeals}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium block mb-1">
-                    <TooltipLabel 
-                      label="Trading Fee (%)"
-                      tooltip="Exchange fee per trade. Binance: 0.1%, Bybit: 0.075%. Applied to every buy and sell."
-                    />
-                  </label>
-                  <Input
-                    type="number"
-                    value={tradingFee}
-                    onChange={(e) => setTradingFee(parseFloat(e.target.value))}
-                    step={0.01}
-                    min={0}
-                    max={1}
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium block mb-1">
-                    <TooltipLabel 
-                      label={t("backtest.startDate")}
-                      tooltip="When to start the backtest. More history = more reliable results but longer processing."
-                    />
-                  </label>
-                  <Input
-                    type="date"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium block mb-1">
-                    <TooltipLabel 
-                      label={t("backtest.endDate")}
-                      tooltip="When to end the backtest. Usually set to today for the most recent data."
-                    />
-                  </label>
-                  <Input
-                    type="date"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div className="mt-4">
-                <label className="text-sm font-medium block mb-2">
-                  <TooltipLabel 
-                    label={t("backtest.tradingPairs")}
-                    tooltip="Select which pairs to trade. More pairs = more opportunities but strategy will run across all of them."
-                  />
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {PAIRS.map((pair) => (
-                    <button
-                      key={pair}
-                      onClick={() => {
-                        if (selectedPairs.includes(pair)) {
-                          setSelectedPairs(selectedPairs.filter((p) => p !== pair));
-                        } else {
-                          setSelectedPairs([...selectedPairs, pair]);
-                        }
-                      }}
-                      className={`px-3 py-1.5 text-sm font-medium transition ${
-                        selectedPairs.includes(pair)
-                          ? "bg-black text-white"
-                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      }`}
-                      style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'}}
-                    >
-                      {pair}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Take Profit Settings */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <TooltipLabel 
-                  label="Take Profit"
-                  tooltip="Automatically close positions when they reach your target profit percentage."
-                />
-                <button
-                  onClick={() => setPriceChangeActive(!priceChangeActive)}
-                  className={`w-12 h-6 rounded-full transition ${
-                    priceChangeActive ? "bg-green-600" : "bg-gray-300"
+          {/* Tab Navigation */}
+          <div className="flex gap-1 border-b-2 border-gray-100 mb-2">
+            {[
+              { key: "settings", label: language === "uk" ? "Налаштування" : "Settings", icon: "⚙️" },
+              { key: "conditions", label: language === "uk" ? "Умови" : "Conditions", icon: "📊" },
+              { key: "advanced", label: language === "uk" ? "Додатково" : "Advanced", icon: "🔧" },
+            ].map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveConfigTab(tab.key)}
+                className={`px-4 py-3 font-bold transition-all flex items-center gap-2 ${activeConfigTab === tab.key
+                  ? "bg-black text-white"
+                  : "text-gray-500 hover:text-black hover:bg-gray-50"
                   }`}
-                >
-                  <div
-                    className={`w-5 h-5 bg-white rounded-full shadow transform transition ${
-                      priceChangeActive ? "translate-x-6" : "translate-x-0.5"
-                    }`}
-                  />
-                </button>
-              </CardTitle>
-            </CardHeader>
-            {priceChangeActive && (
-              <CardContent>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium block mb-1">Target Profit (%)</label>
-                    <Input
-                      type="number"
-                      value={targetProfit}
-                      onChange={(e) => setTargetProfit(parseFloat(e.target.value))}
-                      min={0.1}
-                      step={0.1}
-                    />
-                    <p className="text-xs text-gray-500 mt-1">Close position at this profit %</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium block mb-1">Take Profit Type</label>
-                    <select
-                      value={takeProfitType}
-                      onChange={(e) => setTakeProfitType(e.target.value)}
-                      className="w-full border rounded px-3 py-2"
-                    >
-                      <option value="percentage-total">% of Total Investment</option>
-                      <option value="percentage-base">% of Base Order</option>
-                    </select>
-                  </div>
-                  <div className="md:col-span-2">
-                    <div className="flex items-center gap-3">
-                      <input
-                        type="checkbox"
-                        checked={trailingToggle}
-                        onChange={(e) => setTrailingToggle(e.target.checked)}
-                        className="rounded"
+                style={activeConfigTab === tab.key ? { clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)' } : {}}
+              >
+                <span>{tab.icon}</span>
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Settings Tab */}
+          {activeConfigTab === "settings" && (
+            <>
+              {/* Basic Settings */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>{t("backtest.strategySettings")}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium block mb-1">
+                        <TooltipLabel
+                          label={t("backtest.strategyName")}
+                          tooltip="Give your strategy a unique name to identify it later in your dashboard and strategy list."
+                        />
+                      </label>
+                      <Input
+                        value={strategyName}
+                        onChange={(e) => setStrategyName(e.target.value)}
+                        placeholder="My Strategy"
                       />
-                      <label className="text-sm font-medium">Enable Trailing Take Profit</label>
-                      {trailingToggle && (
-                        <>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium block mb-1">
+                        <TooltipLabel
+                          label={t("backtest.maxActiveDeals")}
+                          tooltip="Maximum positions held at once. More deals = more diversification but capital is split across them."
+                        />
+                      </label>
+                      <Input
+                        type="number"
+                        value={maxActiveDeals}
+                        onChange={(e) => setMaxActiveDeals(parseInt(e.target.value))}
+                        min={1}
+                        max={20}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium block mb-1">
+                        <TooltipLabel
+                          label={t("backtest.initialBalance")}
+                          tooltip="Starting capital for the backtest. Results scale proportionally to this amount."
+                        />
+                      </label>
+                      <Input
+                        type="number"
+                        value={initialBalance}
+                        onChange={(e) => setInitialBalance(parseFloat(e.target.value))}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium block mb-1">
+                        <TooltipLabel
+                          label={t("backtest.baseOrderSize")}
+                          tooltip="Auto-calculated as Initial Balance ÷ Max Active Deals. This ensures you have enough capital for all positions."
+                        />
+                      </label>
+                      <Input
+                        type="number"
+                        value={baseOrderSize}
+                        readOnly
+                        className="bg-gray-50"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">= ${initialBalance.toLocaleString()} ÷ {maxActiveDeals}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium block mb-1">
+                        <TooltipLabel
+                          label="Trading Fee (%)"
+                          tooltip="Exchange fee per trade. Binance: 0.1%, Bybit: 0.075%. Applied to every buy and sell."
+                        />
+                      </label>
+                      <Input
+                        type="number"
+                        value={tradingFee}
+                        onChange={(e) => setTradingFee(parseFloat(e.target.value))}
+                        step={0.01}
+                        min={0}
+                        max={1}
+                      />
+                    </div>
+                    {/* Date Range with Quick Periods */}
+                    <div className="md:col-span-2">
+                      <label className="text-sm font-medium block mb-2">
+                        <TooltipLabel
+                          label={language === "uk" ? "Період" : "Period"}
+                          tooltip="Select backtest period. More history = more reliable results but longer processing."
+                        />
+                      </label>
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        {PERIOD_PRESETS.map((preset) => (
+                          <button
+                            key={preset.months}
+                            onClick={() => setDatePeriod(preset.months)}
+                            className={`px-4 py-2 text-sm font-bold transition ${selectedPeriod === preset.months
+                              ? "bg-black text-white"
+                              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                              }`}
+                            style={{ clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))' }}
+                          >
+                            {language === "uk" ? preset.labelUk : preset.label}
+                          </button>
+                        ))}
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="text-xs text-gray-500 block mb-1">{t("backtest.startDate")}</label>
                           <Input
-                            type="number"
-                            value={trailingDeviation}
-                            onChange={(e) => setTrailingDeviation(parseFloat(e.target.value))}
-                            min={0.1}
-                            step={0.1}
-                            className="w-24"
+                            type="date"
+                            value={startDate}
+                            onChange={(e) => { setStartDate(e.target.value); setSelectedPeriod(null); }}
                           />
-                          <span className="text-sm text-gray-500">% deviation</span>
-                        </>
-                      )}
+                        </div>
+                        <div>
+                          <label className="text-xs text-gray-500 block mb-1">{t("backtest.endDate")}</label>
+                          <Input
+                            type="date"
+                            value={endDate}
+                            onChange={(e) => { setEndDate(e.target.value); setSelectedPeriod(null); }}
+                          />
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </CardContent>
-            )}
-          </Card>
 
-          {/* Stop Loss Settings */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <TooltipLabel 
-                  label="Stop Loss"
-                  tooltip="Automatically close positions when they reach a certain loss percentage, limiting downside risk."
-                />
-                <button
-                  onClick={() => setStopLossToggle(!stopLossToggle)}
-                  className={`w-12 h-6 rounded-full transition ${
-                    stopLossToggle ? "bg-red-600" : "bg-gray-300"
-                  }`}
-                >
-                  <div
-                    className={`w-5 h-5 bg-white rounded-full shadow transform transition ${
-                      stopLossToggle ? "translate-x-6" : "translate-x-0.5"
-                    }`}
-                  />
-                </button>
-              </CardTitle>
-            </CardHeader>
-            {stopLossToggle && (
-              <CardContent>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium block mb-1">Stop Loss (%)</label>
-                    <Input
-                      type="number"
-                      value={stopLossValue}
-                      onChange={(e) => setStopLossValue(parseFloat(e.target.value))}
-                      min={0.1}
-                      step={0.1}
-                    />
-                    <p className="text-xs text-gray-500 mt-1">Close position at this loss %</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium block mb-1">Stop Loss Timeout (minutes)</label>
-                    <Input
-                      type="number"
-                      value={stopLossTimeout}
-                      onChange={(e) => setStopLossTimeout(parseInt(e.target.value))}
-                      min={0}
-                    />
-                    <p className="text-xs text-gray-500 mt-1">0 = immediate, or wait X minutes before activating</p>
-                  </div>
-                </div>
-              </CardContent>
-            )}
-          </Card>
-
-          {/* Safety Orders (DCA) */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <TooltipLabel 
-                  label={`${t("backtest.safetyOrders")} (DCA)`}
-                  tooltip="Safety Orders (Dollar Cost Averaging) automatically buy more when price drops, lowering your average entry price. This helps turn losing positions into winners when price recovers."
-                />
-                <button
-                  onClick={() => setSafetyOrderToggle(!safetyOrderToggle)}
-                  className={`w-12 h-6 transition ${
-                    safetyOrderToggle ? "bg-black" : "bg-gray-300"
-                  }`}
-                  style={{clipPath: 'polygon(3px 0, calc(100% - 3px) 0, 100% 3px, 100% calc(100% - 3px), calc(100% - 3px) 100%, 3px 100%, 0 calc(100% - 3px), 0 3px)'}}
-                >
-                  <div
-                    className={`w-5 h-5 bg-white rounded-full shadow transform transition ${
-                      safetyOrderToggle ? "translate-x-6" : "translate-x-0.5"
-                    }`}
-                  />
-                </button>
-              </CardTitle>
-            </CardHeader>
-            {safetyOrderToggle && (
-              <CardContent className="space-y-4">
-                <div className="grid md:grid-cols-3 gap-4">
-                  <div>
-                    <label className="text-sm font-medium block mb-1">
-                      <TooltipLabel 
-                        label="Safety Order Size ($)"
-                        tooltip="Amount in USD for each safety order. Larger orders = faster recovery but more capital needed."
+                  {/* Trading Pairs */}
+                  <div className="mt-4">
+                    <label className="text-sm font-medium block mb-2">
+                      <TooltipLabel
+                        label={t("backtest.tradingPairs")}
+                        tooltip="Select which pairs to trade. More pairs = more opportunities but strategy will run across all of them."
                       />
                     </label>
-                    <Input
-                      type="number"
-                      value={safetyOrderSize}
-                      onChange={(e) => setSafetyOrderSize(parseFloat(e.target.value))}
-                      min={1}
-                    />
+                    <div className="flex flex-wrap gap-2">
+                      {PAIRS.map((pair) => (
+                        <button
+                          key={pair}
+                          onClick={() => {
+                            if (selectedPairs.includes(pair)) {
+                              setSelectedPairs(selectedPairs.filter((p) => p !== pair));
+                            } else {
+                              setSelectedPairs([...selectedPairs, pair]);
+                            }
+                          }}
+                          className={`px-3 py-1.5 text-sm font-medium transition ${selectedPairs.includes(pair)
+                            ? "bg-black text-white"
+                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                            }`}
+                          style={{ clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))' }}
+                        >
+                          {pair}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                  <div>
-                    <label className="text-sm font-medium block mb-1">
-                      <TooltipLabel 
-                        label="Max Safety Orders"
-                        tooltip="Maximum number of safety orders per deal. More orders = can handle deeper dips but requires more capital. Common range: 1-7."
-                      />
-                    </label>
-                    <Input
-                      type="number"
-                      value={maxSafetyOrdersCount}
-                      onChange={(e) => setMaxSafetyOrdersCount(parseInt(e.target.value))}
-                      min={1}
-                      max={20}
-                    />
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium block mb-1">
-                      <TooltipLabel 
-                        label="Price Deviation (%)"
-                        tooltip="Price drop percentage to trigger the first safety order. Smaller = more frequent orders. Typical: 1-3%."
-                      />
-                    </label>
-                    <Input
-                      type="number"
-                      value={priceDeviation}
-                      onChange={(e) => setPriceDeviation(parseFloat(e.target.value))}
-                      min={0.5}
-                      step={0.5}
-                    />
-                    <p className="text-xs text-gray-500 mt-1">% drop to trigger SO</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium block mb-1">Volume Scale</label>
-                    <Input
-                      type="number"
-                      value={safetyOrderVolumeScale}
-                      onChange={(e) => setSafetyOrderVolumeScale(parseFloat(e.target.value))}
-                      min={1}
-                      step={0.1}
-                    />
-                    <p className="text-xs text-gray-500 mt-1">Multiply SO size each order</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium block mb-1">Step Scale</label>
-                    <Input
-                      type="number"
-                      value={safetyOrderStepScale}
-                      onChange={(e) => setSafetyOrderStepScale(parseFloat(e.target.value))}
-                      min={1}
-                      step={0.1}
-                    />
-                    <p className="text-xs text-gray-500 mt-1">Multiply deviation each order</p>
-                  </div>
-                </div>
 
-                {/* Safety Order Conditions */}
-                <div className="border-t pt-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <h4 className="font-medium text-sm">Safety Order Conditions (Optional)</h4>
-                    <Button size="sm" variant="outline" onClick={() => addCondition("safety")}>
-                      + Add
+                  {/* Take Profit & Stop Loss - Minimalistic */}
+                  <div className="mt-6 pt-4 border-t border-gray-200">
+                    <div className="grid md:grid-cols-2 gap-4">
+                      {/* Take Profit */}
+                      <div className="bg-gray-50 p-4" style={{ clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))' }}>
+                        <div className="flex items-center gap-3 mb-3">
+                          <input
+                            type="checkbox"
+                            checked={priceChangeActive}
+                            onChange={(e) => setPriceChangeActive(e.target.checked)}
+                            className="w-4 h-4 rounded"
+                          />
+                          <label className="font-medium text-sm">Take Profit</label>
+                        </div>
+                        {priceChangeActive && (
+                          <div className="space-y-2 pl-7">
+                            <div className="flex items-center gap-2">
+                              <select
+                                value={takeProfitType}
+                                onChange={(e) => setTakeProfitType(e.target.value)}
+                                className="text-xs border rounded px-2 py-1"
+                              >
+                                <option value="percentage-total">% {language === "uk" ? "від загальної" : "of total"}</option>
+                                <option value="percentage-base">% {language === "uk" ? "від базового" : "of base"}</option>
+                              </select>
+                              <Input
+                                type="number"
+                                value={targetProfit}
+                                onChange={(e) => setTargetProfit(parseFloat(e.target.value))}
+                                min={0.1}
+                                step={0.1}
+                                className="w-20 h-8 text-sm"
+                              />
+                              <span className="text-sm text-gray-500">%</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="checkbox"
+                                checked={trailingToggle}
+                                onChange={(e) => setTrailingToggle(e.target.checked)}
+                                className="w-3 h-3"
+                              />
+                              <span className="text-xs text-gray-600">Trailing</span>
+                              {trailingToggle && (
+                                <>
+                                  <Input
+                                    type="number"
+                                    value={trailingDeviation}
+                                    onChange={(e) => setTrailingDeviation(parseFloat(e.target.value))}
+                                    min={0.1}
+                                    step={0.1}
+                                    className="w-16 h-7 text-xs"
+                                  />
+                                  <span className="text-xs text-gray-500">%</span>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Stop Loss */}
+                      <div className="bg-gray-50 p-4" style={{ clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))' }}>
+                        <div className="flex items-center gap-3 mb-3">
+                          <input
+                            type="checkbox"
+                            checked={stopLossToggle}
+                            onChange={(e) => setStopLossToggle(e.target.checked)}
+                            className="w-4 h-4 rounded"
+                          />
+                          <label className="font-medium text-sm">Stop Loss</label>
+                        </div>
+                        {stopLossToggle && (
+                          <div className="space-y-2 pl-7">
+                            <div className="flex items-center gap-2">
+                              <select
+                                value={stopLossType}
+                                onChange={(e) => setStopLossType(e.target.value)}
+                                className="text-xs border rounded px-2 py-1"
+                              >
+                                <option value="percentage-base">% {language === "uk" ? "від базового" : "of base"}</option>
+                                <option value="percentage-total">% {language === "uk" ? "від загальної" : "of total"}</option>
+                              </select>
+                              <Input
+                                type="number"
+                                value={stopLossValue}
+                                onChange={(e) => setStopLossValue(parseFloat(e.target.value))}
+                                min={0.1}
+                                step={0.1}
+                                className="w-20 h-8 text-sm"
+                              />
+                              <span className="text-sm text-gray-500">%</span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Reinvest Toggle */}
+                    <div className="mt-4 flex items-center gap-3">
+                      <input
+                        type="checkbox"
+                        checked={reinvestToggle}
+                        onChange={(e) => setReinvestToggle(e.target.checked)}
+                        className="w-4 h-4 rounded"
+                      />
+                      <div>
+                        <label className="font-medium text-sm">{language === "uk" ? "Реінвестувати прибуток" : "Reinvest Profits"}</label>
+                        <p className="text-xs text-gray-500">
+                          {language === "uk"
+                            ? "Автоматично додавати прибуток до наступних угод, збільшуючи розмір позицій"
+                            : "Automatically add profits to next trades, increasing position sizes over time"}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </>)}
+
+          {/* Conditions Tab */}
+          {activeConfigTab === "conditions" && (
+            <>
+              {/* Entry Conditions */}
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <CardTitle className="text-green-600">{t("backtest.entryConditions")}</CardTitle>
+                  <Button size="sm" variant="outline" onClick={() => addCondition("entry")}>
+                    {t("backtest.addCondition")}
+                  </Button>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {entryConditions.map((cond, i) => (
+                    <ConditionBuilder
+                      key={i}
+                      condition={cond}
+                      onChange={(updated) => {
+                        const newConds = [...entryConditions];
+                        newConds[i] = updated;
+                        setEntryConditions(newConds);
+                      }}
+                      onRemove={() => setEntryConditions(entryConditions.filter((_, j) => j !== i))}
+                    />
+                  ))}
+                  {entryConditions.length === 0 && (
+                    <p className="text-gray-500 text-sm text-center py-4">
+                      {t("backtest.noEntryConditions")}
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Exit Conditions - with toggle */}
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      checked={conditionsActive}
+                      onChange={(e) => setConditionsActive(e.target.checked)}
+                      className="w-4 h-4 rounded"
+                    />
+                    <CardTitle className="text-red-600">{t("backtest.exitConditions")}</CardTitle>
+                  </div>
+                  {conditionsActive && (
+                    <Button size="sm" variant="outline" onClick={() => addCondition("exit")}>
+                      {t("backtest.addCondition")}
                     </Button>
-                  </div>
-                  <div className="space-y-2">
-                    {safetyConditions.map((cond, i) => (
+                  )}
+                </CardHeader>
+                {conditionsActive && (
+                  <CardContent className="space-y-3">
+                    {exitConditions.map((cond, i) => (
                       <ConditionBuilder
                         key={i}
                         condition={cond}
                         onChange={(updated) => {
-                          const newConds = [...safetyConditions];
+                          const newConds = [...exitConditions];
                           newConds[i] = updated;
-                          setSafetyConditions(newConds);
+                          setExitConditions(newConds);
                         }}
-                        onRemove={() => setSafetyConditions(safetyConditions.filter((_, j) => j !== i))}
+                        onRemove={() => setExitConditions(exitConditions.filter((_, j) => j !== i))}
                       />
                     ))}
-                  </div>
-                </div>
-              </CardContent>
-            )}
-          </Card>
+                    {exitConditions.length === 0 && (
+                      <p className="text-gray-500 text-sm text-center py-4">
+                        {t("backtest.noExitConditions")}
+                      </p>
+                    )}
+                  </CardContent>
+                )}
+              </Card>
 
-          {/* Advanced Settings */}
-          <Card>
-            <CardHeader>
-              <CardTitle>
-                <TooltipLabel 
-                  label="Advanced Settings"
-                  tooltip="Fine-tune your strategy with additional controls for cooldowns, volume filters, and profit management."
-                />
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    checked={minprofToggle}
-                    onChange={(e) => setMinprofToggle(e.target.checked)}
-                    className="rounded"
-                  />
-                  <label className="text-sm font-medium">Minimum Profit to Exit</label>
-                  {minprofToggle && (
-                    <>
+              {/* Safety Orders (DCA) */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <TooltipLabel
+                      label={`${t("backtest.safetyOrders")} (DCA)`}
+                      tooltip="Safety Orders (Dollar Cost Averaging) automatically buy more when price drops, lowering your average entry price. This helps turn losing positions into winners when price recovers."
+                    />
+                    <button
+                      onClick={() => setSafetyOrderToggle(!safetyOrderToggle)}
+                      className={`w-12 h-6 transition ${safetyOrderToggle ? "bg-black" : "bg-gray-300"
+                        }`}
+                      style={{ clipPath: 'polygon(3px 0, calc(100% - 3px) 0, 100% 3px, 100% calc(100% - 3px), calc(100% - 3px) 100%, 3px 100%, 0 calc(100% - 3px), 0 3px)' }}
+                    >
+                      <div
+                        className={`w-5 h-5 bg-white rounded-full shadow transform transition ${safetyOrderToggle ? "translate-x-6" : "translate-x-0.5"
+                          }`}
+                      />
+                    </button>
+                  </CardTitle>
+                </CardHeader>
+                {safetyOrderToggle && (
+                  <CardContent className="space-y-4">
+                    <div className="grid md:grid-cols-3 gap-4">
+                      <div>
+                        <label className="text-sm font-medium block mb-1">
+                          <TooltipLabel
+                            label="Safety Order Size ($)"
+                            tooltip="Amount in USD for each safety order. Larger orders = faster recovery but more capital needed."
+                          />
+                        </label>
+                        <Input
+                          type="number"
+                          value={safetyOrderSize}
+                          onChange={(e) => setSafetyOrderSize(parseFloat(e.target.value))}
+                          min={1}
+                        />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium block mb-1">
+                          <TooltipLabel
+                            label="Max Safety Orders"
+                            tooltip="Maximum number of safety orders per deal. More orders = can handle deeper dips but requires more capital. Common range: 1-7."
+                          />
+                        </label>
+                        <Input
+                          type="number"
+                          value={maxSafetyOrdersCount}
+                          onChange={(e) => setMaxSafetyOrdersCount(parseInt(e.target.value))}
+                          min={1}
+                          max={20}
+                        />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium block mb-1">
+                          <TooltipLabel
+                            label="Price Deviation (%)"
+                            tooltip="Price drop percentage to trigger the first safety order. Smaller = more frequent orders. Typical: 1-3%."
+                          />
+                        </label>
+                        <Input
+                          type="number"
+                          value={priceDeviation}
+                          onChange={(e) => setPriceDeviation(parseFloat(e.target.value))}
+                          min={0.5}
+                          step={0.5}
+                        />
+                        <p className="text-xs text-gray-500 mt-1">% drop to trigger SO</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium block mb-1">Volume Scale</label>
+                        <Input
+                          type="number"
+                          value={safetyOrderVolumeScale}
+                          onChange={(e) => setSafetyOrderVolumeScale(parseFloat(e.target.value))}
+                          min={1}
+                          step={0.1}
+                        />
+                        <p className="text-xs text-gray-500 mt-1">Multiply SO size each order</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium block mb-1">Step Scale</label>
+                        <Input
+                          type="number"
+                          value={safetyOrderStepScale}
+                          onChange={(e) => setSafetyOrderStepScale(parseFloat(e.target.value))}
+                          min={1}
+                          step={0.1}
+                        />
+                        <p className="text-xs text-gray-500 mt-1">Multiply deviation each order</p>
+                      </div>
+                    </div>
+
+                    {/* Safety Order Conditions */}
+                    <div className="border-t pt-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-medium text-sm">Safety Order Conditions (Optional)</h4>
+                        <Button size="sm" variant="outline" onClick={() => addCondition("safety")}>
+                          + Add
+                        </Button>
+                      </div>
+                      <div className="space-y-2">
+                        {safetyConditions.map((cond, i) => (
+                          <ConditionBuilder
+                            key={i}
+                            condition={cond}
+                            onChange={(updated) => {
+                              const newConds = [...safetyConditions];
+                              newConds[i] = updated;
+                              setSafetyConditions(newConds);
+                            }}
+                            onRemove={() => setSafetyConditions(safetyConditions.filter((_, j) => j !== i))}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  </CardContent>
+                )}
+              </Card>
+            </>)}
+
+          {/* Advanced Tab */}
+          {activeConfigTab === "advanced" && (
+            <>
+              {/* Advanced Settings */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>
+                    <TooltipLabel
+                      label={language === "uk" ? "Розширені налаштування" : "Advanced Settings"}
+                      tooltip="Fine-tune your strategy with additional controls for cooldowns, volume filters, and profit management."
+                    />
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="checkbox"
+                        checked={minprofToggle}
+                        onChange={(e) => setMinprofToggle(e.target.checked)}
+                        className="rounded"
+                      />
+                      <label className="text-sm font-medium">{language === "uk" ? "Мін. прибуток для виходу" : "Minimum Profit to Exit"}</label>
+                      {minprofToggle && (
+                        <>
+                          <Input
+                            type="number"
+                            value={minimalProfit}
+                            onChange={(e) => setMinimalProfit(parseFloat(e.target.value))}
+                            className="w-20"
+                            step={0.1}
+                          />
+                          <span className="text-sm text-gray-500">%</span>
+                        </>
+                      )}
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium block mb-1">{language === "uk" ? "Мін. денний обсяг ($)" : "Min Daily Volume ($)"}</label>
                       <Input
                         type="number"
-                        value={minimalProfit}
-                        onChange={(e) => setMinimalProfit(parseFloat(e.target.value))}
-                        className="w-20"
-                        step={0.1}
+                        value={minDailyVolume}
+                        onChange={(e) => setMinDailyVolume(parseFloat(e.target.value))}
+                        min={0}
                       />
-                      <span className="text-sm text-gray-500">%</span>
-                    </>
-                  )}
-                </div>
-                <div>
-                  <label className="text-sm font-medium block mb-1">Reinvest Profit (%)</label>
-                  <Input
-                    type="number"
-                    value={reinvestProfit}
-                    onChange={(e) => setReinvestProfit(parseFloat(e.target.value))}
-                    min={0}
-                    max={100}
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium block mb-1">Risk Reduction (%)</label>
-                  <Input
-                    type="number"
-                    value={riskReduction}
-                    onChange={(e) => setRiskReduction(parseFloat(e.target.value))}
-                    min={0}
-                    max={100}
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium block mb-1">Min Daily Volume ($)</label>
-                  <Input
-                    type="number"
-                    value={minDailyVolume}
-                    onChange={(e) => setMinDailyVolume(parseFloat(e.target.value))}
-                    min={0}
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium block mb-1">Cooldown Between Deals (min)</label>
-                  <Input
-                    type="number"
-                    value={cooldownBetweenDeals}
-                    onChange={(e) => setCooldownBetweenDeals(parseInt(e.target.value))}
-                    min={0}
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium block mb-1">Close Deal After Timeout (min)</label>
-                  <Input
-                    type="number"
-                    value={closeDealAfterTimeout}
-                    onChange={(e) => setCloseDealAfterTimeout(parseInt(e.target.value))}
-                    min={0}
-                  />
-                  <p className="text-xs text-gray-500 mt-1">0 = disabled</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Exit Conditions Toggle */}
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-medium">Use Exit Conditions</h3>
-                  <p className="text-sm text-gray-500">
-                    Enable indicator-based exit instead of just TP/SL
-                  </p>
-                </div>
-                <button
-                  onClick={() => setConditionsActive(!conditionsActive)}
-                  className={`w-12 h-6 transition ${
-                    conditionsActive ? "bg-black" : "bg-gray-300"
-                  }`}
-                  style={{clipPath: 'polygon(3px 0, calc(100% - 3px) 0, 100% 3px, 100% calc(100% - 3px), calc(100% - 3px) 100%, 3px 100%, 0 calc(100% - 3px), 0 3px)'}}
-                >
-                  <div
-                    className={`w-5 h-5 bg-white rounded-full shadow transform transition ${
-                      conditionsActive ? "translate-x-6" : "translate-x-0.5"
-                    }`}
-                  />
-                </button>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Entry Conditions */}
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="text-green-600">{t("backtest.entryConditions")}</CardTitle>
-              <Button size="sm" variant="outline" onClick={() => addCondition("entry")}>
-                {t("backtest.addCondition")}
-              </Button>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {entryConditions.map((cond, i) => (
-                <ConditionBuilder
-                  key={i}
-                  condition={cond}
-                  onChange={(updated) => {
-                    const newConds = [...entryConditions];
-                    newConds[i] = updated;
-                    setEntryConditions(newConds);
-                  }}
-                  onRemove={() => setEntryConditions(entryConditions.filter((_, j) => j !== i))}
-                />
-              ))}
-              {entryConditions.length === 0 && (
-                <p className="text-gray-500 text-sm text-center py-4">
-                  {t("backtest.noEntryConditions")}
-                </p>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Exit Conditions (only when conditionsActive) */}
-          {conditionsActive && (
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-red-600">{t("backtest.exitConditions")}</CardTitle>
-                <Button size="sm" variant="outline" onClick={() => addCondition("exit")}>
-                  {t("backtest.addCondition")}
-                </Button>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {exitConditions.map((cond, i) => (
-                  <ConditionBuilder
-                    key={i}
-                    condition={cond}
-                    onChange={(updated) => {
-                      const newConds = [...exitConditions];
-                      newConds[i] = updated;
-                      setExitConditions(newConds);
-                    }}
-                    onRemove={() => setExitConditions(exitConditions.filter((_, j) => j !== i))}
-                  />
-                ))}
-                {exitConditions.length === 0 && (
-                  <p className="text-gray-500 text-sm text-center py-4">
-                    {t("backtest.noExitConditions")}
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-          )}
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium block mb-1">{language === "uk" ? "Затримка між угодами (хв)" : "Cooldown Between Deals (min)"}</label>
+                      <Input
+                        type="number"
+                        value={cooldownBetweenDeals}
+                        onChange={(e) => setCooldownBetweenDeals(parseInt(e.target.value))}
+                        min={0}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium block mb-1">{language === "uk" ? "Закрити угоду після (хв)" : "Close Deal After Timeout (min)"}</label>
+                      <Input
+                        type="number"
+                        value={closeDealAfterTimeout}
+                        onChange={(e) => setCloseDealAfterTimeout(parseInt(e.target.value))}
+                        min={0}
+                      />
+                      <p className="text-xs text-gray-500 mt-1">0 = {language === "uk" ? "вимкнено" : "disabled"}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </>)}
 
           {/* Run Button */}
           <button
             className="w-full py-4 bg-gradient-to-r from-black via-gray-900 to-black text-white font-bold text-lg relative overflow-hidden group disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'}}
+            style={{ clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))' }}
             onClick={runBacktest}
             disabled={loading}
           >
@@ -1347,10 +1585,10 @@ export default function BacktestPage() {
             <>
               {/* Queue Status */}
               {results.status === 'queued' && (
-                <Card className="bg-gray-50 border-2 border-gray-200" style={{clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))'}}>
+                <Card className="bg-gray-50 border-2 border-gray-200" style={{ clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))' }}>
                   <CardContent className="pt-6">
                     <div className="text-center">
-                      <div className="w-12 h-12 bg-black flex items-center justify-center mx-auto mb-3" style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}><svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>
+                      <div className="w-12 h-12 bg-black flex items-center justify-center mx-auto mb-3" style={{ clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))' }}><svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>
                       <h3 className="font-bold text-lg text-gray-900">Backtest Queued</h3>
                       <p className="text-gray-600 mt-2">{results.message}</p>
                       {results.estimatedWait && (
@@ -1369,7 +1607,7 @@ export default function BacktestPage() {
               {/* Performance Metrics */}
               {results.metrics && (
                 <>
-                  <div className="bg-black text-white" style={{clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))'}}>
+                  <div className="bg-black text-white" style={{ clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))' }}>
                     <div className="p-6">
                       <div className="flex items-center justify-between">
                         <div>
@@ -1380,7 +1618,7 @@ export default function BacktestPage() {
                           onClick={saveStrategy}
                           disabled={saving || saved}
                           className="bg-white text-black hover:bg-gray-100 font-bold"
-                          style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}
+                          style={{ clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))' }}
                         >
                           {saving ? t("backtest.saving") : saved ? t("backtest.saved") : t("backtest.saveStrategy")}
                         </Button>
@@ -1394,28 +1632,28 @@ export default function BacktestPage() {
                     </CardHeader>
                     <CardContent>
                       <div className="grid grid-cols-2 gap-4">
-                        <div className="bg-emerald-50 p-3" style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'}}>
+                        <div className="bg-emerald-50 p-3" style={{ clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))' }}>
                           <p className="text-xs text-emerald-600 font-medium">{t("backtest.netProfit")}</p>
                           <p className="text-xl font-bold text-emerald-700">{(results.metrics?.net_profit * 100).toFixed(1)}%</p>
                           <p className="text-sm text-emerald-600">{results.metrics?.net_profit_usd}</p>
                         </div>
-                        <div className="bg-red-50 p-3" style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'}}>
+                        <div className="bg-red-50 p-3" style={{ clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))' }}>
                           <p className="text-xs text-red-600 font-medium">{t("backtest.maxDrawdown")}</p>
                           <p className="text-xl font-bold text-red-700">{(results.metrics?.max_drawdown * 100).toFixed(1)}%</p>
                         </div>
-                        <div className="bg-gray-100 p-3" style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'}}>
+                        <div className="bg-gray-100 p-3" style={{ clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))' }}>
                           <p className="text-xs text-gray-600 font-medium">{t("strategies.sharpeRatio")}</p>
                           <p className="text-xl font-bold text-gray-900">{results.metrics?.sharpe_ratio?.toFixed(2)}</p>
                         </div>
-                        <div className="bg-emerald-50 p-3" style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'}}>
+                        <div className="bg-emerald-50 p-3" style={{ clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))' }}>
                           <p className="text-xs text-emerald-600 font-medium">{t("strategies.winRate")}</p>
                           <p className="text-xl font-bold text-emerald-700">{(results.metrics?.win_rate * 100).toFixed(0)}%</p>
                         </div>
-                        <div className="bg-gray-50 p-3" style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'}}>
+                        <div className="bg-gray-50 p-3" style={{ clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))' }}>
                           <p className="text-xs text-gray-600 font-medium">{t("backtest.totalTrades")}</p>
                           <p className="text-xl font-bold">{results.metrics?.total_trades}</p>
                         </div>
-                        <div className="bg-gray-100 p-3" style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'}}>
+                        <div className="bg-gray-100 p-3" style={{ clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))' }}>
                           <p className="text-xs text-gray-600 font-medium">{t("backtest.profitFactor")}</p>
                           <p className="text-xl font-bold text-gray-900">{results.metrics?.profit_factor}</p>
                         </div>
@@ -1459,11 +1697,11 @@ export default function BacktestPage() {
               )}
             </>
           ) : (
-            <div className="bg-gradient-to-br from-gray-50 to-white border-2 border-gray-100 relative overflow-hidden" style={{clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))'}}>
-              <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5" style={{clipPath: 'polygon(100% 0, 100% 100%, 0 0)'}}></div>
-              <div className="absolute bottom-0 left-0 w-24 h-24 bg-black/5" style={{clipPath: 'polygon(0 100%, 100% 100%, 0 0)'}}></div>
+            <div className="bg-gradient-to-br from-gray-50 to-white border-2 border-gray-100 relative overflow-hidden" style={{ clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))' }}>
+              <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5" style={{ clipPath: 'polygon(100% 0, 100% 100%, 0 0)' }}></div>
+              <div className="absolute bottom-0 left-0 w-24 h-24 bg-black/5" style={{ clipPath: 'polygon(0 100%, 100% 100%, 0 0)' }}></div>
               <div className="p-8 text-center relative">
-                <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center mx-auto mb-4" style={{clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))'}}>
+                <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center mx-auto mb-4" style={{ clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))' }}>
                   <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>

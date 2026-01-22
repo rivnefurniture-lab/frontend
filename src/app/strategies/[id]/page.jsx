@@ -18,6 +18,8 @@ import { useAuth } from "@/context/AuthProvider";
 import { useLanguage } from "@/context/LanguageContext";
 import { apiFetch, publicFetch } from "@/lib/api";
 import { getTradingPairs, getDefaultPair, getExchanges, isCryptoMode } from "@/config/tradingMode";
+import SuccessModal from "@/components/SuccessModal";
+import { showToast } from "@/components/Toast";
 
 // Build version: 2025-12-14-v3 - percentage fixes
 console.log("[Algotcha] Strategy page loaded - build v2026-01-14-v7");
@@ -27,7 +29,7 @@ export default function StrategyDetailPage() {
   const router = useRouter();
   const { user } = useAuth();
   const { language } = useLanguage();
-  
+
   // Translations
   const t = {
     back: language === "uk" ? "Назад" : "Back",
@@ -76,13 +78,13 @@ export default function StrategyDetailPage() {
     notConnected: language === "uk" ? "Не підключено." : "Not connected.",
     connectNow: language === "uk" ? "Підключити зараз →" : "Connect now →",
   };
-  
+
   // Get config from trading mode
   const AVAILABLE_PAIRS = getTradingPairs();
   const DEFAULT_PAIR = getDefaultPair();
   const EXCHANGES = getExchanges();
   const defaultExchange = EXCHANGES[0]?.id || "interactive_brokers";
-  
+
   const [strategy, setStrategy] = useState(null);
   const [loading, setLoading] = useState(true);
   const [exchange, setExchange] = useState(defaultExchange);
@@ -93,7 +95,10 @@ export default function StrategyDetailPage() {
   const [starting, setStarting] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
   const [connectedExchanges, setConnectedExchanges] = useState([]);
-  
+
+  // Modal states
+  const [successModal, setSuccessModal] = useState({ open: false, type: null, data: {} });
+
   // Backtest rerun state
   const [backtestConfig, setBacktestConfig] = useState({
     startDate: "2024-01-01",
@@ -135,31 +140,31 @@ export default function StrategyDetailPage() {
           if (result) {
             // Transform backtest result to strategy format
             const rawTrades = result.trades ? (typeof result.trades === 'string' ? JSON.parse(result.trades) : result.trades) : [];
-            
+
             // Transform trades to the format expected by the UI
-                   const formattedTrades = rawTrades.map(t => {
-                     const ts = new Date(t.timestamp);
-                     const orderSize = parseFloat(t.order_size) || 1000; // Use actual order_size from backtest
-                     return {
-                       date: ts.toLocaleDateString(),
-                       time: ts.toLocaleTimeString(),
-                       pair: t.symbol || '',
-                       side: t.action || '',
-                       entry: parseFloat(t.price) || 0,
-                       orderSize: orderSize,
-                       pnl: parseFloat(t.profit_loss) / (result.initialBalance || 10000) || 0,
-                       pnlUsd: parseFloat(t.profit_loss) || 0,
-                       balance: parseFloat(t.balance) || 0,
-                       comment: t.comment || '',
-                     };
-                   });
-            
+            const formattedTrades = rawTrades.map(t => {
+              const ts = new Date(t.timestamp);
+              const orderSize = parseFloat(t.order_size) || 1000; // Use actual order_size from backtest
+              return {
+                date: ts.toLocaleDateString(),
+                time: ts.toLocaleTimeString(),
+                pair: t.symbol || '',
+                side: t.action || '',
+                entry: parseFloat(t.price) || 0,
+                orderSize: orderSize,
+                pnl: parseFloat(t.profit_loss) / (result.initialBalance || 10000) || 0,
+                pnlUsd: parseFloat(t.profit_loss) || 0,
+                balance: parseFloat(t.balance) || 0,
+                comment: t.comment || '',
+              };
+            });
+
             // Convert raw decimals to percentages
             const yearlyReturnPct = (result.yearlyReturn || result.yearly_return || 0) * 100;
             const winRatePct = (result.winRate || result.win_rate || 0) * 100;
             const maxDDPct = (result.maxDrawdown || result.max_drawdown || 0) * 100;
             const netProfitPct = (result.netProfit || result.net_profit || 0) * 100;
-            
+
             const transformed = {
               id: `backtest-${backtestId}`,
               name: result.name || result.strategy_name || 'Backtest Result',
@@ -200,7 +205,7 @@ export default function StrategyDetailPage() {
           console.error("Failed to fetch backtest result:", e);
         }
       }
-      
+
       // Fetch preset strategies (public endpoint, no auth required)
       const allStrategies = await publicFetch("/backtest/strategies");
       const found = allStrategies?.find(s => s.id === params.id || s.id === parseInt(params.id));
@@ -213,23 +218,23 @@ export default function StrategyDetailPage() {
           monthly: yearlyReturn ? (yearlyReturn / 12).toFixed(1) : null,
           yearly: yearlyReturn ? yearlyReturn.toFixed(1) : null,
         };
-        
+
         // Use history from API if available (already has proper format)
         // history comes from getAllStrategies with { year: 'Jan 23', value: 5000 } format
-        
+
         // Fetch trades from the backend for preset strategies
         if (found.isPreset || params.id.startsWith('real-')) {
           try {
             const tradesData = await publicFetch(`/backtest/preset-strategies/${params.id}/trades`);
             if (tradesData?.trades && tradesData.trades.length > 0) {
               const allTrades = tradesData.trades;
-              
+
               // Map trades for the table
               found.recentTrades = allTrades.slice(0, 200).map(t => {
                 const profitLossUsd = parseFloat(t.profit_loss) || 0;
                 const orderSize = parseFloat(t.order_size) || 1;
                 const pnlPercent = orderSize > 0 ? (profitLossUsd / orderSize) * 100 : 0;
-                
+
                 return {
                   date: t.timestamp?.split(' ')[0] || t.date || 'N/A',
                   time: t.timestamp?.split(' ')[1] || t.time || '',
@@ -251,7 +256,7 @@ export default function StrategyDetailPage() {
             console.log('Could not fetch trades:', e);
           }
         }
-        
+
         setStrategy(found);
       }
     } catch (err) {
@@ -291,15 +296,17 @@ export default function StrategyDetailPage() {
       router.push("/auth");
       return;
     }
-    
+
     // Check if exchange is connected
     const exchangeConnection = connectedExchanges.find(c => c.exchange === exchange || c === exchange);
     if (!exchangeConnection) {
-      alert(`Please connect your ${exchange} account first on the Connect page.`);
+      showToast(language === "uk"
+        ? `Спочатку підключіть ${exchange} на сторінці Connect`
+        : `Please connect your ${exchange} account first`, "warning");
       router.push("/connect");
       return;
     }
-    
+
     try {
       setStarting(true);
       const response = await apiFetch("/strategies/start", {
@@ -314,24 +321,27 @@ export default function StrategyDetailPage() {
           maxBudget: Number(maxBudget),
         },
       });
-      
+
       if (response?.error) {
-        alert("Error: " + response.error);
+        showToast(response.error, "error");
         return;
       }
-      
-      alert(`✓ Live trading started!\n\nOrder size: $${amount}\nMax risk: $${maxBudget}\n\nGo to Dashboard to monitor.`);
-      router.push("/dashboard");
+
+      setSuccessModal({
+        open: true,
+        type: "live",
+        data: { amount, maxBudget }
+      });
     } catch (e) {
       console.error("Start trading error:", e);
-      alert("Error: " + e.message);
+      showToast(e.message, "error");
     } finally {
       setStarting(false);
     }
   };
 
   const formatValue = (val, suffix = "", decimals = 1) => {
-    if (val === null || val === undefined || Number.isNaN(val)) return "—";
+    if (val === null || val === undefined) return "—";
     const num = Number(val);
     if (Number.isNaN(num)) return "—";
     return `${num.toFixed(decimals)}${suffix}`;
@@ -346,6 +356,37 @@ export default function StrategyDetailPage() {
 
   return (
     <div className="container py-8">
+      {/* Success Modal */}
+      <SuccessModal
+        open={successModal.open}
+        onClose={() => {
+          setSuccessModal({ open: false, type: null, data: {} });
+          if (successModal.type === "live") {
+            router.push("/dashboard");
+          }
+        }}
+        title={successModal.type === "backtest"
+          ? (language === "uk" ? "Бектест в черзі!" : "Backtest Queued!")
+          : (language === "uk" ? "Запущено!" : "Started!")
+        }
+        subtitle={successModal.type === "backtest"
+          ? (language === "uk" ? "Ваш бектест додано до черги обробки" : "Your backtest has been added to the processing queue")
+          : (language === "uk" ? "Аналіз запущено успішно" : "Analysis started successfully")
+        }
+        icon={successModal.type === "backtest" ? "queue" : "success"}
+        details={successModal.type === "backtest" ? [
+          { label: language === "uk" ? "Позиція в черзі" : "Queue Position", value: `#${successModal.data.position || 1}` },
+          { label: language === "uk" ? "Очікуваний час" : "Estimated Wait", value: `~${successModal.data.wait || 10} ${language === "uk" ? "хв" : "min"}` },
+        ] : [
+          { label: language === "uk" ? "Розмір ордеру" : "Order Size", value: `$${successModal.data.amount}` },
+          { label: language === "uk" ? "Макс. ризик" : "Max Risk", value: `$${successModal.data.maxBudget}` },
+        ]}
+        footer={successModal.type === "backtest"
+          ? (language === "uk" ? "Слідкуйте за прогресом у плаваючому моніторі!" : "Watch the floating monitor for live progress!")
+          : (language === "uk" ? "Перейдіть на панель для моніторингу" : "Go to Dashboard to monitor")
+        }
+      />
+
       {bannerMessage && (
         <div className="mb-6 p-4 rounded-lg border border-amber-200 bg-amber-50 text-amber-800 text-sm">
           {bannerMessage}
@@ -366,7 +407,7 @@ export default function StrategyDetailPage() {
         </div>
         <div className="flex gap-2">
           {strategy.tags?.map((tag) => (
-            <span key={tag} className="px-3 py-1 bg-gray-100 text-gray-700 text-sm font-medium" style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'}}>
+            <span key={tag} className="px-3 py-1 bg-gray-100 text-gray-700 text-sm font-medium" style={{ clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))' }}>
               {tag}
             </span>
           ))}
@@ -385,7 +426,7 @@ export default function StrategyDetailPage() {
           </div>
 
           {/* Returns Breakdown */}
-          <div className="bg-white border-2 border-gray-100 p-6" style={{clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))'}}>
+          <div className="bg-white border-2 border-gray-100 p-6" style={{ clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))' }}>
             <h3 className="text-lg font-bold mb-4">{t.returnsBreakdown}</h3>
             <div className="grid grid-cols-4 gap-4 text-center mb-6">
               {[
@@ -394,7 +435,7 @@ export default function StrategyDetailPage() {
                 { label: t.monthly, val: strategy.returns?.monthly },
                 { label: t.yearly, val: strategy.returns?.yearly || strategy.cagr },
               ].map((item) => (
-                <div key={item.label} className="p-4 bg-gray-50" style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}>
+                <div key={item.label} className="p-4 bg-gray-50" style={{ clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))' }}>
                   <div className="text-2xl font-bold text-emerald-600">
                     {item.val !== null && item.val !== undefined ? `${formatSigned(Number(item.val))}%` : "—"}
                   </div>
@@ -402,11 +443,11 @@ export default function StrategyDetailPage() {
                 </div>
               ))}
             </div>
-            
+
             {/* Yearly Performance History */}
             <div className="border-t-2 border-gray-100 pt-4">
               <div className="flex items-center gap-2 mb-3">
-                <div className="w-6 h-6 bg-gray-800 flex items-center justify-center" style={{clipPath: 'polygon(0 0, calc(100% - 3px) 0, 100% 3px, 100% 100%, 3px 100%, 0 calc(100% - 3px))'}}>
+                <div className="w-6 h-6 bg-gray-800 flex items-center justify-center" style={{ clipPath: 'polygon(0 0, calc(100% - 3px) 0, 100% 3px, 100% 100%, 3px 100%, 0 calc(100% - 3px))' }}>
                   <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
@@ -422,19 +463,17 @@ export default function StrategyDetailPage() {
                   return (
                     <div
                       key={year}
-                      className={`p-3 text-center ${
-                        isPast ? 'bg-gray-50' : 'bg-gray-100 opacity-60'
-                      }`}
-                      style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'}}
+                      className={`p-3 text-center ${isPast ? 'bg-gray-50' : 'bg-gray-100 opacity-60'
+                        }`}
+                      style={{ clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))' }}
                     >
                       <div className="text-xs text-gray-500 mb-1 font-medium">{year}</div>
-                      <div className={`font-bold ${
-                        value === undefined || value === null
+                      <div className={`font-bold ${value === undefined || value === null
                           ? 'text-gray-400'
                           : isPositive
                             ? 'text-emerald-600'
                             : 'text-red-600'
-                      }`}>
+                        }`}>
                         {value === undefined || value === null ? '—' : `${isPositive ? '+' : ''}${value.toFixed(1)}%`}
                       </div>
                     </div>
@@ -442,8 +481,8 @@ export default function StrategyDetailPage() {
                 })}
               </div>
               <p className="text-xs text-gray-500 mt-3">
-                {language === "uk" 
-                  ? "Очікується оновлена річна розбивка з останнього бектесту. Минулі результати не гарантують майбутніх." 
+                {language === "uk"
+                  ? "Очікується оновлена річна розбивка з останнього бектесту. Минулі результати не гарантують майбутніх."
                   : "Awaiting updated yearly breakdown from the latest backtest. Past performance does not guarantee future results."}
               </p>
             </div>
@@ -460,12 +499,11 @@ export default function StrategyDetailPage() {
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className={`px-4 py-3 font-bold transition-all ${
-                  activeTab === tab.key
+                className={`px-4 py-3 font-bold transition-all ${activeTab === tab.key
                     ? "bg-black text-white"
                     : "text-gray-500 hover:text-black hover:bg-gray-50"
-                }`}
-                style={activeTab === tab.key ? {clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)'} : {}}
+                  }`}
+                style={activeTab === tab.key ? { clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)' } : {}}
               >
                 {tab.key === "backtest" ? (
                   <span className="flex items-center gap-1.5">
@@ -491,32 +529,32 @@ export default function StrategyDetailPage() {
                   <div className="h-72">
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={strategy.history}>
-                      <defs>
-                        <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
-                          <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                      <XAxis 
-                        dataKey="year" 
-                        tick={{ fontSize: 11 }}
-                      />
-                      <YAxis tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
-                      <Tooltip 
-                        formatter={(v) => [`$${v?.toLocaleString()}`, "Balance"]}
-                        labelFormatter={(label) => label ? `Year ${label}` : ''}
-                      />
-                      <Area
-                        type="monotone"
-                        dataKey="value"
-                        stroke="#10b981"
-                        fill="url(#colorValue)"
-                        strokeWidth={2}
-                      />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </div>
+                        <defs>
+                          <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
+                            <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                        <XAxis
+                          dataKey="year"
+                          tick={{ fontSize: 11 }}
+                        />
+                        <YAxis tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
+                        <Tooltip
+                          formatter={(v) => [`$${v?.toLocaleString()}`, "Balance"]}
+                          labelFormatter={(label) => label ? `Year ${label}` : ''}
+                        />
+                        <Area
+                          type="monotone"
+                          dataKey="value"
+                          stroke="#10b981"
+                          fill="url(#colorValue)"
+                          strokeWidth={2}
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
                 ) : (
                   <div className="h-72 flex items-center justify-center bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
                     <div className="text-center">
@@ -609,13 +647,12 @@ export default function StrategyDetailPage() {
                           <td className="px-4 py-3 text-gray-500">{trade.time}</td>
                           <td className="px-4 py-3 font-medium">{trade.pair}</td>
                           <td className="px-4 py-3">
-                            <span className={`px-2 py-1 rounded-md text-xs font-medium ${
-                              trade.side === "BUY" || trade.side?.includes("Entry") 
-                                ? "bg-green-100 text-green-700" 
+                            <span className={`px-2 py-1 rounded-md text-xs font-medium ${trade.side === "BUY" || trade.side?.includes("Entry")
+                                ? "bg-green-100 text-green-700"
                                 : trade.side === "SELL" || trade.side?.includes("Exit")
-                                ? "bg-red-100 text-red-700"
-                                : "bg-gray-100 text-gray-700"
-                            }`}>
+                                  ? "bg-red-100 text-red-700"
+                                  : "bg-gray-100 text-gray-700"
+                              }`}>
                               {trade.side}
                             </span>
                           </td>
@@ -631,17 +668,17 @@ export default function StrategyDetailPage() {
                           </td>
                         </tr>
                       )) || (
-                        <tr>
-                          <td colSpan={9} className="px-4 py-12 text-center">
-                            <div className="flex flex-col items-center gap-3">
-                              <svg className="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                              </svg>
-                              <p className="text-gray-500">No trades available. Run a backtest to see trades.</p>
-                            </div>
-                          </td>
-                        </tr>
-                      )}
+                          <tr>
+                            <td colSpan={9} className="px-4 py-12 text-center">
+                              <div className="flex flex-col items-center gap-3">
+                                <svg className="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                </svg>
+                                <p className="text-gray-500">No trades available. Run a backtest to see trades.</p>
+                              </div>
+                            </td>
+                          </tr>
+                        )}
                     </tbody>
                   </table>
                 </div>
@@ -685,7 +722,7 @@ export default function StrategyDetailPage() {
               <CardHeader>
                 <CardTitle>🔄 Rerun Backtest</CardTitle>
                 <p className="text-sm text-gray-500">Test this strategy with different parameters and time periods</p>
-                <div className="flex items-center gap-1.5 text-xs text-emerald-600 mt-1 bg-emerald-50 px-2 py-1 inline-flex" style={{clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'}}>
+                <div className="flex items-center gap-1.5 text-xs text-emerald-600 mt-1 bg-emerald-50 px-2 py-1 inline-flex" style={{ clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))' }}>
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
@@ -718,11 +755,10 @@ export default function StrategyDetailPage() {
                       <button
                         key={preset.label}
                         onClick={() => setBacktestConfig({ ...backtestConfig, startDate: preset.start, endDate: preset.end })}
-                        className={`px-3 py-1.5 rounded-full text-sm transition ${
-                          backtestConfig.startDate === preset.start && backtestConfig.endDate === preset.end
+                        className={`px-3 py-1.5 rounded-full text-sm transition ${backtestConfig.startDate === preset.start && backtestConfig.endDate === preset.end
                             ? "bg-green-600 text-white"
                             : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                        }`}
+                          }`}
                       >
                         {preset.label}
                       </button>
@@ -742,12 +778,11 @@ export default function StrategyDetailPage() {
                       <button
                         key={preset.label}
                         onClick={() => setBacktestConfig({ ...backtestConfig, startDate: preset.start, endDate: preset.end })}
-                        className={`px-3 py-1.5 text-sm transition ${
-                          backtestConfig.startDate === preset.start && backtestConfig.endDate === preset.end
+                        className={`px-3 py-1.5 text-sm transition ${backtestConfig.startDate === preset.start && backtestConfig.endDate === preset.end
                             ? "bg-black text-white"
                             : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                        }`}
-                        style={{clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'}}
+                          }`}
+                        style={{ clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))' }}
                       >
                         {preset.label}
                       </button>
@@ -783,11 +818,10 @@ export default function StrategyDetailPage() {
                       <button
                         key={amount}
                         onClick={() => setBacktestConfig({ ...backtestConfig, initialCapital: amount })}
-                        className={`px-3 py-1.5 rounded-full text-sm transition ${
-                          backtestConfig.initialCapital === amount
+                        className={`px-3 py-1.5 rounded-full text-sm transition ${backtestConfig.initialCapital === amount
                             ? "bg-green-600 text-white"
                             : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                        }`}
+                          }`}
                       >
                         ${amount.toLocaleString()}
                       </button>
@@ -808,7 +842,7 @@ export default function StrategyDetailPage() {
                   <label className="text-sm font-medium text-gray-700 block mb-2">📊 {isCryptoMode() ? "Trading Pairs" : (language === "uk" ? "Інструменти" : "Instruments")}</label>
                   {(() => {
                     const availablePairs = AVAILABLE_PAIRS;
-                    
+
                     return (
                       <>
                         <div className="flex flex-wrap gap-2">
@@ -824,11 +858,10 @@ export default function StrategyDetailPage() {
                                     setBacktestConfig({ ...backtestConfig, pairs: [...backtestConfig.pairs, pair] });
                                   }
                                 }}
-                                className={`px-3 py-1.5 rounded-full text-sm transition ${
-                                  isSelected
+                                className={`px-3 py-1.5 rounded-full text-sm transition ${isSelected
                                     ? "bg-purple-600 text-white"
                                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                                }`}
+                                  }`}
                               >
                                 {pair}
                               </button>
@@ -850,8 +883,8 @@ export default function StrategyDetailPage() {
                           </button>
                         </div>
                         <p className="text-xs text-gray-400 mt-1">
-                          {backtestConfig.pairs.length === 0 
-                            ? 'Select pairs to backtest (max active deals will match pairs count)' 
+                          {backtestConfig.pairs.length === 0
+                            ? 'Select pairs to backtest (max active deals will match pairs count)'
                             : `${backtestConfig.pairs.length} pairs selected • Max active deals: ${backtestConfig.pairs.length}`}
                         </p>
                       </>
@@ -866,13 +899,13 @@ export default function StrategyDetailPage() {
                   const dataStart = new Date('2023-01-01');
                   const dataEnd = new Date('2025-12-14');
                   const pairCount = backtestConfig.pairs.length;
-                  
+
                   const warnings = [];
                   if (start < dataStart) warnings.push(`Start date before available data (2023-01-01)`);
                   if (end > dataEnd) warnings.push(`End date after available data (2025-12-14)`);
                   if (end <= start) warnings.push(`End date must be after start date`);
                   if (pairCount === 0) warnings.push(`Please select at least 1 pair`);
-                  
+
                   return warnings.length > 0 ? (
                     <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-sm">
                       <div className="font-medium text-yellow-800 mb-1">⚠️ Warnings:</div>
@@ -890,7 +923,7 @@ export default function StrategyDetailPage() {
                     setRunningBacktest(true);
                     setBacktestResult(null);
                     setBacktestProgress({ stage: 'Starting...', percent: 5 });
-                    
+
                     // Progress simulation with messages
                     const progressMessages = [
                       { msg: '📡 Connecting to backtest server...', pct: 10 },
@@ -901,7 +934,7 @@ export default function StrategyDetailPage() {
                       { msg: '📈 Simulating trades...', pct: 80 },
                       { msg: '📋 Calculating metrics...', pct: 90 },
                     ];
-                    
+
                     let progressIdx = 0;
                     const progressInterval = setInterval(() => {
                       if (progressIdx < progressMessages.length) {
@@ -909,7 +942,7 @@ export default function StrategyDetailPage() {
                         progressIdx++;
                       }
                     }, 3000);
-                    
+
                     try {
                       // Build payload with strategy's RSI/EMA/BB configuration
                       const payload = {
@@ -943,7 +976,14 @@ export default function StrategyDetailPage() {
                       setRunningBacktest(false);
 
                       // Show queue confirmation
-                      alert(`✅ Backtest queued!\n\nPosition: #${queueResponse.queuePosition || 1}\nEstimated wait: ${queueResponse.estimatedWaitMinutes || 10} minutes\n\nWatch the floating monitor for live progress!\nYou'll receive an email when complete.`);
+                      setSuccessModal({
+                        open: true,
+                        type: "backtest",
+                        data: {
+                          position: queueResponse.queuePosition || 1,
+                          wait: queueResponse.estimatedWaitMinutes || 10
+                        }
+                      });
 
                       // Clear the result to prevent showing old data
                       setBacktestResult(null);
@@ -968,13 +1008,13 @@ export default function StrategyDetailPage() {
 
                 {/* Progress Indicator */}
                 {runningBacktest && backtestProgress && (
-                  <div className="bg-gray-50 border-2 border-gray-200 p-4" style={{clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))'}}>
+                  <div className="bg-gray-50 border-2 border-gray-200 p-4" style={{ clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))' }}>
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm font-medium text-gray-800">{backtestProgress.stage || backtestProgress.msg}</span>
                       <span className="text-sm text-emerald-600 font-bold">{backtestProgress.percent || backtestProgress.pct}%</span>
                     </div>
-                    <div className="w-full bg-gray-200 h-2" style={{clipPath: 'polygon(0 0, calc(100% - 2px) 0, 100% 2px, 100% 100%, 2px 100%, 0 calc(100% - 2px))'}}>
-                      <div 
+                    <div className="w-full bg-gray-200 h-2" style={{ clipPath: 'polygon(0 0, calc(100% - 2px) 0, 100% 2px, 100% 100%, 2px 100%, 0 calc(100% - 2px))' }}>
+                      <div
                         className="bg-emerald-500 h-2 transition-all duration-500"
                         style={{ width: `${backtestProgress.percent || backtestProgress.pct}%`, clipPath: 'polygon(0 0, calc(100% - 2px) 0, 100% 2px, 100% 100%, 2px 100%, 0 calc(100% - 2px))' }}
                       />
@@ -987,132 +1027,130 @@ export default function StrategyDetailPage() {
 
                 {/* Results */}
                 {backtestResult && (
-                  <div className={`p-4 ${
-                    backtestResult.status === 'success' 
-                      ? 'bg-emerald-50 border-2 border-emerald-200' 
+                  <div className={`p-4 ${backtestResult.status === 'success'
+                      ? 'bg-emerald-50 border-2 border-emerald-200'
                       : backtestResult.status === 'error'
-                      ? 'bg-red-50 border-2 border-red-200'
-                      : 'bg-gray-50 border-2 border-gray-200'
-                  }`} style={{clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))'}}>
-                    <h4 className={`font-bold mb-2 ${
-                      backtestResult.status === 'success' ? 'text-emerald-800' : 
-                      backtestResult.status === 'error' ? 'text-red-800' : 'text-gray-800'
-                    }`}>
-                      {backtestResult.status === 'success' ? '✅ Backtest Complete' : 
-                       backtestResult.status === 'error' ? '❌ Error' : '📊 Results'}
+                        ? 'bg-red-50 border-2 border-red-200'
+                        : 'bg-gray-50 border-2 border-gray-200'
+                    }`} style={{ clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))' }}>
+                    <h4 className={`font-bold mb-2 ${backtestResult.status === 'success' ? 'text-emerald-800' :
+                        backtestResult.status === 'error' ? 'text-red-800' : 'text-gray-800'
+                      }`}>
+                      {backtestResult.status === 'success' ? '✅ Backtest Complete' :
+                        backtestResult.status === 'error' ? '❌ Error' : '📊 Results'}
                     </h4>
-                    
+
                     {backtestResult.error && (
                       <p className="text-red-700 text-sm">{backtestResult.error}</p>
                     )}
-                    
+
                     {backtestResult.metrics && (
                       <>
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-3">
-                        <div className="bg-white p-3 rounded-lg">
-                          <div className="text-xs text-gray-500">Net Profit</div>
-                          <div className={`font-bold text-lg ${backtestResult.metrics.net_profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                            {backtestResult.metrics.net_profit >= 0 ? '+' : ''}{backtestResult.metrics.net_profit?.toFixed(2)}%
-                          </div>
-                          {backtestResult.metrics.net_profit_usd && (
-                            <div className="text-xs text-gray-400">{backtestResult.metrics.net_profit_usd}</div>
-                          )}
-                        </div>
-                        <div className="bg-white p-3 rounded-lg">
-                          <div className="text-xs text-gray-500">Total Trades</div>
-                          <div className="font-bold text-lg">{backtestResult.metrics.total_trades}</div>
-                        </div>
-                        <div className="bg-white p-3 rounded-lg">
-                          <div className="text-xs text-gray-500">Win Rate</div>
-                          <div className="font-bold text-lg">{(backtestResult.metrics.win_rate * 100)?.toFixed(1)}%</div>
-                        </div>
-                        <div className="bg-white p-3 rounded-lg">
-                          <div className="text-xs text-gray-500">Max Drawdown</div>
-                          <div className="font-bold text-lg text-red-600">{backtestResult.metrics.max_drawdown?.toFixed(2)}%</div>
-                        </div>
-                        <div className="bg-white p-3 rounded-lg">
-                          <div className="text-xs text-gray-500">Sharpe Ratio</div>
-                          <div className="font-bold text-lg">{backtestResult.metrics.sharpe_ratio?.toFixed(2)}</div>
-                        </div>
-                        <div className="bg-white p-3 rounded-lg">
-                          <div className="text-xs text-gray-500">Profit Factor</div>
-                          <div className="font-bold text-lg">{typeof backtestResult.metrics.profit_factor === 'number' ? backtestResult.metrics.profit_factor.toFixed(2) : backtestResult.metrics.profit_factor}</div>
-                        </div>
-                      </div>
-                      
-                      {/* Equity Curve */}
-                      {backtestResult.chartData?.balanceHistory && backtestResult.chartData.balanceHistory.length > 0 && (
-                        <div className="mt-4 p-4 bg-white rounded-lg">
-                          <h5 className="font-medium mb-3">📈 Equity Curve</h5>
-                          <div className="h-48 relative">
-                            <ResponsiveContainer width="100%" height="100%">
-                              <AreaChart data={backtestResult.chartData.balanceHistory}>
-                                <defs>
-                                  <linearGradient id="rerunGradient" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
-                                    <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
-                                  </linearGradient>
-                                </defs>
-                                <XAxis dataKey="date" tick={{fontSize: 10}} />
-                                <YAxis tick={{fontSize: 10}} domain={['auto', 'auto']} />
-                                <Tooltip formatter={(v) => [`$${v?.toLocaleString()}`, 'Balance']} />
-                                <Area type="monotone" dataKey="balance" stroke="#10b981" fill="url(#rerunGradient)" />
-                              </AreaChart>
-                            </ResponsiveContainer>
-                          </div>
-                        </div>
-                      )}
-                      
-                      {/* Recent Trades */}
-                      {backtestResult.trades && backtestResult.trades.length > 0 && (
-                        <div className="mt-4 p-4 bg-white rounded-lg">
-                          <div className="flex justify-between items-center mb-3">
-                            <h5 className="font-medium">📋 Latest Trades ({Math.min(showAllTrades ? backtestResult.trades.length : 20, backtestResult.trades.length)} of {backtestResult.totalTrades || backtestResult.trades.length})</h5>
-                            {backtestResult.trades.length > 20 && (
-                              <button
-                                onClick={() => setShowAllTrades(!showAllTrades)}
-                                className="text-sm text-emerald-600 hover:underline"
-                              >
-                                {showAllTrades ? 'Show Less' : 'Show All'}
-                              </button>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-3">
+                          <div className="bg-white p-3 rounded-lg">
+                            <div className="text-xs text-gray-500">Net Profit</div>
+                            <div className={`font-bold text-lg ${backtestResult.metrics.net_profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                              {backtestResult.metrics.net_profit >= 0 ? '+' : ''}{backtestResult.metrics.net_profit?.toFixed(2)}%
+                            </div>
+                            {backtestResult.metrics.net_profit_usd && (
+                              <div className="text-xs text-gray-400">{backtestResult.metrics.net_profit_usd}</div>
                             )}
                           </div>
-                          <div className={`overflow-x-auto ${showAllTrades ? 'max-h-96' : 'max-h-64'} overflow-y-auto`}>
-                            <table className="w-full text-sm">
-                              <thead className="bg-gray-50 sticky top-0">
-                                <tr>
-                                  <th className="text-left py-2 px-2">Date</th>
-                                  <th className="text-left py-2 px-2">Pair</th>
-                                  <th className="text-left py-2 px-2">Action</th>
-                                  <th className="text-right py-2 px-2">Price</th>
-                                  <th className="text-right py-2 px-2">P&L</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {backtestResult.trades
-                                  .slice(-(showAllTrades ? backtestResult.trades.length : 20))
-                                  .reverse()
-                                  .map((trade, idx) => (
-                                  <tr key={idx} className="border-t">
-                                    <td className="py-2 px-2 text-xs">{trade.timestamp?.split(' ')[0] || trade.date}</td>
-                                    <td className="py-2 px-2">{trade.symbol}</td>
-                                    <td className={`py-2 px-2 font-medium ${trade.action === 'BUY' ? 'text-green-600' : 'text-red-600'}`}>
-                                      {trade.action}
-                                    </td>
-                                    <td className="py-2 px-2 text-right">${parseFloat(trade.price)?.toLocaleString()}</td>
-                                    <td className={`py-2 px-2 text-right font-medium ${parseFloat(trade.profit_loss) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                      {parseFloat(trade.profit_loss) > 0 ? '+' : ''}{parseFloat(trade.profit_loss)?.toFixed(2) || '0.00'}
-                                    </td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
+                          <div className="bg-white p-3 rounded-lg">
+                            <div className="text-xs text-gray-500">Total Trades</div>
+                            <div className="font-bold text-lg">{backtestResult.metrics.total_trades}</div>
+                          </div>
+                          <div className="bg-white p-3 rounded-lg">
+                            <div className="text-xs text-gray-500">Win Rate</div>
+                            <div className="font-bold text-lg">{(backtestResult.metrics.win_rate * 100)?.toFixed(1)}%</div>
+                          </div>
+                          <div className="bg-white p-3 rounded-lg">
+                            <div className="text-xs text-gray-500">Max Drawdown</div>
+                            <div className="font-bold text-lg text-red-600">{backtestResult.metrics.max_drawdown?.toFixed(2)}%</div>
+                          </div>
+                          <div className="bg-white p-3 rounded-lg">
+                            <div className="text-xs text-gray-500">Sharpe Ratio</div>
+                            <div className="font-bold text-lg">{backtestResult.metrics.sharpe_ratio?.toFixed(2)}</div>
+                          </div>
+                          <div className="bg-white p-3 rounded-lg">
+                            <div className="text-xs text-gray-500">Profit Factor</div>
+                            <div className="font-bold text-lg">{typeof backtestResult.metrics.profit_factor === 'number' ? backtestResult.metrics.profit_factor.toFixed(2) : backtestResult.metrics.profit_factor}</div>
                           </div>
                         </div>
-                      )}
+
+                        {/* Equity Curve */}
+                        {backtestResult.chartData?.balanceHistory && backtestResult.chartData.balanceHistory.length > 0 && (
+                          <div className="mt-4 p-4 bg-white rounded-lg">
+                            <h5 className="font-medium mb-3">📈 Equity Curve</h5>
+                            <div className="h-48 relative">
+                              <ResponsiveContainer width="100%" height="100%">
+                                <AreaChart data={backtestResult.chartData.balanceHistory}>
+                                  <defs>
+                                    <linearGradient id="rerunGradient" x1="0" y1="0" x2="0" y2="1">
+                                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
+                                      <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                                    </linearGradient>
+                                  </defs>
+                                  <XAxis dataKey="date" tick={{ fontSize: 10 }} />
+                                  <YAxis tick={{ fontSize: 10 }} domain={['auto', 'auto']} />
+                                  <Tooltip formatter={(v) => [`$${v?.toLocaleString()}`, 'Balance']} />
+                                  <Area type="monotone" dataKey="balance" stroke="#10b981" fill="url(#rerunGradient)" />
+                                </AreaChart>
+                              </ResponsiveContainer>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Recent Trades */}
+                        {backtestResult.trades && backtestResult.trades.length > 0 && (
+                          <div className="mt-4 p-4 bg-white rounded-lg">
+                            <div className="flex justify-between items-center mb-3">
+                              <h5 className="font-medium">📋 Latest Trades ({Math.min(showAllTrades ? backtestResult.trades.length : 20, backtestResult.trades.length)} of {backtestResult.totalTrades || backtestResult.trades.length})</h5>
+                              {backtestResult.trades.length > 20 && (
+                                <button
+                                  onClick={() => setShowAllTrades(!showAllTrades)}
+                                  className="text-sm text-emerald-600 hover:underline"
+                                >
+                                  {showAllTrades ? 'Show Less' : 'Show All'}
+                                </button>
+                              )}
+                            </div>
+                            <div className={`overflow-x-auto ${showAllTrades ? 'max-h-96' : 'max-h-64'} overflow-y-auto`}>
+                              <table className="w-full text-sm">
+                                <thead className="bg-gray-50 sticky top-0">
+                                  <tr>
+                                    <th className="text-left py-2 px-2">Date</th>
+                                    <th className="text-left py-2 px-2">Pair</th>
+                                    <th className="text-left py-2 px-2">Action</th>
+                                    <th className="text-right py-2 px-2">Price</th>
+                                    <th className="text-right py-2 px-2">P&L</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {backtestResult.trades
+                                    .slice(-(showAllTrades ? backtestResult.trades.length : 20))
+                                    .reverse()
+                                    .map((trade, idx) => (
+                                      <tr key={idx} className="border-t">
+                                        <td className="py-2 px-2 text-xs">{trade.timestamp?.split(' ')[0] || trade.date}</td>
+                                        <td className="py-2 px-2">{trade.symbol}</td>
+                                        <td className={`py-2 px-2 font-medium ${trade.action === 'BUY' ? 'text-green-600' : 'text-red-600'}`}>
+                                          {trade.action}
+                                        </td>
+                                        <td className="py-2 px-2 text-right">${parseFloat(trade.price)?.toLocaleString()}</td>
+                                        <td className={`py-2 px-2 text-right font-medium ${parseFloat(trade.profit_loss) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                          {parseFloat(trade.profit_loss) > 0 ? '+' : ''}{parseFloat(trade.profit_loss)?.toFixed(2) || '0.00'}
+                                        </td>
+                                      </tr>
+                                    ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        )}
                       </>
                     )}
-                    
+
                     {backtestResult.runTime && (
                       <p className="text-xs text-gray-500 mt-3">
                         {backtestResult.cached && <span className="text-green-600">⚡ Cached result • </span>}
@@ -1134,108 +1172,154 @@ export default function StrategyDetailPage() {
               <CardTitle>{t.startLiveTrading}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-sm text-gray-500">
-                {t.connectFirst}{" "}
-                <Link href="/connect" className="text-emerald-600 underline">
-                  {t.connectPage}
-                </Link>
-                {language === "uk" ? "." : " first."}
-              </p>
+              {/* Coming Soon for Stocks Mode */}
+              {!isCryptoMode() ? (
+                <div className="space-y-4">
+                  <div className="bg-amber-50 border-2 border-amber-200 p-4" style={{ clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))' }}>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="px-2 py-0.5 bg-amber-500 text-white text-xs font-bold" style={{ clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))' }}>
+                        {language === "uk" ? "НЕЗАБАРОМ" : "COMING SOON"}
+                      </span>
+                    </div>
+                    <p className="text-amber-800 font-medium text-sm">
+                      {language === "uk" ? "Жива торгівля акціями" : "Live Stock Trading"}
+                    </p>
+                    <p className="text-amber-700 text-xs mt-1">
+                      {language === "uk"
+                        ? "Інтеграція з брокерами в розробці. Поки що ви можете використовувати бектестинг для аналізу стратегій."
+                        : "Broker integration is in development. In the meantime, you can use backtesting to analyze strategies."}
+                    </p>
+                  </div>
 
-              <div>
-                <label className="text-sm text-gray-600 block mb-1">{isCryptoMode() ? t.exchange : (language === "uk" ? "Брокер" : "Broker")}</label>
-                <select
-                  className="w-full h-11 px-4 rounded-lg border border-gray-200"
-                  value={exchange}
-                  onChange={(e) => setExchange(e.target.value)}
-                >
-                  {EXCHANGES.map((ex) => {
-                    const isConnected = connectedExchanges.some(c => c.exchange === ex.id || c === ex.id);
-                    return (
-                      <option key={ex.id} value={ex.id}>
-                        {ex.name} {isConnected ? `✓ ${t.connected}` : ""}
-                      </option>
-                    );
-                  })}
-                </select>
-                {!connectedExchanges.some(c => c.exchange === exchange || c === exchange) && (
-                  <p className="text-xs text-amber-600 mt-1 flex items-center gap-1">
-                    <span>⚠️</span>
-                    <span>{t.notConnected}</span>
-                    <Link href="/connect" className="text-emerald-600 hover:underline">{t.connectNow}</Link>
+                  <div className="bg-gray-50 border-2 border-gray-200 p-4" style={{ clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))' }}>
+                    <p className="text-gray-700 font-medium text-sm mb-2">
+                      {language === "uk" ? "✓ Що доступно зараз:" : "✓ What's available now:"}
+                    </p>
+                    <ul className="text-gray-600 text-xs space-y-1">
+                      <li>• {language === "uk" ? "Бектестинг з історичними даними Yahoo Finance" : "Backtesting with Yahoo Finance historical data"}</li>
+                      <li>• {language === "uk" ? "Аналіз стратегій на акціях, ETF, товарах" : "Strategy analysis on stocks, ETFs, commodities"}</li>
+                      <li>• {language === "uk" ? "Повний доступ до всіх індикаторів" : "Full access to all indicators"}</li>
+                    </ul>
+                  </div>
+
+                  <Link href="/backtest" className="block">
+                    <Button className="w-full btn-primary">
+                      {language === "uk" ? "Перейти до бектесту" : "Go to Backtest"}
+                    </Button>
+                  </Link>
+
+                  <p className="text-xs text-gray-400 text-center">
+                    {language === "uk"
+                      ? "Для живої торгівлі криптовалютами перейдіть в режим Crypto"
+                      : "For live crypto trading, switch to Crypto mode"}
                   </p>
-                )}
-              </div>
-
-              <div>
-                <label className="text-sm text-gray-600 block mb-1">{t.tradingPair}</label>
-                <select
-                  className="w-full h-11 px-4 rounded-lg border border-gray-200"
-                  value={symbol}
-                  onChange={(e) => setSymbol(e.target.value)}
-                >
-                  {AVAILABLE_PAIRS.slice(0, 10).map((pair) => (
-                    <option key={pair} value={pair}>{pair}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="text-sm text-gray-600 block mb-1">{t.timeframe}</label>
-                <select
-                  className="w-full h-11 px-4 rounded-lg border border-gray-200"
-                  value={timeframe}
-                  onChange={(e) => setTimeframe(e.target.value)}
-                >
-                  <option value="1m">1m</option>
-                  <option value="5m">5m</option>
-                  <option value="15m">15m</option>
-                  <option value="1h">1h</option>
-                  <option value="4h">4h</option>
-                </select>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-sm text-gray-600 block mb-1">{t.orderSize}</label>
-                  <input
-                    type="number"
-                    className="w-full h-11 px-4 rounded-lg border border-gray-200"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                    min="1"
-                    placeholder={t.perTrade}
-                  />
-                  <span className="text-xs text-gray-400">{t.perTrade}</span>
                 </div>
-                <div>
-                  <label className="text-sm text-gray-600 block mb-1">{t.maxRisk}</label>
-                  <input
-                    type="number"
-                    className="w-full h-11 px-4 rounded-lg border border-gray-200"
-                    value={maxBudget}
-                    onChange={(e) => setMaxBudget(e.target.value)}
-                    min="1"
-                    placeholder={language === "uk" ? "Макс. втрата" : "Max loss allowed"}
-                  />
-                  <span className="text-xs text-gray-400">{t.closesIfLoss}</span>
-                </div>
-              </div>
+              ) : (
+                <>
+                  <p className="text-sm text-gray-500">
+                    {t.connectFirst}{" "}
+                    <Link href="/connect" className="text-emerald-600 underline">
+                      {t.connectPage}
+                    </Link>
+                    {language === "uk" ? "." : " first."}
+                  </p>
 
-              <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm">
-                <p className="font-medium text-yellow-800">⚠️ {t.riskWarning}</p>
-                <p className="text-yellow-700 text-xs mt-1">
-                  {t.riskWarningText} ${maxBudget || 0}{t.allPositionsClose}
-                </p>
-              </div>
+                  <div>
+                    <label className="text-sm text-gray-600 block mb-1">{isCryptoMode() ? t.exchange : (language === "uk" ? "Брокер" : "Broker")}</label>
+                    <select
+                      className="w-full h-11 px-4 rounded-lg border border-gray-200"
+                      value={exchange}
+                      onChange={(e) => setExchange(e.target.value)}
+                    >
+                      {EXCHANGES.map((ex) => {
+                        const isConnected = connectedExchanges.some(c => c.exchange === ex.id || c === ex.id);
+                        return (
+                          <option key={ex.id} value={ex.id}>
+                            {ex.name} {isConnected ? `✓ ${t.connected}` : ""}
+                          </option>
+                        );
+                      })}
+                    </select>
+                    {!connectedExchanges.some(c => c.exchange === exchange || c === exchange) && (
+                      <p className="text-xs text-amber-600 mt-1 flex items-center gap-1">
+                        <span>⚠️</span>
+                        <span>{t.notConnected}</span>
+                        <Link href="/connect" className="text-emerald-600 hover:underline">{t.connectNow}</Link>
+                      </p>
+                    )}
+                  </div>
 
-              <Button className="w-full" disabled={starting} onClick={startLive}>
-                {starting ? t.starting : t.startLive}
-              </Button>
+                  <div>
+                    <label className="text-sm text-gray-600 block mb-1">{t.tradingPair}</label>
+                    <select
+                      className="w-full h-11 px-4 rounded-lg border border-gray-200"
+                      value={symbol}
+                      onChange={(e) => setSymbol(e.target.value)}
+                    >
+                      {AVAILABLE_PAIRS.slice(0, 10).map((pair) => (
+                        <option key={pair} value={pair}>{pair}</option>
+                      ))}
+                    </select>
+                  </div>
 
-              <p className="text-xs text-gray-400 text-center">
-                {t.tradingRisk}
-              </p>
+                  <div>
+                    <label className="text-sm text-gray-600 block mb-1">{t.timeframe}</label>
+                    <select
+                      className="w-full h-11 px-4 rounded-lg border border-gray-200"
+                      value={timeframe}
+                      onChange={(e) => setTimeframe(e.target.value)}
+                    >
+                      <option value="1m">1m</option>
+                      <option value="5m">5m</option>
+                      <option value="15m">15m</option>
+                      <option value="1h">1h</option>
+                      <option value="4h">4h</option>
+                    </select>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-sm text-gray-600 block mb-1">{t.orderSize}</label>
+                      <input
+                        type="number"
+                        className="w-full h-11 px-4 rounded-lg border border-gray-200"
+                        value={amount}
+                        onChange={(e) => setAmount(e.target.value)}
+                        min="1"
+                        placeholder={t.perTrade}
+                      />
+                      <span className="text-xs text-gray-400">{t.perTrade}</span>
+                    </div>
+                    <div>
+                      <label className="text-sm text-gray-600 block mb-1">{t.maxRisk}</label>
+                      <input
+                        type="number"
+                        className="w-full h-11 px-4 rounded-lg border border-gray-200"
+                        value={maxBudget}
+                        onChange={(e) => setMaxBudget(e.target.value)}
+                        min="1"
+                        placeholder={language === "uk" ? "Макс. втрата" : "Max loss allowed"}
+                      />
+                      <span className="text-xs text-gray-400">{t.closesIfLoss}</span>
+                    </div>
+                  </div>
+
+                  <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm">
+                    <p className="font-medium text-yellow-800">⚠️ {t.riskWarning}</p>
+                    <p className="text-yellow-700 text-xs mt-1">
+                      {t.riskWarningText} ${maxBudget || 0}{t.allPositionsClose}
+                    </p>
+                  </div>
+
+                  <Button className="w-full" disabled={starting} onClick={startLive}>
+                    {starting ? t.starting : t.startLive}
+                  </Button>
+
+                  <p className="text-xs text-gray-400 text-center">
+                    {t.tradingRisk}
+                  </p>
+                </>
+              )}
             </CardContent>
           </Card>
 
@@ -1281,9 +1365,9 @@ function MetricCard({ label, value, color }) {
   };
 
   return (
-    <div 
+    <div
       className={`p-4 ${colors[color] || colors.black} shadow-lg hover:shadow-xl transition-all`}
-      style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'}}
+      style={{ clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))' }}
     >
       <div className="text-2xl font-bold">{value}</div>
       <div className="text-sm opacity-80">{label}</div>
@@ -1297,7 +1381,7 @@ function ConditionGroup({ title, conditions }) {
       <h4 className="font-bold mb-3">{title}</h4>
       <div className="space-y-2">
         {conditions.map((cond, i) => (
-          <div key={i} className="p-3 bg-gray-50 border-2 border-gray-100" style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}>
+          <div key={i} className="p-3 bg-gray-50 border-2 border-gray-100" style={{ clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))' }}>
             <div className="font-bold text-black">{cond.indicator}</div>
             <div className="grid grid-cols-2 gap-2 mt-2 text-sm">
               {Object.entries(cond.subfields || {}).map(([key, val]) => (

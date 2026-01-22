@@ -1,10 +1,12 @@
 import "@/styles/index.css";
 import { AuthProvider } from "@/context/AuthProvider";
 import { LanguageProvider } from "@/context/LanguageContext";
+import { SubscriptionProvider } from "@/context/SubscriptionContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CookieConsent from "@/components/CookieConsent";
 import { BacktestMonitorWrapper } from "@/components/BacktestMonitorWrapper";
+import { ToastProvider } from "@/components/Toast";
 
 // Build: 2026-01-15-v10-force-refresh
 const BUILD_VERSION = "2026-01-15-v10";
@@ -78,13 +80,17 @@ export default function RootLayout({ children }) {
       <body>
         <LanguageProvider>
           <AuthProvider>
-            <div className="min-h-screen flex flex-col">
-              <Navbar />
-              <main className="flex-1">{children}</main>
-              <Footer />
-            </div>
-            <BacktestMonitorWrapper />
-            <CookieConsent />
+            <SubscriptionProvider>
+              <ToastProvider>
+                <div className="min-h-screen flex flex-col">
+                  <Navbar />
+                  <main className="flex-1">{children}</main>
+                  <Footer />
+                </div>
+                <BacktestMonitorWrapper />
+                <CookieConsent />
+              </ToastProvider>
+            </SubscriptionProvider>
           </AuthProvider>
         </LanguageProvider>
       </body>
