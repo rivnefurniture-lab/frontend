@@ -23,6 +23,21 @@ import {
   AreaChart,
   Area,
 } from "recharts";
+import {
+  Settings2,
+  GitGraph,
+  ShieldCheck,
+  PlayCircle,
+  CheckCircle2,
+  ChevronRight,
+  AlertCircle,
+  Clock,
+  Wallet,
+  Calendar,
+  Layers,
+  BarChart3,
+  ArrowRight
+} from "lucide-react";
 import { getTradingPairs, getDefaultPair, isCryptoMode, STOCKS_CONFIG } from "@/config/tradingMode";
 import SuccessModal from "@/components/SuccessModal";
 
@@ -973,25 +988,69 @@ export default function BacktestPage() {
         {/* Configuration Panel */}
         <div className="lg:col-span-2 space-y-6">
           {/* Tab Navigation */}
-          <div className="flex gap-1 border-b-2 border-gray-100 mb-2">
-            {[
-              { key: "settings", label: language === "uk" ? "Налаштування" : "Settings", icon: "⚙️" },
-              { key: "conditions", label: language === "uk" ? "Умови" : "Conditions", icon: "📊" },
-              { key: "advanced", label: language === "uk" ? "Додатково" : "Advanced", icon: "🔧" },
-            ].map((tab) => (
-              <button
-                key={tab.key}
-                onClick={() => setActiveConfigTab(tab.key)}
-                className={`px-4 py-3 font-bold transition-all flex items-center gap-2 ${activeConfigTab === tab.key
-                  ? "bg-black text-white"
-                  : "text-gray-500 hover:text-black hover:bg-gray-50"
-                  }`}
-                style={activeConfigTab === tab.key ? { clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)' } : {}}
-              >
-                <span>{tab.icon}</span>
-                {tab.label}
-              </button>
-            ))}
+          {/* Stepper Navigation */}
+          <div className="mb-8 relative">
+            <div className="absolute top-1/2 left-0 w-full h-1 bg-gray-100 -z-10 rounded-full" />
+            <div className="grid grid-cols-3 gap-4">
+              {[
+                {
+                  id: "settings",
+                  step: 1,
+                  label: "Configuration",
+                  desc: "Assets & Time",
+                  icon: <Settings2 className="w-5 h-5" />
+                },
+                {
+                  id: "conditions",
+                  step: 2,
+                  label: "Strategy Logic",
+                  desc: "Entry & Exit",
+                  icon: <GitGraph className="w-5 h-5" />
+                },
+                {
+                  id: "advanced",
+                  step: 3,
+                  label: "Risk & Execution",
+                  desc: "Safety Orders",
+                  icon: <ShieldCheck className="w-5 h-5" />
+                },
+              ].map((step, idx) => {
+                const isActive = activeConfigTab === step.id;
+                const isCompleted =
+                  (step.id === "settings" && activeConfigTab !== "settings") ||
+                  (step.id === "conditions" && activeConfigTab === "advanced");
+
+                return (
+                  <button
+                    key={step.id}
+                    onClick={() => setActiveConfigTab(step.id)}
+                    className={`relative flex flex-col items-center group`}
+                  >
+                    <div
+                      className={`w-12 h-12 rounded-xl flex items-center justify-center border-2 transition-all duration-300 z-10 ${isActive
+                        ? "bg-black text-white border-black shadow-lg scale-110"
+                        : isCompleted
+                          ? "bg-emerald-500 text-white border-emerald-500"
+                          : "bg-white text-gray-400 border-gray-200 group-hover:border-gray-300"
+                        }`}
+                      style={isActive ? { clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))' } : {}}
+                    >
+                      {isCompleted ? <CheckCircle2 className="w-6 h-6" /> : step.icon}
+                    </div>
+                    <div className="mt-3 text-center">
+                      <span className={`text-xs font-bold uppercase tracking-wider block mb-0.5 ${isActive ? "text-emerald-600" : "text-gray-400"
+                        }`}>
+                        Step {step.step}
+                      </span>
+                      <span className={`text-sm font-bold ${isActive ? "text-black" : "text-gray-500"
+                        }`}>
+                        {step.label}
+                      </span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           {/* Settings Tab */}
@@ -1005,11 +1064,12 @@ export default function BacktestPage() {
                 <CardContent>
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
-                      <label className="text-sm font-medium block mb-1">
+                      <label className="text-sm font-medium block mb-1 flex items-center gap-1">
                         <TooltipLabel
                           label={t("backtest.strategyName")}
                           tooltip="Give your strategy a unique name to identify it later in your dashboard and strategy list."
                         />
+                        <span className="text-red-500">*</span>
                       </label>
                       <Input
                         value={strategyName}
@@ -1018,11 +1078,12 @@ export default function BacktestPage() {
                       />
                     </div>
                     <div>
-                      <label className="text-sm font-medium block mb-1">
+                      <label className="text-sm font-medium block mb-1 flex items-center gap-1">
                         <TooltipLabel
                           label={t("backtest.maxActiveDeals")}
                           tooltip="Maximum positions held at once. More deals = more diversification but capital is split across them."
                         />
+                        <span className="text-red-500">*</span>
                       </label>
                       <Input
                         type="number"
@@ -1033,11 +1094,12 @@ export default function BacktestPage() {
                       />
                     </div>
                     <div>
-                      <label className="text-sm font-medium block mb-1">
+                      <label className="text-sm font-medium block mb-1 flex items-center gap-1">
                         <TooltipLabel
                           label={t("backtest.initialBalance")}
                           tooltip="Starting capital for the backtest. Results scale proportionally to this amount."
                         />
+                        <span className="text-red-500">*</span>
                       </label>
                       <Input
                         type="number"
@@ -1101,7 +1163,9 @@ export default function BacktestPage() {
                       </div>
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <label className="text-xs text-gray-500 block mb-1">{t("backtest.startDate")}</label>
+                          <label className="text-xs text-gray-500 block mb-1 flex gap-1">
+                            {t("backtest.startDate")} <span className="text-red-500">*</span>
+                          </label>
                           <Input
                             type="date"
                             value={startDate}
@@ -1109,7 +1173,9 @@ export default function BacktestPage() {
                           />
                         </div>
                         <div>
-                          <label className="text-xs text-gray-500 block mb-1">{t("backtest.endDate")}</label>
+                          <label className="text-xs text-gray-500 block mb-1 flex gap-1">
+                            {t("backtest.endDate")} <span className="text-red-500">*</span>
+                          </label>
                           <Input
                             type="date"
                             value={endDate}
@@ -1122,11 +1188,12 @@ export default function BacktestPage() {
 
                   {/* Trading Pairs */}
                   <div className="mt-4">
-                    <label className="text-sm font-medium block mb-2">
+                    <label className="text-sm font-medium block mb-2 flex items-center gap-1">
                       <TooltipLabel
                         label={t("backtest.tradingPairs")}
                         tooltip="Select which pairs to trade. More pairs = more opportunities but strategy will run across all of them."
                       />
+                      <span className="text-red-500">*</span>
                     </label>
                     <div className="flex flex-wrap gap-2">
                       {PAIRS.map((pair) => (
@@ -1269,6 +1336,19 @@ export default function BacktestPage() {
                   </div>
                 </CardContent>
               </Card>
+
+
+              {/* Next Step Button */}
+              <div className="flex justify-end mt-6">
+                <button
+                  onClick={() => setActiveConfigTab("conditions")}
+                  className="px-8 py-3 bg-black text-white font-bold flex items-center gap-2 group hover:bg-gray-800 transition-all"
+                  style={{ clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))' }}
+                >
+                  Step 2: Strategy Logic
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </button>
+              </div>
             </>)}
 
           {/* Conditions Tab */}
@@ -1277,7 +1357,9 @@ export default function BacktestPage() {
               {/* Entry Conditions */}
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
-                  <CardTitle className="text-green-600">{t("backtest.entryConditions")}</CardTitle>
+                  <CardTitle className="text-green-600 flex items-center gap-1">
+                    {t("backtest.entryConditions")} <span className="text-red-500">*</span>
+                  </CardTitle>
                   <Button size="sm" variant="outline" onClick={() => addCondition("entry")}>
                     {t("backtest.addCondition")}
                   </Button>
@@ -1463,6 +1545,17 @@ export default function BacktestPage() {
                   </CardContent>
                 )}
               </Card>
+              {/* Next Step Button */}
+              <div className="flex justify-end mt-6">
+                <button
+                  onClick={() => setActiveConfigTab("advanced")}
+                  className="px-8 py-3 bg-black text-white font-bold flex items-center gap-2 group hover:bg-gray-800 transition-all"
+                  style={{ clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))' }}
+                >
+                  Step 3: Risk & Execution
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </button>
+              </div>
             </>)}
 
           {/* Advanced Tab */}
@@ -1532,51 +1625,48 @@ export default function BacktestPage() {
                   </div>
                 </CardContent>
               </Card>
-            </>)}
 
-          {/* Run Button */}
-          <button
-            className="w-full py-4 bg-gradient-to-r from-black via-gray-900 to-black text-white font-bold text-lg relative overflow-hidden group disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{ clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))' }}
-            onClick={runBacktest}
-            disabled={loading}
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-emerald-600/20 via-transparent to-emerald-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-emerald-400 to-transparent opacity-50"></div>
-            <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-emerald-400 to-transparent opacity-50"></div>
-            <div className="relative flex items-center justify-center gap-3">
-              {loading ? (
-                <>
-                  <svg className="animate-spin h-5 w-5 text-emerald-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  <span>{t("backtest.runningBacktest")}</span>
-                  <div className="flex gap-1">
-                    <div className="w-1.5 h-1.5 bg-emerald-400 animate-pulse"></div>
-                    <div className="w-1.5 h-1.5 bg-emerald-400 animate-pulse delay-100"></div>
-                    <div className="w-1.5 h-1.5 bg-emerald-400 animate-pulse delay-200"></div>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <svg className="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                  <span>{t("backtest.runBacktest")}</span>
-                  <svg className="w-4 h-4 text-gray-400 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </>
+
+              {/* Run Button */}
+              <button
+                className="w-full py-4 bg-gradient-to-r from-black via-gray-900 to-black text-white font-bold text-lg relative overflow-hidden group disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))' }}
+                onClick={runBacktest}
+                disabled={loading}
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-emerald-600/20 via-transparent to-emerald-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-emerald-400 to-transparent opacity-50"></div>
+                <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-emerald-400 to-transparent opacity-50"></div>
+                <div className="relative flex items-center justify-center gap-3">
+                  {loading ? (
+                    <>
+                      <svg className="animate-spin h-5 w-5 text-emerald-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      <span>{t("backtest.runningBacktest")}</span>
+                      <div className="flex gap-1">
+                        <div className="w-1.5 h-1.5 bg-emerald-400 animate-pulse"></div>
+                        <div className="w-1.5 h-1.5 bg-emerald-400 animate-pulse delay-100"></div>
+                        <div className="w-1.5 h-1.5 bg-emerald-400 animate-pulse delay-200"></div>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <PlayCircle className="w-5 h-5 text-emerald-400" />
+                      <span>{t("backtest.runBacktest")}</span>
+                      <div className="w-4 h-4" /> {/* Spacer to center text with icon */}
+                    </>
+                  )}
+                </div>
+              </button>
+
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                  {error}
+                </div>
               )}
-            </div>
-          </button>
-
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-              {error}
-            </div>
-          )}
+            </>)}
         </div>
 
         {/* Results Panel */}
@@ -1720,7 +1810,7 @@ export default function BacktestPage() {
             </div>
           )}
         </div>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 }
