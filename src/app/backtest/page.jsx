@@ -98,6 +98,9 @@ const PERIOD_PRESETS = [
 ];
 
 function ConditionBuilder({ condition, onChange, onRemove }) {
+  const indicatorMeta = INDICATORS.find((ind) => ind.id === condition.indicator);
+  const currentTimeframe = condition.subfields?.Timeframe || TIMEFRAMES[0];
+
   const handleChange = (key, value) => {
     onChange({
       ...condition,
@@ -106,28 +109,47 @@ function ConditionBuilder({ condition, onChange, onRemove }) {
   };
 
   return (
-    <div className="bg-gray-50 p-4 border-2 border-gray-100" style={{ clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))' }}>
-      <div className="flex justify-between items-center mb-3">
-        <select
-          value={condition.indicator}
-          onChange={(e) => onChange({ ...condition, indicator: e.target.value, subfields: { Timeframe: TIMEFRAMES[0] } })}
-          className="font-bold bg-white border-2 border-gray-200 px-3 py-2"
-          style={{ clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))' }}
-        >
-          {INDICATORS.map((ind) => (
-            <option key={ind.id} value={ind.id}>{ind.name}</option>
-          ))}
-        </select>
-        <button onClick={onRemove} className="text-red-500 hover:text-red-700 text-sm font-bold">
-          Remove
-        </button>
+    <div className="border-2 border-gray-200 bg-white rounded-xl shadow-sm" style={{ clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))' }}>
+      <div className="flex flex-wrap items-center justify-between gap-4 px-4 py-3 border-b border-gray-100 bg-gray-50">
+        <div className="flex items-center gap-3">
+          <div className="px-3 py-1 text-xs font-semibold bg-black text-white uppercase tracking-wide rounded-md">
+            {condition.indicator}
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-gray-900">
+              {indicatorMeta?.name || condition.indicator}
+            </p>
+            <p className="text-xs text-gray-500">
+              Timeframe: <span className="font-semibold text-gray-800">{currentTimeframe}</span>
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <select
+            value={condition.indicator}
+            onChange={(e) => onChange({ ...condition, indicator: e.target.value, subfields: { Timeframe: TIMEFRAMES[0] } })}
+            className="text-sm bg-white border-2 border-gray-200 px-3 py-2 font-semibold"
+            style={{ clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))' }}
+          >
+            {INDICATORS.map((ind) => (
+              <option key={ind.id} value={ind.id}>{ind.name}</option>
+            ))}
+          </select>
+          <button
+            onClick={onRemove}
+            className="text-xs font-bold text-red-500 hover:text-red-700 px-3 py-1 border border-red-100 bg-red-50"
+            style={{ clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))' }}
+          >
+            Remove
+          </button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 p-4">
         <div>
           <label className="text-xs text-gray-500 block mb-1">Timeframe</label>
           <select
-            value={condition.subfields?.Timeframe || TIMEFRAMES[0]}
+            value={currentTimeframe}
             onChange={(e) => handleChange("Timeframe", e.target.value)}
             className="w-full border rounded px-2 py-1.5 text-sm"
           >
@@ -886,6 +908,17 @@ export default function BacktestPage() {
     return new Date(dateStr).toLocaleDateString();
   };
 
+  const periodLabel = `${formatDate(startDate)} - ${formatDate(endDate)}`;
+  const tpLabel = priceChangeActive
+    ? `${targetProfit}% ${takeProfitType === "percentage-total" ? (language === "uk" ? "від загальної" : "of total") : (language === "uk" ? "від базового" : "of base")}${trailingToggle ? ` • ${language === "uk" ? "трейл" : "trail"} ${trailingDeviation}%` : ""}`
+    : language === "uk" ? "Take Profit вимкнено" : "Take Profit off";
+  const slLabel = stopLossToggle
+    ? `${stopLossValue}% ${stopLossType === "percentage-total" ? (language === "uk" ? "загальна" : "total") : (language === "uk" ? "базова" : "base")} SL`
+    : language === "uk" ? "SL вимкнено" : "SL off";
+  const safetyLabel = safetyOrderToggle
+    ? `${maxSafetyOrdersCount} SO • ${priceDeviation}%`
+    : language === "uk" ? "Без SO" : "No safety orders";
+
   // Auth guard - require login
   if (authLoading) {
     return (
@@ -1627,50 +1660,121 @@ export default function BacktestPage() {
               </Card>
 
 
-              {/* Run Button */}
-              <button
-                className="w-full py-4 bg-gradient-to-r from-black via-gray-900 to-black text-white font-bold text-lg relative overflow-hidden group disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{ clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))' }}
-                onClick={runBacktest}
-                disabled={loading}
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-emerald-600/20 via-transparent to-emerald-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-emerald-400 to-transparent opacity-50"></div>
-                <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-emerald-400 to-transparent opacity-50"></div>
-                <div className="relative flex items-center justify-center gap-3">
-                  {loading ? (
-                    <>
-                      <svg className="animate-spin h-5 w-5 text-emerald-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      <span>{t("backtest.runningBacktest")}</span>
-                      <div className="flex gap-1">
-                        <div className="w-1.5 h-1.5 bg-emerald-400 animate-pulse"></div>
-                        <div className="w-1.5 h-1.5 bg-emerald-400 animate-pulse delay-100"></div>
-                        <div className="w-1.5 h-1.5 bg-emerald-400 animate-pulse delay-200"></div>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <PlayCircle className="w-5 h-5 text-emerald-400" />
-                      <span>{t("backtest.runBacktest")}</span>
-                      <div className="w-4 h-4" /> {/* Spacer to center text with icon */}
-                    </>
-                  )}
-                </div>
-              </button>
-
-              {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-                  {error}
-                </div>
-              )}
+              <p className="text-center text-sm text-gray-500 mt-4">
+                {language === "uk"
+                  ? "Перегляньте підсумки та запустіть бектест у панелі \"Review & Run\""
+                  : "Review settings and launch from the \"Review & Run\" panel."}
+              </p>
             </>)}
         </div>
 
         {/* Results Panel */}
         <div className="space-y-6">
+          <div className="sticky top-4 z-10">
+            <Card className="shadow-lg border-gray-200">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <PlayCircle className="w-5 h-5" />
+                  {language === "uk" ? "Перевірити та запустити" : "Review & Run"}
+                </CardTitle>
+                <p className="text-sm text-gray-500">
+                  {language === "uk"
+                    ? "Переконайтесь, що параметри виглядають правильно перед додаванням у чергу."
+                    : "Make sure the setup looks right before queueing your backtest."}
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 bg-gray-900 text-white flex items-center justify-center" style={{ clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))' }}>
+                      <Layers className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <p className="text-xs uppercase text-gray-500 font-semibold">{language === "uk" ? "Активи" : "Assets"}</p>
+                      <p className="font-semibold text-gray-900">{selectedPairs.length} {language === "uk" ? "обрано" : "selected"}</p>
+                      <p className="text-xs text-gray-500 truncate max-w-[160px]">
+                        {selectedPairs.slice(0, 3).join(", ")}{selectedPairs.length > 3 ? ` +${selectedPairs.length - 3}` : ""}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 bg-emerald-500 text-white flex items-center justify-center" style={{ clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))' }}>
+                      <Calendar className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <p className="text-xs uppercase text-gray-500 font-semibold">{language === "uk" ? "Період" : "Period"}</p>
+                      <p className="font-semibold text-gray-900">{periodLabel}</p>
+                      <p className="text-xs text-gray-500">{selectedPeriod ? `${selectedPeriod}m preset` : language === "uk" ? "Кастомний діапазон" : "Custom range"}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 bg-gray-100 text-gray-900 flex items-center justify-center" style={{ clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))' }}>
+                      <Wallet className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <p className="text-xs uppercase text-gray-500 font-semibold">{language === "uk" ? "Розмір угоди" : "Sizing"}</p>
+                      <p className="font-semibold text-gray-900">${baseOrderSize.toLocaleString()} {language === "uk" ? "база" : "base"}</p>
+                      <p className="text-xs text-gray-500">{language === "uk" ? "Угод одночасно" : "Max deals"}: {maxActiveDeals}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 bg-gray-900 text-white flex items-center justify-center" style={{ clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))' }}>
+                      <ShieldCheck className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <p className="text-xs uppercase text-gray-500 font-semibold">{language === "uk" ? "Захист" : "Protection"}</p>
+                      <p className="font-semibold text-gray-900">{tpLabel}</p>
+                      <p className="text-xs text-gray-500">{slLabel} • {safetyLabel}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  className="w-full py-4 bg-gradient-to-r from-black via-gray-900 to-black text-white font-bold text-lg relative overflow-hidden group disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{ clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))' }}
+                  onClick={runBacktest}
+                  disabled={loading}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-emerald-600/20 via-transparent to-emerald-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-emerald-400 to-transparent opacity-50"></div>
+                  <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-emerald-400 to-transparent opacity-50"></div>
+                  <div className="relative flex items-center justify-center gap-3">
+                    {loading ? (
+                      <>
+                        <svg className="animate-spin h-5 w-5 text-emerald-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span>{t("backtest.runningBacktest")}</span>
+                        <div className="flex gap-1">
+                          <div className="w-1.5 h-1.5 bg-emerald-400 animate-pulse"></div>
+                          <div className="w-1.5 h-1.5 bg-emerald-400 animate-pulse delay-100"></div>
+                          <div className="w-1.5 h-1.5 bg-emerald-400 animate-pulse delay-200"></div>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <PlayCircle className="w-5 h-5 text-emerald-400" />
+                        <span>{t("backtest.runBacktest")}</span>
+                        <div className="w-4 h-4" />
+                      </>
+                    )}
+                  </div>
+                </button>
+
+                {error && (
+                  <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                    {error}
+                  </div>
+                )}
+                <p className="text-xs text-gray-500">
+                  {language === "uk"
+                    ? "Бектести додаються в чергу. Ми надішлемо email, коли все буде готово."
+                    : "Backtests run in the queue. We'll email you when it's done."}
+                </p>
+              </CardContent>
+            </Card>
+          </div>
           {results ? (
             <>
               {/* Queue Status */}
