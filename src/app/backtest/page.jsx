@@ -612,6 +612,14 @@ export default function BacktestPage() {
 
   // Success modal state
   const [successModal, setSuccessModal] = useState({ open: false, position: 1, wait: 10 });
+  const [notifyEmail, setNotifyEmail] = useState("");
+  const [notifyTelegram, setNotifyTelegram] = useState("");
+  const [notifyWhatsapp, setNotifyWhatsapp] = useState("");
+  const [notifyChannels, setNotifyChannels] = useState({
+    email: true,
+    telegram: false,
+    whatsapp: false,
+  });
 
   // Selected period for quick buttons
   const [selectedPeriod, setSelectedPeriod] = useState(6); // default 6 months
@@ -628,6 +636,12 @@ export default function BacktestPage() {
     setEndDate(end.toISOString().split('T')[0]);
     setSelectedPeriod(months);
   };
+
+  useEffect(() => {
+    if (user?.email) {
+      setNotifyEmail(user.email);
+    }
+  }, [user]);
 
   const addCondition = (type) => {
     const newCondition = {
@@ -797,6 +811,31 @@ export default function BacktestPage() {
     }
 
     try {
+      const selectedChannels = Object.entries(notifyChannels)
+        .filter(([_, enabled]) => enabled)
+        .map(([k]) => k);
+
+      if (selectedChannels.length === 0) {
+        setError(language === "uk" ? "Оберіть канал сповіщень" : "Select at least one notification channel");
+        setLoading(false);
+        return;
+      }
+
+      let notifyVia = "email";
+      const hasWhatsApp = selectedChannels.includes("whatsapp");
+      const hasEmail = selectedChannels.includes("email");
+      const hasTelegram = selectedChannels.includes("telegram");
+
+      if (selectedChannels.length === 3 || (hasWhatsApp && (hasEmail || hasTelegram))) {
+        notifyVia = "all";
+      } else if (hasEmail && hasTelegram) {
+        notifyVia = "both";
+      } else if (hasWhatsApp) {
+        notifyVia = "whatsapp";
+      } else if (hasTelegram) {
+        notifyVia = "telegram";
+      }
+
       // Build payload matching backtest2.py EXACTLY
       const payload = {
         strategy_name: strategyName,
@@ -858,8 +897,10 @@ export default function BacktestPage() {
         method: "POST",
         body: {
           payload,
-          notifyVia: 'email',
-          notifyEmail: '',
+          notifyVia,
+          notifyEmail: notifyChannels.email ? notifyEmail : '',
+          notifyTelegram: notifyChannels.telegram ? notifyTelegram : '',
+          notifyWhatsapp: notifyChannels.whatsapp ? notifyWhatsapp : '',
         },
       });
 
@@ -1248,6 +1289,81 @@ export default function BacktestPage() {
                           {pair}
                         </button>
                       ))}
+                    </div>
+                  </div>
+
+                  {/* Notifications */}
+                  <div className="mt-6 pt-4 border-t border-gray-200">
+                    <label className="text-sm font-medium block mb-2 flex items-center gap-1">
+                      {language === "uk" ? "Сповіщення" : "Notifications"}
+                    </label>
+                    <div className="grid md:grid-cols-3 gap-3">
+                      <label className="flex items-center gap-2 text-sm bg-gray-50 border border-gray-200 px-3 py-2">
+                        <input
+                          type="checkbox"
+                          checked={notifyChannels.email}
+                          onChange={(e) =>
+                            setNotifyChannels((prev) => ({ ...prev, email: e.target.checked }))
+                          }
+                        />
+                        <span>Email</span>
+                      </label>
+                      <label className="flex items-center gap-2 text-sm bg-gray-50 border border-gray-200 px-3 py-2">
+                        <input
+                          type="checkbox"
+                          checked={notifyChannels.telegram}
+                          onChange={(e) =>
+                            setNotifyChannels((prev) => ({ ...prev, telegram: e.target.checked }))
+                          }
+                        />
+                        <span>Telegram</span>
+                      </label>
+                      <label className="flex items-center gap-2 text-sm bg-gray-50 border border-gray-200 px-3 py-2">
+                        <input
+                          type="checkbox"
+                          checked={notifyChannels.whatsapp}
+                          onChange={(e) =>
+                            setNotifyChannels((prev) => ({ ...prev, whatsapp: e.target.checked }))
+                          }
+                        />
+                        <span>WhatsApp</span>
+                      </label>
+                    </div>
+                    <div className="grid md:grid-cols-3 gap-3 mt-3">
+                      <div>
+                        <label className="text-xs text-gray-500 block mb-1">Email</label>
+                        <Input
+                          value={notifyEmail}
+                          onChange={(e) => setNotifyEmail(e.target.value)}
+                          placeholder="you@example.com"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-500 block mb-1">Telegram ID / @handle</label>
+                        <Input
+                          value={notifyTelegram}
+                          onChange={(e) => setNotifyTelegram(e.target.value)}
+                          placeholder="@username or chat id"
+                        />
+                        <p className="text-[11px] text-gray-500 mt-1">
+                          {language === "uk"
+                            ? "Напишіть /start в боті, щоб отримати chat_id"
+                            : "Send /start to the bot to get your chat_id"}
+                        </p>
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-500 block mb-1">WhatsApp</label>
+                        <Input
+                          value={notifyWhatsapp}
+                          onChange={(e) => setNotifyWhatsapp(e.target.value)}
+                          placeholder="+123456789"
+                        />
+                        <p className="text-[11px] text-gray-500 mt-1">
+                          {language === "uk"
+                            ? "У форматі +380..."
+                            : "Format: +1... including country code"}
+                        </p>
+                      </div>
                     </div>
                   </div>
 

@@ -273,8 +273,19 @@ function AccountPageContent() {
     twitter: "",
     profilePhoto: "",
   });
+  const [notificationSettings, setNotificationSettings] = useState({
+    emailNotifications: true,
+    telegramEnabled: false,
+    telegramId: "",
+    whatsappEnabled: false,
+    whatsappNumber: "",
+    notifyOnTrade: true,
+    notifyOnBacktest: true,
+    notifyOnBalance: true,
+  });
   const [message, setMessage] = useState(null);
   const [error, setError] = useState(null);
+  const [notifSaving, setNotifSaving] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -304,6 +315,17 @@ function AccountPageContent() {
           profilePhoto: userData.profilePhoto || p.profilePhoto,
           phone: userData.phone || p.phone,
           country: userData.country || p.country,
+        }));
+        setNotificationSettings((prev) => ({
+          ...prev,
+          emailNotifications: userData.emailNotifications ?? prev.emailNotifications,
+          telegramEnabled: userData.telegramEnabled ?? prev.telegramEnabled,
+          telegramId: userData.telegramId || prev.telegramId,
+          whatsappEnabled: userData.whatsappEnabled ?? prev.whatsappEnabled,
+          whatsappNumber: userData.whatsappNumber || prev.whatsappNumber,
+          notifyOnTrade: userData.notifyOnTrade ?? prev.notifyOnTrade,
+          notifyOnBacktest: userData.notifyOnBacktest ?? prev.notifyOnBacktest,
+          notifyOnBalance: userData.notifyOnBalance ?? prev.notifyOnBalance,
         }));
       }
     } catch (e) {
@@ -449,6 +471,32 @@ function AccountPageContent() {
       setError(err.message || (language === "uk" ? "Не вдалося оновити профіль." : "Failed to update profile."));
     } finally {
       setSaving(false);
+    }
+  };
+
+  const onSaveNotifications = async () => {
+    setNotifSaving(true);
+    setError(null);
+    setMessage(null);
+    try {
+      await apiFetch("/user/notifications", {
+        method: "POST",
+        body: {
+          telegramId: notificationSettings.telegramId,
+          telegramEnabled: notificationSettings.telegramEnabled,
+          whatsappNumber: notificationSettings.whatsappNumber,
+          whatsappEnabled: notificationSettings.whatsappEnabled,
+          emailNotifications: notificationSettings.emailNotifications,
+          notifyOnTrade: notificationSettings.notifyOnTrade,
+          notifyOnBacktest: notificationSettings.notifyOnBacktest,
+          notifyOnBalance: notificationSettings.notifyOnBalance,
+        },
+      });
+      setMessage(language === "uk" ? "Налаштування сповіщень збережено." : "Notification settings saved.");
+    } catch (err) {
+      setError(err.message || (language === "uk" ? "Не вдалося оновити сповіщення." : "Failed to update notifications."));
+    } finally {
+      setNotifSaving(false);
     }
   };
 
@@ -914,6 +962,86 @@ function AccountPageContent() {
                     <Input placeholder="Telegram @username" value={profile.telegram} onChange={(e) => setProfile({ ...profile, telegram: e.target.value })} />
                     <Input placeholder="Twitter @username" value={profile.twitter} onChange={(e) => setProfile({ ...profile, twitter: e.target.value })} />
                   </div>
+                </div>
+
+                <div className="p-4 border-2 border-gray-100 bg-gray-50" style={{clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))'}}>
+                  <h4 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
+                    <Shield className="w-4 h-4" />
+                    {language === "uk" ? "Сповіщення" : "Notifications"}
+                  </h4>
+                  <div className="grid md:grid-cols-2 gap-4 mb-4">
+                    <label className="flex items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        checked={notificationSettings.emailNotifications}
+                        onChange={(e) => setNotificationSettings({ ...notificationSettings, emailNotifications: e.target.checked })}
+                      />
+                      <span>Email</span>
+                    </label>
+                    <label className="flex items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        checked={notificationSettings.telegramEnabled}
+                        onChange={(e) => setNotificationSettings({ ...notificationSettings, telegramEnabled: e.target.checked })}
+                      />
+                      <span>Telegram</span>
+                    </label>
+                    <label className="flex items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        checked={notificationSettings.whatsappEnabled}
+                        onChange={(e) => setNotificationSettings({ ...notificationSettings, whatsappEnabled: e.target.checked })}
+                      />
+                      <span>WhatsApp</span>
+                    </label>
+                  </div>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">Telegram chat ID</label>
+                      <Input
+                        placeholder="@username or chat_id"
+                        value={notificationSettings.telegramId}
+                        onChange={(e) => setNotificationSettings({ ...notificationSettings, telegramId: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">WhatsApp</label>
+                      <Input
+                        placeholder="+123456789"
+                        value={notificationSettings.whatsappNumber}
+                        onChange={(e) => setNotificationSettings({ ...notificationSettings, whatsappNumber: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-4 mt-4 text-sm">
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={notificationSettings.notifyOnTrade}
+                        onChange={(e) => setNotificationSettings({ ...notificationSettings, notifyOnTrade: e.target.checked })}
+                      />
+                      <span>{language === "uk" ? "Оповіщення про угоди" : "Notify on trades"}</span>
+                    </label>
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={notificationSettings.notifyOnBacktest}
+                        onChange={(e) => setNotificationSettings({ ...notificationSettings, notifyOnBacktest: e.target.checked })}
+                      />
+                      <span>{language === "uk" ? "Оповіщення про бектест" : "Notify on backtests"}</span>
+                    </label>
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={notificationSettings.notifyOnBalance}
+                        onChange={(e) => setNotificationSettings({ ...notificationSettings, notifyOnBalance: e.target.checked })}
+                      />
+                      <span>{language === "uk" ? "Баланс / апдейти" : "Balance updates"}</span>
+                    </label>
+                  </div>
+                  <Button onClick={onSaveNotifications} disabled={notifSaving} className="mt-4">
+                    {notifSaving ? t.saving : (language === "uk" ? "Зберегти сповіщення" : "Save notifications")}
+                  </Button>
                 </div>
 
                 {error && <div className="p-3 bg-red-50 border-2 border-red-200 text-red-600 text-sm" style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'}}>{error}</div>}
