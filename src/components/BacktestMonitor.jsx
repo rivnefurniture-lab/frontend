@@ -32,6 +32,7 @@ export function BacktestMonitor({ user }) {
   // Track last shown completion to avoid duplicates
   const [lastShownCompletionId, setLastShownCompletionId] = useState(null);
   const [lastResultsCheck, setLastResultsCheck] = useState(0);
+  const shownResultsRef = useRef(new Set());
 
   // Fetch user's active backtests with time estimates
   useEffect(() => {
@@ -70,16 +71,13 @@ export function BacktestMonitor({ user }) {
           setLastResultsCheck(now);
           try {
             const results = await apiFetch('/backtest/results');
-            // Find the most recently completed one that we haven't shown yet
-            if (results && results.length > 0) {
-              const latest = results[0]; // Most recent
-              // Only show if it's new (created in the last 2 minutes) and we haven't shown it
-              const latestTime = new Date(latest.timestamp_run || latest.createdAt).getTime();
-              const isRecent = (now - latestTime) < 120000; // Within 2 minutes
-              
-              if (isRecent && latest.id !== lastShownCompletionId) {
-                setCompletedBacktest(latest);
-                setLastShownCompletionId(latest.id);
+            // Find the most recent result that hasn't been shown yet
+            if (Array.isArray(results) && results.length > 0) {
+              const unseen = results.find((r) => !shownResultsRef.current.has(r.id));
+              if (unseen && unseen.id !== lastShownCompletionId) {
+                shownResultsRef.current.add(unseen.id);
+                setCompletedBacktest(unseen);
+                setLastShownCompletionId(unseen.id);
                 // Auto-hide after 15 seconds
                 setTimeout(() => setCompletedBacktest(null), 15000);
               }
@@ -404,4 +402,3 @@ export function BacktestMonitor({ user }) {
     </>
   );
 }
-
