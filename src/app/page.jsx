@@ -5,7 +5,7 @@ import Link from "next/link";
 import HeroSection from "@/components/HeroSection";
 import { apiFetch } from "@/lib/api";
 import { useLanguage } from "@/context/LanguageContext";
-import { Star, Quote } from "lucide-react";
+import { Star, Quote, CheckCircle } from "lucide-react";
 import { isCryptoMode, isStocksMode, getExchanges } from "@/config/tradingMode";
 
 // Testimonial avatar with photo
@@ -346,28 +346,34 @@ export default function Page() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {testimonials.map((testimonial, index) => (
               <div
                 key={testimonial.id}
-                className="bg-white p-6 shadow-lg border-2 border-gray-100 hover:border-black hover:shadow-2xl transition-all relative group"
+                className="bg-white p-7 shadow-lg border-2 border-gray-100 hover:border-black hover:shadow-2xl transition-all relative group min-h-[260px] flex flex-col justify-between"
                 style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'}}
               >
-                <div className="absolute top-4 right-4 text-gray-100 group-hover:text-emerald-100 transition-colors">
-                  <Quote className="w-8 h-8" />
+                <div className="flex items-start justify-between mb-4">
+                  <div className="inline-flex items-center gap-2 text-xs font-semibold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full">
+                    <CheckCircle className="w-4 h-4" />
+                    <span>{language === "uk" ? "Перевірено" : "Verified"}</span>
+                  </div>
+                  <div className="text-gray-100 group-hover:text-emerald-100 transition-colors">
+                    <Quote className="w-8 h-8" />
+                  </div>
                 </div>
 
-                <div className="flex gap-1 mb-4">
+                <div className="flex gap-1 mb-3">
                   {[...Array(testimonial.rating)].map((_, i) => (
                     <Star key={i} className="w-4 h-4 fill-black text-black" />
                   ))}
                 </div>
 
-                <p className="text-gray-600 text-sm mb-6 leading-relaxed">
-                  "{testimonial.text}"
+                <p className="text-gray-700 text-base leading-relaxed flex-1">
+                  {testimonial.text}
                 </p>
 
-                <div className="flex items-center gap-3 pt-4 border-t-2 border-gray-100">
+                <div className="flex items-center gap-3 pt-4 border-t-2 border-gray-100 mt-6">
                   {testimonial.photo ? (
                     <img 
                       src={testimonial.photo}
