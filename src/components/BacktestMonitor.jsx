@@ -70,7 +70,7 @@ export function BacktestMonitor({ user }) {
         if (shouldCheckResults || (now - lastResultsCheck > 30000 && previousBacktestIds.size > 0)) {
           setLastResultsCheck(now);
           try {
-            const results = await apiFetch('/backtest/results');
+            const results = await apiFetch('/backtest/results?noCache=1');
             // Find the most recent result that hasn't been shown yet
             if (Array.isArray(results) && results.length > 0) {
               const unseen = results.find((r) => !shownResultsRef.current.has(r.id));
