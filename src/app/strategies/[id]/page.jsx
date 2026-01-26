@@ -113,7 +113,6 @@ export default function StrategyDetailPage() {
   const [bannerMessage, setBannerMessage] = useState(null);
   const [loadingAllTrades, setLoadingAllTrades] = useState(false);
   const [showAllStrategyTrades, setShowAllStrategyTrades] = useState(false);
-  const [showChecks, setShowChecks] = useState(false);
 
   useEffect(() => {
     fetchStrategy();
@@ -142,16 +141,8 @@ export default function StrategyDetailPage() {
             // Transform backtest result to strategy format
             const rawTrades = result.trades ? (typeof result.trades === 'string' ? JSON.parse(result.trades) : result.trades) : [];
 
-            const isExecutionAction = (action = '') => {
-              const a = action.toString().toLowerCase();
-              return a.includes('buy') || a.includes('sell') || a.includes('entry') || a.includes('exit');
-            };
-
-            const executionTrades = rawTrades.filter((t) => isExecutionAction(t.action));
-            const checkTrades = rawTrades.filter((t) => !isExecutionAction(t.action));
-
             // Transform trades to the format expected by the UI
-            const formattedTrades = executionTrades.map(t => {
+            const formattedTrades = rawTrades.map(t => {
               const ts = new Date(t.timestamp);
               const orderSize = parseFloat(t.order_size) || 1000; // Use actual order_size from backtest
               return {
@@ -165,65 +156,36 @@ export default function StrategyDetailPage() {
                 pnlUsd: parseFloat(t.profit_loss) || 0,
                 balance: parseFloat(t.balance) || 0,
                 comment: t.comment || '',
-                timestamp: ts.getTime(),
               };
             });
-
-            const formattedChecks = checkTrades.map(t => {
-              const ts = new Date(t.timestamp);
-              const orderSize = parseFloat(t.order_size) || 1000;
-              return {
-                date: ts.toLocaleDateString(),
-                time: ts.toLocaleTimeString(),
-                pair: t.symbol || '',
-                side: t.action || 'Check',
-                entry: parseFloat(t.price) || 0,
-                orderSize,
-                pnl: parseFloat(t.profit_loss) / (result.initialBalance || 10000) || 0,
-                pnlUsd: parseFloat(t.profit_loss) || 0,
-                balance: parseFloat(t.balance) || 0,
-                comment: t.comment || '',
-                timestamp: ts.getTime(),
-              };
-            });
-
-            // Build a fallback history from trades if chartData is missing
-            let history =
-              result.chartData
-                ? (typeof result.chartData === 'string' ? JSON.parse(result.chartData) : result.chartData)
-                : [];
-            if ((!history || history.length === 0) && formattedTrades.length > 0) {
-              const sortedTrades = [...formattedTrades].sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
-              let balance = result.initialBalance || result.initial_balance || 10000;
-              history = sortedTrades.map((t, idx) => {
-                balance = t.balance || balance + (t.pnlUsd || 0);
-                return {
-                  label: t.date,
-                  value: balance,
-                  idx,
-                };
-              });
-            }
-            // Secondary fallback: if still empty but recentTrades exist, build from those
-            if ((!history || history.length === 0) && (result.recentTrades?.length || formattedTrades.length)) {
-              const baseTrades = result.recentTrades || formattedTrades;
-              const sortedTrades = [...baseTrades].sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
-              let balance = result.initialBalance || result.initial_balance || 10000;
-              history = sortedTrades.map((t, idx) => {
-                balance = t.balance || balance + (t.pnlUsd || 0);
-                return {
-                  label: t.date,
-                  value: balance,
-                  idx,
-                };
-              });
-            }
 
             // Convert raw decimals to percentages
             const yearlyReturnPct = (result.yearlyReturn || result.yearly_return || 0) * 100;
             const winRatePct = (result.winRate || result.win_rate || 0) * 100;
             const maxDDPct = (result.maxDrawdown || result.max_drawdown || 0) * 100;
             const netProfitPct = (result.netProfit || result.net_profit || 0) * 100;
+
+            // Normalize chart data for the UI (Recharts expects an array)
+            let parsedChartData = result.chartData ? (typeof result.chartData === 'string' ? JSON.parse(result.chartData) : result.chartData) : null;
+            // Worker returns shape {timestamps, unrealized_balance, bh_timestamps, bh_balance, drawdown}
+            let balanceHistory = [];
+            if (parsedChartData) {
+              if (Array.isArray(parsedChartData.balanceHistory)) {
+                balanceHistory = parsedChartData.balanceHistory;
+              } else if (Array.isArray(parsedChartData.unrealized_balance)) {
+                const ts = Array.isArray(parsedChartData.timestamps) ? parsedChartData.timestamps : [];
+                balanceHistory = parsedChartData.unrealized_balance.map((val, idx) => ({
+                  time: ts[idx] || idx,
+                  value: Number(val),
+                }));
+              } else if (Array.isArray(parsedChartData.bh_balance)) {
+                const ts = Array.isArray(parsedChartData.bh_timestamps) ? parsedChartData.bh_timestamps : [];
+                balanceHistory = parsedChartData.bh_balance.map((val, idx) => ({
+                  time: ts[idx] || idx,
+                  value: Number(val),
+                }));
+              }
+            }
 
             const transformed = {
               id: `backtest-${backtestId}`,
@@ -237,9 +199,8 @@ export default function StrategyDetailPage() {
               maxDD: maxDDPct,
               maxDrawdown: maxDDPct,
               winRate: winRatePct,
-              totalTrades: result.totalTrades || result.total_trades || executionTrades.length,
-              totalBacktestTrades: executionTrades.length,
-              totalTradesWithChecks: executionTrades.length + formattedChecks.length,
+              totalTrades: result.totalTrades || result.total_trades || 0,
+              totalBacktestTrades: result.totalTrades || result.total_trades || 0,
               profitFactor: result.profitFactor || result.profit_factor || 0,
               yearlyReturn: yearlyReturnPct,
               cagr: yearlyReturnPct,
@@ -247,10 +208,10 @@ export default function StrategyDetailPage() {
               endDate: result.endDate || result.end_date,
               initialBalance: result.initialBalance || result.initial_balance || 10000,
               pairs: result.pairs || [],
-              history,
+              history: balanceHistory,
+              chartData: { balanceHistory },
               trades: rawTrades,
               recentTrades: formattedTrades,
-              checkTrades: formattedChecks,
               config: result.config ? (typeof result.config === 'string' ? JSON.parse(result.config) : result.config) : {},
               returns: {
                 daily: (yearlyReturnPct / 365).toFixed(3),
@@ -416,14 +377,6 @@ export default function StrategyDetailPage() {
     return `${sign}${num}`;
   };
 
-  const displayedTrades = (() => {
-    if (!strategy) return [];
-    const trades = showChecks
-      ? [...(strategy.recentTrades || []), ...(strategy.checkTrades || [])]
-      : (strategy.recentTrades || []);
-    return trades.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
-  })();
-
   return (
     <div className="container py-8">
       {/* Success Modal */}
@@ -506,7 +459,7 @@ export default function StrategyDetailPage() {
                 { label: t.yearly, val: strategy.returns?.yearly || strategy.cagr },
               ].map((item) => (
                 <div key={item.label} className="p-4 bg-gray-50" style={{ clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))' }}>
-                  <div className={`text-2xl font-bold ${Number(item.val) < 0 ? 'text-red-600' : 'text-emerald-600'}`}>
+                  <div className="text-2xl font-bold text-emerald-600">
                     {item.val !== null && item.val !== undefined ? `${formatSigned(Number(item.val))}%` : "—"}
                   </div>
                   <div className="text-sm text-gray-500 font-medium">{item.label}</div>
@@ -606,7 +559,10 @@ export default function StrategyDetailPage() {
                           </linearGradient>
                         </defs>
                         <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                        <XAxis dataKey="label" tick={{ fontSize: 11 }} />
+                        <XAxis
+                          dataKey="year"
+                          tick={{ fontSize: 11 }}
+                        />
                         <YAxis tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
                         <Tooltip
                           formatter={(v) => [`$${v?.toLocaleString()}`, "Balance"]}
@@ -637,7 +593,7 @@ export default function StrategyDetailPage() {
                     <div className="text-sm text-gray-500">{t.totalTrades}</div>
                   </div>
                   <div>
-                    <div className="text-lg font-semibold">{formatValue(strategy.profitFactor, "x", 2)}</div>
+                    <div className="text-lg font-semibold">{strategy.profitFactor}x</div>
                     <div className="text-sm text-gray-500">{t.profitFactor}</div>
                   </div>
                   <div>
@@ -654,19 +610,8 @@ export default function StrategyDetailPage() {
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>{t.backtestTrades}</CardTitle>
                 <div className="flex items-center gap-3">
-                  <label className="flex items-center gap-2 text-sm text-gray-600">
-                    <input
-                      type="checkbox"
-                      className="h-4 w-4"
-                      checked={showChecks}
-                      onChange={(e) => setShowChecks(e.target.checked)}
-                    />
-                    Include checks
-                  </label>
                   <span className="text-sm text-gray-500">
-                    {(showChecks ? (strategy.totalTradesWithChecks || 0) : (strategy.totalBacktestTrades || 0)) > 0
-                      ? `${(showChecks ? strategy.totalTradesWithChecks : strategy.totalBacktestTrades) || 0} trades`
-                      : 'No trades'}
+                    {strategy.recentTrades?.length || 0} of {strategy.totalBacktestTrades || 0} trades
                   </span>
                   {strategy.totalBacktestTrades > (strategy.recentTrades?.length || 0) && (
                     <button
@@ -719,7 +664,7 @@ export default function StrategyDetailPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {displayedTrades?.map((trade, i) => (
+                      {strategy.recentTrades?.map((trade, i) => (
                         <tr key={i} className="border-b last:border-0 hover:bg-gray-50 transition">
                           <td className="px-4 py-3">{trade.date}</td>
                           <td className="px-4 py-3 text-gray-500">{trade.time}</td>
@@ -760,7 +705,7 @@ export default function StrategyDetailPage() {
                     </tbody>
                   </table>
                 </div>
-                {!displayedTrades?.length && (
+                {!strategy.recentTrades?.length && (
                   <p className="text-center text-gray-500 py-4">No trades yet</p>
                 )}
               </CardContent>
