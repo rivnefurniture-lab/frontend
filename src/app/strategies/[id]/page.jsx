@@ -204,6 +204,20 @@ export default function StrategyDetailPage() {
                 };
               });
             }
+            // Secondary fallback: if still empty but recentTrades exist, build from those
+            if ((!history || history.length === 0) && (result.recentTrades?.length || formattedTrades.length)) {
+              const baseTrades = result.recentTrades || formattedTrades;
+              const sortedTrades = [...baseTrades].sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+              let balance = result.initialBalance || result.initial_balance || 10000;
+              history = sortedTrades.map((t, idx) => {
+                balance = t.balance || balance + (t.pnlUsd || 0);
+                return {
+                  label: t.date,
+                  value: balance,
+                  idx,
+                };
+              });
+            }
 
             // Convert raw decimals to percentages
             const yearlyReturnPct = (result.yearlyReturn || result.yearly_return || 0) * 100;
