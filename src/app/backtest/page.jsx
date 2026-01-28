@@ -105,7 +105,7 @@ const PERIOD_PRESETS = [
   { label: "3Y", labelUk: "3Р", months: 36 },
 ];
 
-function ConditionBuilder({ condition, onChange, onRemove }) {
+function ConditionBuilder({ condition, onChange, onRemove, language = "en" }) {
   const handleChange = (key, value) => {
     onChange({
       ...condition,
@@ -121,6 +121,17 @@ function ConditionBuilder({ condition, onChange, onRemove }) {
       options={options}
       size="sm"
       className={className}
+    />
+  );
+  
+  // Mini tooltip label for condition builder (compact version)
+  const TipLabel = ({ label, labelUk, tip, tipUk }) => (
+    <TooltipLabel
+      label={language === "uk" && labelUk ? labelUk : label}
+      tooltip={tip}
+      tooltipUk={tipUk}
+      language={language}
+      className="text-xs font-medium text-gray-500"
     />
   );
 
@@ -139,13 +150,20 @@ function ConditionBuilder({ condition, onChange, onRemove }) {
           className="ml-3 px-3 py-1.5 text-red-500 hover:text-white hover:bg-red-500 text-xs font-bold border-2 border-red-200 hover:border-red-500 transition-all"
           style={{ clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))' }}
         >
-          Remove
+          {language === "uk" ? "Видалити" : "Remove"}
         </button>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <div>
-          <label className="text-xs font-medium text-gray-500 block mb-1.5">Timeframe</label>
+          <label className="text-xs font-medium text-gray-500 block mb-1.5">
+            <TipLabel 
+              label="Timeframe" 
+              labelUk="Таймфрейм"
+              tip="Chart interval for indicator calculation. Shorter = more signals but more noise. Longer = fewer but more reliable signals."
+              tipUk="Інтервал графіка для розрахунку індикатора. Коротший = більше сигналів, але більше шуму. Довший = менше, але надійніші сигнали."
+            />
+          </label>
           <ConditionSelect
             value={condition.subfields?.Timeframe || TIMEFRAMES[0]}
             onChange={(val) => handleChange("Timeframe", val)}
@@ -157,7 +175,14 @@ function ConditionBuilder({ condition, onChange, onRemove }) {
         {condition.indicator === "RSI" && (
           <>
             <div>
-              <label className="text-xs font-medium text-gray-500 block mb-1.5">RSI Length</label>
+              <label className="text-xs font-medium text-gray-500 block mb-1.5">
+                <TipLabel 
+                  label="RSI Length" 
+                  labelUk="Період RSI"
+                  tip="Number of periods for RSI calculation. 14 is standard. Lower = more sensitive, Higher = smoother."
+                  tipUk="Кількість періодів для розрахунку RSI. 14 - стандарт. Менше = чутливіший, Більше = плавніший."
+                />
+              </label>
               <ConditionSelect
                 value={condition.subfields?.["RSI Length"] || 14}
                 onChange={(val) => handleChange("RSI Length", parseInt(val))}
@@ -165,7 +190,14 @@ function ConditionBuilder({ condition, onChange, onRemove }) {
               />
             </div>
             <div>
-              <label className="text-xs font-medium text-gray-500 block mb-1.5">Condition</label>
+              <label className="text-xs font-medium text-gray-500 block mb-1.5">
+                <TipLabel 
+                  label="Condition" 
+                  labelUk="Умова"
+                  tip="How to compare indicator value. 'Less Than' = buy when oversold (<30). 'Greater Than' = sell when overbought (>70)."
+                  tipUk="Як порівнювати значення індикатора. 'Менше' = купити при перепроданості (<30). 'Більше' = продати при перекупленості (>70)."
+                />
+              </label>
               <ConditionSelect
                 value={condition.subfields?.Condition || "Less Than"}
                 onChange={(val) => handleChange("Condition", val)}
@@ -173,12 +205,19 @@ function ConditionBuilder({ condition, onChange, onRemove }) {
               />
             </div>
             <div>
-              <label className="text-xs font-medium text-gray-500 block mb-1.5">Signal Value</label>
+              <label className="text-xs font-medium text-gray-500 block mb-1.5">
+                <TipLabel 
+                  label="Signal Value" 
+                  labelUk="Значення"
+                  tip="RSI threshold (0-100). Common: 30 for oversold entry, 70 for overbought exit. Adjust based on asset volatility."
+                  tipUk="Поріг RSI (0-100). Типово: 30 для перепроданості, 70 для перекупленості. Налаштуйте залежно від волатильності."
+                />
+              </label>
               <Input
                 type="number"
                 value={condition.subfields?.["Signal Value"] || 30}
                 onChange={(e) => handleChange("Signal Value", parseFloat(e.target.value))}
-                className="h-9 text-sm"
+                inputSize="sm"
                 min={0}
                 max={100}
               />
@@ -190,7 +229,14 @@ function ConditionBuilder({ condition, onChange, onRemove }) {
         {condition.indicator === "MA" && (
           <>
             <div>
-              <label className="text-xs font-medium text-gray-500 block mb-1.5">MA Type</label>
+              <label className="text-xs font-medium text-gray-500 block mb-1.5">
+                <TipLabel 
+                  label="MA Type" 
+                  labelUk="Тип MA"
+                  tip="SMA = Simple Moving Average (equal weight). EMA = Exponential (more weight to recent prices, faster reaction)."
+                  tipUk="SMA = Проста ковзна середня (рівна вага). EMA = Експоненційна (більша вага останнім цінам, швидша реакція)."
+                />
+              </label>
               <ConditionSelect
                 value={condition.subfields?.["MA Type"] || "SMA"}
                 onChange={(val) => handleChange("MA Type", val)}
@@ -198,7 +244,14 @@ function ConditionBuilder({ condition, onChange, onRemove }) {
               />
             </div>
             <div>
-              <label className="text-xs font-medium text-gray-500 block mb-1.5">Fast MA</label>
+              <label className="text-xs font-medium text-gray-500 block mb-1.5">
+                <TipLabel 
+                  label="Fast MA" 
+                  labelUk="Швидка MA"
+                  tip="Short-term moving average period. Reacts faster to price changes. Common: 9, 14, 20."
+                  tipUk="Період короткострокової ковзної середньої. Швидше реагує на зміни ціни. Типово: 9, 14, 20."
+                />
+              </label>
               <ConditionSelect
                 value={condition.subfields?.["Fast MA"] || 14}
                 onChange={(val) => handleChange("Fast MA", parseInt(val))}
@@ -206,7 +259,14 @@ function ConditionBuilder({ condition, onChange, onRemove }) {
               />
             </div>
             <div>
-              <label className="text-xs font-medium text-gray-500 block mb-1.5">Slow MA</label>
+              <label className="text-xs font-medium text-gray-500 block mb-1.5">
+                <TipLabel 
+                  label="Slow MA" 
+                  labelUk="Повільна MA"
+                  tip="Long-term moving average period. Represents overall trend. Common: 50, 100, 200."
+                  tipUk="Період довгострокової ковзної середньої. Представляє загальний тренд. Типово: 50, 100, 200."
+                />
+              </label>
               <ConditionSelect
                 value={condition.subfields?.["Slow MA"] || 28}
                 onChange={(val) => handleChange("Slow MA", parseInt(val))}
@@ -214,7 +274,14 @@ function ConditionBuilder({ condition, onChange, onRemove }) {
               />
             </div>
             <div>
-              <label className="text-xs font-medium text-gray-500 block mb-1.5">Condition</label>
+              <label className="text-xs font-medium text-gray-500 block mb-1.5">
+                <TipLabel 
+                  label="Condition" 
+                  labelUk="Умова"
+                  tip="'Crossing Up' = Fast MA crosses above Slow (bullish). 'Crossing Down' = Fast crosses below Slow (bearish)."
+                  tipUk="'Перетин вгору' = Швидка MA перетинає повільну знизу (бичий). 'Перетин вниз' = перетинає зверху (ведмежий)."
+                />
+              </label>
               <ConditionSelect
                 value={condition.subfields?.Condition || "Crossing Up"}
                 onChange={(val) => handleChange("Condition", val)}
@@ -228,7 +295,14 @@ function ConditionBuilder({ condition, onChange, onRemove }) {
         {condition.indicator === "MACD" && (
           <>
             <div>
-              <label className="text-xs font-medium text-gray-500 block mb-1.5">MACD Preset</label>
+              <label className="text-xs font-medium text-gray-500 block mb-1.5">
+                <TipLabel 
+                  label="MACD Preset" 
+                  labelUk="Пресет MACD"
+                  tip="Fast, Slow, Signal periods. Standard 12,26,9 is most common. Faster presets give more signals."
+                  tipUk="Швидкий, повільний, сигнальний періоди. Стандарт 12,26,9 найпоширеніший. Швидші дають більше сигналів."
+                />
+              </label>
               <ConditionSelect
                 value={condition.subfields?.["MACD Preset"] || "12,26,9"}
                 onChange={(val) => handleChange("MACD Preset", val)}
@@ -236,7 +310,14 @@ function ConditionBuilder({ condition, onChange, onRemove }) {
               />
             </div>
             <div>
-              <label className="text-xs font-medium text-gray-500 block mb-1.5">MACD Trigger</label>
+              <label className="text-xs font-medium text-gray-500 block mb-1.5">
+                <TipLabel 
+                  label="MACD Trigger" 
+                  labelUk="Тригер MACD"
+                  tip="'Crossing Up' = MACD line crosses above signal (buy). 'Crossing Down' = crosses below (sell)."
+                  tipUk="'Перетин вгору' = лінія MACD перетинає сигнальну знизу (купівля). 'Перетин вниз' = зверху (продаж)."
+                />
+              </label>
               <ConditionSelect
                 value={condition.subfields?.["MACD Trigger"] || "Crossing Up"}
                 onChange={(val) => handleChange("MACD Trigger", val)}
@@ -244,7 +325,14 @@ function ConditionBuilder({ condition, onChange, onRemove }) {
               />
             </div>
             <div>
-              <label className="text-xs font-medium text-gray-500 block mb-1.5">Line Trigger</label>
+              <label className="text-xs font-medium text-gray-500 block mb-1.5">
+                <TipLabel 
+                  label="Line Trigger" 
+                  labelUk="Позиція лінії"
+                  tip="Additional filter: 'Above Zero' = only in uptrend. 'Below Zero' = only in downtrend. 'Any' = no filter."
+                  tipUk="Додатковий фільтр: 'Вище нуля' = тільки у висхідному тренді. 'Нижче нуля' = у низхідному. 'Будь-який' = без фільтра."
+                />
+              </label>
               <ConditionSelect
                 value={condition.subfields?.["Line Trigger"] || ""}
                 onChange={(val) => handleChange("Line Trigger", val)}
@@ -258,7 +346,14 @@ function ConditionBuilder({ condition, onChange, onRemove }) {
         {condition.indicator === "BollingerBands" && (
           <>
             <div>
-              <label className="text-xs font-medium text-gray-500 block mb-1.5">BB Period</label>
+              <label className="text-xs font-medium text-gray-500 block mb-1.5">
+                <TipLabel 
+                  label="BB Period" 
+                  labelUk="Період BB"
+                  tip="Number of periods for Bollinger Bands calculation. Standard is 20. Higher = wider bands."
+                  tipUk="Кількість періодів для розрахунку Bollinger Bands. Стандарт 20. Більше = ширші смуги."
+                />
+              </label>
               <ConditionSelect
                 value={condition.subfields?.["BB% Period"] || 20}
                 onChange={(val) => handleChange("BB% Period", parseInt(val))}
@@ -266,7 +361,14 @@ function ConditionBuilder({ condition, onChange, onRemove }) {
               />
             </div>
             <div>
-              <label className="text-xs font-medium text-gray-500 block mb-1.5">Deviation</label>
+              <label className="text-xs font-medium text-gray-500 block mb-1.5">
+                <TipLabel 
+                  label="Deviation" 
+                  labelUk="Відхилення"
+                  tip="Standard deviations for band width. Standard is 2. Higher = wider bands, fewer signals."
+                  tipUk="Стандартні відхилення для ширини смуг. Стандарт 2. Більше = ширші смуги, менше сигналів."
+                />
+              </label>
               <ConditionSelect
                 value={condition.subfields?.Deviation || 2}
                 onChange={(val) => handleChange("Deviation", parseFloat(val))}
@@ -274,7 +376,14 @@ function ConditionBuilder({ condition, onChange, onRemove }) {
               />
             </div>
             <div>
-              <label className="text-xs font-medium text-gray-500 block mb-1.5">Condition</label>
+              <label className="text-xs font-medium text-gray-500 block mb-1.5">
+                <TipLabel 
+                  label="Condition" 
+                  labelUk="Умова"
+                  tip="How to compare %B value. 'Less Than 0' = below lower band (oversold). 'Greater Than 1' = above upper band."
+                  tipUk="Як порівнювати значення %B. 'Менше 0' = нижче нижньої смуги (перепроданість). 'Більше 1' = вище верхньої смуги."
+                />
+              </label>
               <ConditionSelect
                 value={condition.subfields?.Condition || "Less Than"}
                 onChange={(val) => handleChange("Condition", val)}
@@ -282,12 +391,19 @@ function ConditionBuilder({ condition, onChange, onRemove }) {
               />
             </div>
             <div>
-              <label className="text-xs font-medium text-gray-500 block mb-1.5">%B Value (0-1)</label>
+              <label className="text-xs font-medium text-gray-500 block mb-1.5">
+                <TipLabel 
+                  label="%B Value (0-1)" 
+                  labelUk="Значення %B"
+                  tip="%B shows price position relative to bands. 0 = at lower band, 0.5 = at middle, 1 = at upper band."
+                  tipUk="%B показує позицію ціни відносно смуг. 0 = на нижній смузі, 0.5 = посередині, 1 = на верхній смузі."
+                />
+              </label>
               <Input
                 type="number"
                 value={condition.subfields?.["Signal Value"] || 0}
                 onChange={(e) => handleChange("Signal Value", parseFloat(e.target.value))}
-                className="h-9 text-sm"
+                inputSize="sm"
                 step={0.1}
                 min={0}
                 max={1}
@@ -300,7 +416,14 @@ function ConditionBuilder({ condition, onChange, onRemove }) {
         {condition.indicator === "Stochastic" && (
           <>
             <div>
-              <label className="text-xs font-medium text-gray-500 block mb-1.5">Stochastic Preset</label>
+              <label className="text-xs font-medium text-gray-500 block mb-1.5">
+                <TipLabel 
+                  label="Stochastic Preset" 
+                  labelUk="Пресет Стохастику"
+                  tip="%K period, %K smoothing, %D smoothing. Standard 14,3,3. Faster presets (9,3,3) give more signals."
+                  tipUk="Період %K, згладжування %K, згладжування %D. Стандарт 14,3,3. Швидші (9,3,3) дають більше сигналів."
+                />
+              </label>
               <ConditionSelect
                 value={condition.subfields?.["Stochastic Preset"] || "14,3,3"}
                 onChange={(val) => handleChange("Stochastic Preset", val)}
@@ -308,7 +431,14 @@ function ConditionBuilder({ condition, onChange, onRemove }) {
               />
             </div>
             <div>
-              <label className="text-xs font-medium text-gray-500 block mb-1.5">K Condition</label>
+              <label className="text-xs font-medium text-gray-500 block mb-1.5">
+                <TipLabel 
+                  label="K Condition" 
+                  labelUk="Умова %K"
+                  tip="How to compare %K value. 'Less Than 20' = oversold zone. 'Greater Than 80' = overbought zone."
+                  tipUk="Як порівнювати значення %K. 'Менше 20' = зона перепроданості. 'Більше 80' = зона перекупленості."
+                />
+              </label>
               <ConditionSelect
                 value={condition.subfields?.["K Condition"] || "Less Than"}
                 onChange={(val) => handleChange("K Condition", val)}
@@ -316,18 +446,32 @@ function ConditionBuilder({ condition, onChange, onRemove }) {
               />
             </div>
             <div>
-              <label className="text-xs font-medium text-gray-500 block mb-1.5">K Signal Value</label>
+              <label className="text-xs font-medium text-gray-500 block mb-1.5">
+                <TipLabel 
+                  label="K Signal Value" 
+                  labelUk="Значення %K"
+                  tip="Threshold for %K line (0-100). Common levels: 20 for oversold, 80 for overbought."
+                  tipUk="Поріг для лінії %K (0-100). Типові рівні: 20 для перепроданості, 80 для перекупленості."
+                />
+              </label>
               <Input
                 type="number"
                 value={condition.subfields?.["K Signal Value"] || 20}
                 onChange={(e) => handleChange("K Signal Value", parseFloat(e.target.value))}
-                className="h-9 text-sm"
+                inputSize="sm"
                 min={0}
                 max={100}
               />
             </div>
             <div>
-              <label className="text-xs font-medium text-gray-500 block mb-1.5">K/D Crossover</label>
+              <label className="text-xs font-medium text-gray-500 block mb-1.5">
+                <TipLabel 
+                  label="K/D Crossover" 
+                  labelUk="Перетин K/D"
+                  tip="Optional crossover signal. '%K Crossing Up %D' = bullish. '%K Crossing Down %D' = bearish."
+                  tipUk="Необов'язковий сигнал перетину. '%K перетинає %D вгору' = бичий. '%K перетинає %D вниз' = ведмежий."
+                />
+              </label>
               <ConditionSelect
                 value={condition.subfields?.Condition || ""}
                 onChange={(val) => handleChange("Condition", val)}
@@ -341,7 +485,14 @@ function ConditionBuilder({ condition, onChange, onRemove }) {
         {condition.indicator === "ParabolicSAR" && (
           <>
             <div>
-              <label className="text-xs font-medium text-gray-500 block mb-1.5">PSAR Preset</label>
+              <label className="text-xs font-medium text-gray-500 block mb-1.5">
+                <TipLabel 
+                  label="PSAR Preset" 
+                  labelUk="Пресет PSAR"
+                  tip="Step and Max values. Standard 0.02, 0.2. Conservative = fewer signals. Aggressive = more signals."
+                  tipUk="Крок і максимальне значення. Стандарт 0.02, 0.2. Консервативний = менше сигналів. Агресивний = більше."
+                />
+              </label>
               <ConditionSelect
                 value={condition.subfields?.["PSAR Preset"] || "0.02,0.2"}
                 onChange={(val) => handleChange("PSAR Preset", val)}
@@ -349,7 +500,14 @@ function ConditionBuilder({ condition, onChange, onRemove }) {
               />
             </div>
             <div className="md:col-span-2">
-              <label className="text-xs font-medium text-gray-500 block mb-1.5">Condition</label>
+              <label className="text-xs font-medium text-gray-500 block mb-1.5">
+                <TipLabel 
+                  label="Condition" 
+                  labelUk="Умова"
+                  tip="'Crossing Long' = price moves above SAR dots (uptrend start). 'Crossing Short' = price moves below (downtrend)."
+                  tipUk="'Перетин Long' = ціна рухається вище точок SAR (початок висхідного тренду). 'Перетин Short' = нижче (низхідний)."
+                />
+              </label>
               <ConditionSelect
                 value={condition.subfields?.Condition || "Crossing (Long)"}
                 onChange={(val) => handleChange("Condition", val)}
@@ -365,7 +523,14 @@ function ConditionBuilder({ condition, onChange, onRemove }) {
         {/* TradingView Signal */}
         {condition.indicator === "TradingView" && (
           <div className="md:col-span-3">
-            <label className="text-xs font-medium text-gray-500 block mb-1.5">Signal Value</label>
+            <label className="text-xs font-medium text-gray-500 block mb-1.5">
+              <TipLabel 
+                label="Signal Value" 
+                labelUk="Значення сигналу"
+                tip="TradingView technical analysis recommendation. Aggregates 26 indicators. 'Strong Buy' = most bullish, 'Strong Sell' = most bearish."
+                tipUk="Рекомендація технічного аналізу TradingView. Агрегує 26 індикаторів. 'Strong Buy' = найбільш бичий, 'Strong Sell' = найбільш ведмежий."
+              />
+            </label>
             <ConditionSelect
               value={condition.subfields?.["Signal Value"] || "Buy"}
               onChange={(val) => handleChange("Signal Value", val)}
@@ -378,7 +543,14 @@ function ConditionBuilder({ condition, onChange, onRemove }) {
         {condition.indicator === "HeikenAshi" && (
           <>
             <div>
-              <label className="text-xs font-medium text-gray-500 block mb-1.5">Condition</label>
+              <label className="text-xs font-medium text-gray-500 block mb-1.5">
+                <TipLabel 
+                  label="Condition" 
+                  labelUk="Умова"
+                  tip="Heiken Ashi smooths candles for trend clarity. 'Greater Than 0' = bullish candles. 'Less Than 0' = bearish."
+                  tipUk="Heiken Ashi згладжує свічки для ясності тренду. 'Більше 0' = бичі свічки. 'Менше 0' = ведмежі."
+                />
+              </label>
               <ConditionSelect
                 value={condition.subfields?.Condition || "Greater Than"}
                 onChange={(val) => handleChange("Condition", val)}
@@ -386,12 +558,19 @@ function ConditionBuilder({ condition, onChange, onRemove }) {
               />
             </div>
             <div>
-              <label className="text-xs font-medium text-gray-500 block mb-1.5">Signal Value</label>
+              <label className="text-xs font-medium text-gray-500 block mb-1.5">
+                <TipLabel 
+                  label="Signal Value" 
+                  labelUk="Значення"
+                  tip="Threshold value for comparison. Usually 0 for trend direction (positive = bullish, negative = bearish)."
+                  tipUk="Порогове значення для порівняння. Зазвичай 0 для напрямку тренду (позитивне = бичий, негативне = ведмежий)."
+                />
+              </label>
               <Input
                 type="number"
                 value={condition.subfields?.["Signal Value"] || 0}
                 onChange={(e) => handleChange("Signal Value", parseFloat(e.target.value))}
-                className="w-full border rounded px-2 py-1.5 text-sm"
+                inputSize="sm"
               />
             </div>
           </>
@@ -1006,9 +1185,9 @@ export default function BacktestPage() {
         </div>
       )}
 
-      <div className="grid lg:grid-cols-3 gap-8">
+      <div className={`grid gap-8 ${results ? "lg:grid-cols-3" : "lg:grid-cols-1 max-w-4xl mx-auto"}`}>
         {/* Configuration Panel */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className={`${results ? "lg:col-span-2" : ""} space-y-6`}>
           {/* Modern Stepper Navigation */}
           <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm mb-8">
             <div className="flex items-center justify-between">
@@ -1335,11 +1514,25 @@ export default function BacktestPage() {
                             onChange={setPriceChangeActive}
                             size="md"
                           />
-                          <label className="font-bold text-sm text-emerald-800">Take Profit</label>
+                          <label className="font-bold text-sm text-emerald-800">
+                            <TooltipLabel
+                              label="Take Profit"
+                              tooltip="Automatically sell when profit reaches target %. Locks in gains. Without it, relies only on exit conditions."
+                              tooltipUk="Автоматично продати, коли прибуток досягне цільового %. Фіксує прибуток. Без цього, покладається лише на умови виходу."
+                              language={language}
+                            />
+                          </label>
                         </div>
                         {priceChangeActive && (
                           <div className="space-y-3 pl-8">
                             <div className="flex items-center gap-2 flex-wrap">
+                              <TooltipLabel
+                                label=""
+                                tooltip="'% of total' = profit from entire position including safety orders. '% of base' = profit from initial order only."
+                                tooltipUk="'% від загальної' = прибуток від всієї позиції включаючи safety orders. '% від базового' = прибуток лише від початкового ордера."
+                                language={language}
+                                className="mr-1"
+                              />
                               <SelectInline
                                 value={takeProfitType}
                                 onChange={setTakeProfitType}
@@ -1364,7 +1557,13 @@ export default function BacktestPage() {
                                 onChange={setTrailingToggle}
                                 size="sm"
                               />
-                              <span className="text-xs font-medium text-gray-600">Trailing</span>
+                              <TooltipLabel
+                                label="Trailing"
+                                tooltip="Instead of fixed target, trails the price up and sells when price drops by deviation %. Captures more profit in strong trends."
+                                tooltipUk="Замість фіксованої цілі, слідує за ціною вгору і продає коли ціна падає на % відхилення. Захоплює більше прибутку в сильних трендах."
+                                language={language}
+                                className="text-xs font-medium text-gray-600"
+                              />
                               {trailingToggle && (
                                 <>
                                   <Input
@@ -1391,11 +1590,25 @@ export default function BacktestPage() {
                             onChange={setStopLossToggle}
                             size="md"
                           />
-                          <label className="font-bold text-sm text-red-800">Stop Loss</label>
+                          <label className="font-bold text-sm text-red-800">
+                            <TooltipLabel
+                              label="Stop Loss"
+                              tooltip="Automatically sell when loss reaches limit %. Protects capital from large losses. Essential for risk management."
+                              tooltipUk="Автоматично продати, коли збиток досягає ліміту %. Захищає капітал від великих втрат. Необхідний для управління ризиками."
+                              language={language}
+                            />
+                          </label>
                         </div>
                         {stopLossToggle && (
                           <div className="space-y-3 pl-8">
                             <div className="flex items-center gap-2 flex-wrap">
+                              <TooltipLabel
+                                label=""
+                                tooltip="'% of base' = loss calculated from initial entry price. '% of total' = loss from average price including safety orders."
+                                tooltipUk="'% від базового' = збиток розраховується від початкової ціни входу. '% від загальної' = збиток від середньої ціни включаючи safety orders."
+                                language={language}
+                                className="mr-1"
+                              />
                               <SelectInline
                                 value={stopLossType}
                                 onChange={setStopLossType}
@@ -1494,6 +1707,7 @@ export default function BacktestPage() {
                     <ConditionBuilder
                       key={i}
                       condition={cond}
+                      language={language}
                       onChange={(updated) => {
                         const newConds = [...entryConditions];
                         newConds[i] = updated;
@@ -1544,6 +1758,7 @@ export default function BacktestPage() {
                       <ConditionBuilder
                         key={i}
                         condition={cond}
+                        language={language}
                         onChange={(updated) => {
                           const newConds = [...exitConditions];
                           newConds[i] = updated;
@@ -1670,9 +1885,16 @@ export default function BacktestPage() {
                     {/* Safety Order Conditions */}
                     <div className="border-t pt-4">
                       <div className="flex items-center justify-between mb-3">
-                        <h4 className="font-medium text-sm">Safety Order Conditions (Optional)</h4>
+                        <h4 className="font-medium text-sm">
+                          <TooltipLabel
+                            label={language === "uk" ? "Умови Safety Order (необов'язково)" : "Safety Order Conditions (Optional)"}
+                            tooltip="Additional indicator conditions to trigger safety orders. If set, safety orders will only execute when BOTH price deviation AND these conditions are met."
+                            tooltipUk="Додаткові умови індикаторів для активації safety orders. Якщо задані, safety orders виконуються лише коли І падіння ціни І ці умови виконані."
+                            language={language}
+                          />
+                        </h4>
                         <Button size="sm" variant="outline" onClick={() => addCondition("safety")}>
-                          + Add
+                          + {language === "uk" ? "Додати" : "Add"}
                         </Button>
                       </div>
                       <div className="space-y-2">
@@ -1680,6 +1902,7 @@ export default function BacktestPage() {
                           <ConditionBuilder
                             key={i}
                             condition={cond}
+                            language={language}
                             onChange={(updated) => {
                               const newConds = [...safetyConditions];
                               newConds[i] = updated;
@@ -1732,6 +1955,8 @@ export default function BacktestPage() {
                     <TooltipLabel
                       label={language === "uk" ? "Розширені налаштування" : "Advanced Settings"}
                       tooltip="Fine-tune your strategy with additional controls for cooldowns, volume filters, and profit management."
+                      tooltipUk="Налаштуйте стратегію з додатковими контролями для затримок, фільтрів обсягу та управління прибутком."
+                      language={language}
                     />
                   </CardTitle>
                 </CardHeader>
@@ -1743,7 +1968,13 @@ export default function BacktestPage() {
                         onChange={setMinprofToggle}
                         size="md"
                       />
-                      <label className="text-sm font-medium">{language === "uk" ? "Мін. прибуток для виходу" : "Minimum Profit to Exit"}</label>
+                      <TooltipLabel
+                        label={language === "uk" ? "Мін. прибуток для виходу" : "Minimum Profit to Exit"}
+                        tooltip="Only close position if profit exceeds this minimum %. Prevents closing too early on small gains. Useful with exit conditions."
+                        tooltipUk="Закривати позицію тільки якщо прибуток перевищує цей мінімум %. Запобігає ранньому закриттю при малих прибутках."
+                        language={language}
+                        className="text-sm font-medium"
+                      />
                       {minprofToggle && (
                         <>
                           <Input
@@ -1758,7 +1989,14 @@ export default function BacktestPage() {
                       )}
                     </div>
                     <div>
-                      <label className="text-sm font-medium block mb-1">{language === "uk" ? "Мін. денний обсяг ($)" : "Min Daily Volume ($)"}</label>
+                      <label className="text-sm font-medium block mb-1.5">
+                        <TooltipLabel
+                          label={language === "uk" ? "Мін. денний обсяг ($)" : "Min Daily Volume ($)"}
+                          tooltip="Only trade assets with daily volume above this threshold. Filters out illiquid assets. 0 = no filter."
+                          tooltipUk="Торгувати лише активами з денним обсягом вище цього порогу. Відфільтровує неліквідні активи. 0 = без фільтра."
+                          language={language}
+                        />
+                      </label>
                       <Input
                         type="number"
                         value={minDailyVolume}
@@ -1767,7 +2005,14 @@ export default function BacktestPage() {
                       />
                     </div>
                     <div>
-                      <label className="text-sm font-medium block mb-1">{language === "uk" ? "Затримка між угодами (хв)" : "Cooldown Between Deals (min)"}</label>
+                      <label className="text-sm font-medium block mb-1.5">
+                        <TooltipLabel
+                          label={language === "uk" ? "Затримка між угодами (хв)" : "Cooldown Between Deals (min)"}
+                          tooltip="Wait time after closing a deal before opening a new one on the same pair. Prevents overtrading. 0 = no cooldown."
+                          tooltipUk="Час очікування після закриття угоди перед відкриттям нової на тій самій парі. Запобігає надмірній торгівлі. 0 = без затримки."
+                          language={language}
+                        />
+                      </label>
                       <Input
                         type="number"
                         value={cooldownBetweenDeals}
@@ -1776,7 +2021,14 @@ export default function BacktestPage() {
                       />
                     </div>
                     <div>
-                      <label className="text-sm font-medium block mb-1">{language === "uk" ? "Закрити угоду після (хв)" : "Close Deal After Timeout (min)"}</label>
+                      <label className="text-sm font-medium block mb-1.5">
+                        <TooltipLabel
+                          label={language === "uk" ? "Закрити угоду після (хв)" : "Close Deal After Timeout (min)"}
+                          tooltip="Force close position after this many minutes regardless of profit/loss. Limits time in trade. 0 = disabled."
+                          tooltipUk="Примусово закрити позицію після цієї кількості хвилин незалежно від прибутку/збитку. Обмежує час в угоді. 0 = вимкнено."
+                          language={language}
+                        />
+                      </label>
                       <Input
                         type="number"
                         value={closeDealAfterTimeout}
@@ -1900,9 +2152,9 @@ export default function BacktestPage() {
             </>)}
         </div>
 
-        {/* Results Panel */}
+        {/* Results Panel - only shown when there are results */}
+        {results && (
         <div className="space-y-6">
-          {results ? (
             <>
               {/* Queue Status */}
               {results.status === 'queued' && (
@@ -2017,30 +2269,8 @@ export default function BacktestPage() {
                 </Card>
               )}
             </>
-          ) : (
-            <div className="bg-gradient-to-br from-gray-50 to-white border-2 border-gray-100 relative overflow-hidden" style={{ clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))' }}>
-              <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5" style={{ clipPath: 'polygon(100% 0, 100% 100%, 0 0)' }}></div>
-              <div className="absolute bottom-0 left-0 w-24 h-24 bg-black/5" style={{ clipPath: 'polygon(0 100%, 100% 100%, 0 0)' }}></div>
-              <div className="p-8 text-center relative">
-                <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center mx-auto mb-4" style={{ clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))' }}>
-                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                </div>
-                <h3 className="font-bold text-lg mb-2 text-gray-900">{t("backtest.noResultsYet")}</h3>
-                <p className="text-gray-500 text-sm max-w-xs mx-auto">
-                  {t("backtest.configureToSee")}
-                </p>
-                <div className="mt-6 flex items-center justify-center gap-4 text-xs text-gray-400">
-                  <div className="flex items-center gap-1">
-                    <div className="w-2 h-2 bg-emerald-400"></div>
-                    <span>{language === "uk" ? "Готово до запуску" : "Ready to run"}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
+        )}
       </div >
     </div >
   );
