@@ -301,9 +301,11 @@ function AccountPageContent() {
       if (userData && !userData.error) {
         setProfile(p => ({
           ...p,
+          name: userData.name || p.name,
           profilePhoto: userData.profilePhoto || p.profilePhoto,
-          phone: userData.phone || p.phone,
+          phone: userData.phone || userData.whatsappNumber || p.phone,
           country: userData.country || p.country,
+          telegram: userData.telegramId || p.telegram,
         }));
       }
     } catch (e) {
@@ -426,6 +428,7 @@ function AccountPageContent() {
     setMessage(null);
 
     try {
+      // Update email if changed
       if (profile.email !== user.email) {
         const { error: emailError } = await supabase.auth.updateUser({
           email: profile.email,
@@ -433,6 +436,7 @@ function AccountPageContent() {
         if (emailError) throw emailError;
       }
 
+      // Update Supabase auth metadata
       const { error: metaError } = await supabase.auth.updateUser({
         data: {
           name: profile.name,
@@ -442,8 +446,29 @@ function AccountPageContent() {
           twitter: profile.twitter,
         },
       });
-
       if (metaError) throw metaError;
+
+      // Save profile to backend API
+      await apiFetch("/user/profile", {
+        method: "POST",
+        body: JSON.stringify({
+          name: profile.name,
+          phone: profile.phone,
+          country: profile.country,
+        }),
+      });
+
+      // Save notification settings (telegram, whatsapp) to backend
+      await apiFetch("/user/notifications", {
+        method: "POST",
+        body: JSON.stringify({
+          telegramId: profile.telegram || null,
+          telegramEnabled: !!profile.telegram,
+          whatsappNumber: profile.phone || null,
+          whatsappEnabled: !!profile.phone,
+        }),
+      });
+
       setMessage(language === "uk" ? "Профіль оновлено успішно!" : "Profile updated successfully!");
     } catch (err) {
       setError(err.message || (language === "uk" ? "Не вдалося оновити профіль." : "Failed to update profile."));
