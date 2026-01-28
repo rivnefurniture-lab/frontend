@@ -4,7 +4,7 @@ import { forwardRef, useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { ChevronDown, Check } from "lucide-react";
 
-// Fully custom dropdown with portal for proper z-index handling
+// Custom dropdown with proper positioning
 export const Select = forwardRef(({ 
   options = [], 
   value, 
@@ -16,51 +16,61 @@ export const Select = forwardRef(({
   error = false,
 }, ref) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
-  const containerRef = useRef(null);
+  const [position, setPosition] = useState({ top: 0, left: 0, width: 0 });
   const buttonRef = useRef(null);
+  const dropdownRef = useRef(null);
 
   const sizes = {
-    sm: { height: "h-8", text: "text-sm", padding: "px-3 py-1.5", cut: "4px" },
-    md: { height: "h-10", text: "text-sm", padding: "px-3 py-2", cut: "5px" },
-    lg: { height: "h-12", text: "text-base", padding: "px-4 py-3", cut: "6px" },
+    sm: { height: "h-8", text: "text-sm", padding: "px-3 py-1.5" },
+    md: { height: "h-10", text: "text-sm", padding: "px-3 py-2" },
+    lg: { height: "h-12", text: "text-base", padding: "px-4 py-3" },
   };
 
-  const { height, text, padding, cut } = sizes[size] || sizes.md;
+  const { height, text, padding } = sizes[size] || sizes.md;
   const selectedOption = options.find(opt => (opt.value ?? opt) === value);
   const displayValue = selectedOption ? (selectedOption.label ?? selectedOption) : placeholder;
 
-  // Calculate dropdown position
+  // Update position when opened
   useEffect(() => {
     if (isOpen && buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
-      setDropdownPosition({
-        top: rect.bottom + window.scrollY + 4,
-        left: rect.left + window.scrollX,
-        width: rect.width,
+      setPosition({
+        top: rect.bottom + 4,
+        left: rect.left,
+        width: Math.max(rect.width, 140),
       });
     }
   }, [isOpen]);
 
-  // Close dropdown when clicking outside
+  // Close on click outside
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (containerRef.current && !containerRef.current.contains(event.target)) {
-        setIsOpen(false);
-      }
+    if (!isOpen) return;
+    
+    const handleClick = (e) => {
+      if (buttonRef.current?.contains(e.target)) return;
+      if (dropdownRef.current?.contains(e.target)) return;
+      setIsOpen(false);
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+    
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [isOpen]);
 
   // Close on escape
   useEffect(() => {
-    const handleEscape = (event) => {
-      if (event.key === "Escape") setIsOpen(false);
-    };
+    if (!isOpen) return;
+    const handleEscape = (e) => { if (e.key === "Escape") setIsOpen(false); };
     document.addEventListener("keydown", handleEscape);
     return () => document.removeEventListener("keydown", handleEscape);
-  }, []);
+  }, [isOpen]);
+
+  // Close on scroll
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleScroll = () => setIsOpen(false);
+    window.addEventListener("scroll", handleScroll, true);
+    return () => window.removeEventListener("scroll", handleScroll, true);
+  }, [isOpen]);
 
   const handleSelect = (optionValue) => {
     onChange?.(optionValue);
@@ -68,8 +78,7 @@ export const Select = forwardRef(({
   };
 
   return (
-    <div className={`relative ${className}`} ref={containerRef}>
-      {/* Trigger button */}
+    <div className={`relative ${className}`}>
       <button
         ref={(el) => { buttonRef.current = el; if (ref) ref.current = el; }}
         type="button"
@@ -80,31 +89,24 @@ export const Select = forwardRef(({
           border-2 bg-white text-left font-medium rounded
           flex items-center
           transition-all duration-200
-          ${error 
-            ? "border-red-500" 
-            : isOpen 
-              ? "border-emerald-500" 
-              : "border-gray-200 hover:border-gray-300"
-          }
+          ${error ? "border-red-500" : isOpen ? "border-emerald-500" : "border-gray-200 hover:border-gray-300"}
           ${disabled ? "opacity-50 cursor-not-allowed bg-gray-50" : "cursor-pointer"}
           ${!selectedOption ? "text-gray-400" : "text-gray-900"}
         `}
       >
         <span className="truncate flex-1">{displayValue}</span>
-        <ChevronDown 
-          className={`w-4 h-4 text-gray-400 transition-transform duration-200 ml-1 flex-shrink-0 ${isOpen ? "rotate-180" : ""}`} 
-        />
+        <ChevronDown className={`w-4 h-4 text-gray-400 ml-1 flex-shrink-0 transition-transform ${isOpen ? "rotate-180" : ""}`} />
       </button>
 
-      {/* Dropdown menu - Portal to body */}
       {isOpen && !disabled && typeof document !== 'undefined' && createPortal(
         <div 
-          className="fixed bg-white border-2 border-gray-200 shadow-xl max-h-60 overflow-auto rounded-lg"
+          ref={dropdownRef}
+          className="fixed bg-white border border-gray-200 shadow-lg max-h-60 overflow-auto rounded-lg py-1"
           style={{ 
-            top: dropdownPosition.top,
-            left: dropdownPosition.left,
-            width: dropdownPosition.width,
-            zIndex: 9999,
+            top: position.top,
+            left: position.left,
+            width: position.width,
+            zIndex: 99999,
           }}
         >
           {options.map((opt) => {
@@ -120,11 +122,7 @@ export const Select = forwardRef(({
                 className={`
                   w-full px-3 py-2 text-left ${text} font-medium
                   flex items-center justify-between
-                  transition-colors duration-150
-                  ${isSelected 
-                    ? "bg-emerald-50 text-emerald-700" 
-                    : "text-gray-700 hover:bg-gray-50"
-                  }
+                  ${isSelected ? "bg-emerald-50 text-emerald-700" : "text-gray-700 hover:bg-gray-50"}
                 `}
               >
                 <span>{optLabel}</span>
@@ -141,7 +139,7 @@ export const Select = forwardRef(({
 
 Select.displayName = "Select";
 
-// Compact inline custom dropdown - also uses portal
+// Compact version
 export const SelectInline = forwardRef(({ 
   options = [], 
   value, 
@@ -151,35 +149,41 @@ export const SelectInline = forwardRef(({
   error = false,
 }, ref) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
-  const containerRef = useRef(null);
+  const [position, setPosition] = useState({ top: 0, left: 0, width: 0 });
   const buttonRef = useRef(null);
+  const dropdownRef = useRef(null);
 
   const selectedOption = options.find(opt => (opt.value ?? opt) === value);
   const displayValue = selectedOption ? (selectedOption.label ?? selectedOption) : "Select";
 
-  // Calculate dropdown position
   useEffect(() => {
     if (isOpen && buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
-      setDropdownPosition({
-        top: rect.bottom + window.scrollY + 2,
-        left: rect.left + window.scrollX,
-        width: Math.max(rect.width, 120),
+      setPosition({
+        top: rect.bottom + 2,
+        left: rect.left,
+        width: Math.max(rect.width, 100),
       });
     }
   }, [isOpen]);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (containerRef.current && !containerRef.current.contains(event.target)) {
-        setIsOpen(false);
-      }
+    if (!isOpen) return;
+    const handleClick = (e) => {
+      if (buttonRef.current?.contains(e.target)) return;
+      if (dropdownRef.current?.contains(e.target)) return;
+      setIsOpen(false);
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleScroll = () => setIsOpen(false);
+    window.addEventListener("scroll", handleScroll, true);
+    return () => window.removeEventListener("scroll", handleScroll, true);
+  }, [isOpen]);
 
   const handleSelect = (optionValue) => {
     onChange?.(optionValue);
@@ -187,43 +191,34 @@ export const SelectInline = forwardRef(({
   };
 
   return (
-    <div className={`relative inline-block ${className}`} ref={containerRef}>
-      {/* Trigger button */}
+    <div className={`relative inline-block ${className}`}>
       <button
         ref={(el) => { buttonRef.current = el; if (ref) ref.current = el; }}
         type="button"
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
         className={`
-          h-8 pl-3 pr-6 text-xs font-medium rounded
+          h-8 px-3 text-xs font-medium rounded
           border-2 bg-white text-left
-          flex items-center
-          transition-all duration-200
-          ${error 
-            ? "border-red-500" 
-            : isOpen 
-              ? "border-emerald-500" 
-              : "border-gray-200 hover:border-gray-300"
-          }
+          flex items-center gap-1
+          ${error ? "border-red-500" : isOpen ? "border-emerald-500" : "border-gray-200 hover:border-gray-300"}
           ${disabled ? "opacity-50 cursor-not-allowed bg-gray-50" : "cursor-pointer"}
           text-gray-700
         `}
       >
         <span className="truncate">{displayValue}</span>
-        <ChevronDown 
-          className={`w-3 h-3 text-gray-400 ml-1 flex-shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
-        />
+        <ChevronDown className={`w-3 h-3 text-gray-400 flex-shrink-0 ${isOpen ? "rotate-180" : ""}`} />
       </button>
 
-      {/* Dropdown menu - Portal to body */}
       {isOpen && !disabled && typeof document !== 'undefined' && createPortal(
         <div 
-          className="fixed bg-white border-2 border-gray-200 shadow-lg max-h-48 overflow-auto rounded-lg"
+          ref={dropdownRef}
+          className="fixed bg-white border border-gray-200 shadow-lg max-h-48 overflow-auto rounded-lg py-1"
           style={{ 
-            top: dropdownPosition.top,
-            left: dropdownPosition.left,
-            minWidth: dropdownPosition.width,
-            zIndex: 9999,
+            top: position.top,
+            left: position.left,
+            minWidth: position.width,
+            zIndex: 99999,
           }}
         >
           {options.map((opt) => {
@@ -237,13 +232,9 @@ export const SelectInline = forwardRef(({
                 type="button"
                 onClick={() => handleSelect(optValue)}
                 className={`
-                  w-full px-3 py-2 text-left text-xs font-medium
+                  w-full px-3 py-1.5 text-left text-xs font-medium
                   flex items-center justify-between
-                  transition-colors duration-150
-                  ${isSelected 
-                    ? "bg-emerald-50 text-emerald-700" 
-                    : "text-gray-700 hover:bg-gray-50"
-                  }
+                  ${isSelected ? "bg-emerald-50 text-emerald-700" : "text-gray-700 hover:bg-gray-50"}
                 `}
               >
                 <span>{optLabel}</span>

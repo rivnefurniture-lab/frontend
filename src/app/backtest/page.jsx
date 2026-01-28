@@ -113,149 +113,167 @@ function ConditionBuilder({ condition, onChange, onRemove, language = "en" }) {
     });
   };
 
-  // Field component with inline label
-  const Field = ({ label, labelUk, tip, tipUk, children, width = "w-auto" }) => (
-    <div className={`flex flex-col ${width}`}>
-      <span className="text-[10px] text-gray-500 mb-0.5 whitespace-nowrap">
-        <TooltipLabel
-          label={language === "uk" && labelUk ? labelUk : label}
-          tooltip={tip}
-          tooltipUk={tipUk}
-          language={language}
-          className="text-[10px] font-medium"
-        />
-      </span>
+  // Field with label
+  const Field = ({ label, children, className = "" }) => (
+    <div className={className}>
+      <label className="text-[11px] text-gray-500 block mb-1">{label}</label>
       {children}
     </div>
   );
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-3 shadow-sm">
-      {/* Single row layout */}
-      <div className="flex flex-wrap items-end gap-2">
-        {/* Indicator selector - wider */}
-        <div className="flex-shrink-0" style={{ minWidth: '160px' }}>
-          <Select
-            value={condition.indicator}
-            onChange={(val) => onChange({ ...condition, indicator: val, subfields: { Timeframe: TIMEFRAMES[0] } })}
-            options={INDICATORS.map(ind => ({ value: ind.id, label: ind.name }))}
-            size="sm"
-          />
-        </div>
-        
-        {/* Timeframe - always shown */}
-        <Field label="TF" labelUk="ТФ" tip="Chart timeframe" tipUk="Таймфрейм графіка">
-          <Select
-            value={condition.subfields?.Timeframe || TIMEFRAMES[0]}
-            onChange={(val) => handleChange("Timeframe", val)}
-            options={TIMEFRAMES.map(tf => ({ value: tf, label: tf }))}
-            size="sm"
-            className="w-16"
-          />
-        </Field>
+    <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+      {/* Header: Indicator + Remove */}
+      <div className="flex items-center justify-between mb-3">
+        <Select
+          value={condition.indicator}
+          onChange={(val) => onChange({ ...condition, indicator: val, subfields: { Timeframe: TIMEFRAMES[0] } })}
+          options={INDICATORS.map(ind => ({ value: ind.id, label: ind.name }))}
+          size="sm"
+          className="w-56"
+        />
+        <button 
+          onClick={onRemove} 
+          className="px-3 py-1.5 text-red-500 hover:bg-red-50 text-xs font-medium border border-red-200 rounded transition-colors"
+        >
+          {language === "uk" ? "Видалити" : "Remove"}
+        </button>
+      </div>
 
-        {/* RSI Indicator */}
-        {condition.indicator === "RSI" && (
-          <>
-            <Field label="Period" labelUk="Період" tip="RSI calculation period" tipUk="Період розрахунку RSI">
+      {/* RSI Indicator - 2 columns */}
+      {condition.indicator === "RSI" && (
+        <div className="space-y-3">
+          <div className="grid grid-cols-2 gap-3">
+            <Field label={language === "uk" ? "Таймфрейм" : "Timeframe"}>
+              <Select
+                value={condition.subfields?.Timeframe || TIMEFRAMES[0]}
+                onChange={(val) => handleChange("Timeframe", val)}
+                options={TIMEFRAMES.map(tf => ({ value: tf, label: tf }))}
+                size="sm"
+              />
+            </Field>
+            <Field label={language === "uk" ? "Період RSI" : "RSI Period"}>
               <Select
                 value={condition.subfields?.["RSI Length"] || 14}
                 onChange={(val) => handleChange("RSI Length", parseInt(val))}
                 options={RSI_LENGTHS.map(len => ({ value: len, label: String(len) }))}
                 size="sm"
-                className="w-16"
               />
             </Field>
-            <Field label="When" labelUk="Коли" tip="Comparison condition" tipUk="Умова порівняння">
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label={language === "uk" ? "Умова" : "Condition"}>
               <Select
                 value={condition.subfields?.Condition || "Less Than"}
                 onChange={(val) => handleChange("Condition", val)}
-                options={CONDITIONS.map(c => ({ value: c, label: language === "uk" ? (c === "Less Than" ? "< Менше" : c === "Greater Than" ? "> Більше" : c) : (c === "Less Than" ? "< Less" : c === "Greater Than" ? "> Greater" : c) }))}
+                options={[
+                  { value: "Less Than", label: language === "uk" ? "Менше ніж" : "Less Than" },
+                  { value: "Greater Than", label: language === "uk" ? "Більше ніж" : "Greater Than" },
+                ]}
                 size="sm"
-                className="w-24"
               />
             </Field>
-            <Field label="Value" labelUk="Знач." tip="RSI threshold (0-100)" tipUk="Поріг RSI (0-100)">
+            <Field label={language === "uk" ? "Значення" : "Value"}>
               <Input
                 type="number"
                 value={condition.subfields?.["Signal Value"] || 30}
                 onChange={(e) => handleChange("Signal Value", parseFloat(e.target.value))}
                 inputSize="sm"
-                className="w-16"
                 min={0}
                 max={100}
               />
             </Field>
-          </>
-        )}
+          </div>
+        </div>
+      )}
 
-        {/* MA Indicator */}
-        {condition.indicator === "MA" && (
-          <>
-            <Field label="Type" labelUk="Тип" tip="Moving average type" tipUk="Тип ковзної середньої">
+      {/* MA Indicator - 2 columns */}
+      {condition.indicator === "MA" && (
+        <div className="space-y-3">
+          <div className="grid grid-cols-2 gap-3">
+            <Field label={language === "uk" ? "Таймфрейм" : "Timeframe"}>
+              <Select
+                value={condition.subfields?.Timeframe || TIMEFRAMES[0]}
+                onChange={(val) => handleChange("Timeframe", val)}
+                options={TIMEFRAMES.map(tf => ({ value: tf, label: tf }))}
+                size="sm"
+              />
+            </Field>
+            <Field label={language === "uk" ? "Тип MA" : "MA Type"}>
               <Select
                 value={condition.subfields?.["MA Type"] || "SMA"}
                 onChange={(val) => handleChange("MA Type", val)}
                 options={[{ value: "SMA", label: "SMA" }, { value: "EMA", label: "EMA" }]}
                 size="sm"
-                className="w-16"
               />
             </Field>
-            <Field label="Fast" labelUk="Швид." tip="Fast MA period" tipUk="Період швидкої MA">
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label={language === "uk" ? "Швидка MA" : "Fast MA"}>
               <Select
                 value={condition.subfields?.["Fast MA"] || 14}
                 onChange={(val) => handleChange("Fast MA", parseInt(val))}
                 options={[5, 10, 14, 20, 25, 50].map(v => ({ value: v, label: String(v) }))}
                 size="sm"
-                className="w-16"
               />
             </Field>
-            <Field label="Slow" labelUk="Повіл." tip="Slow MA period" tipUk="Період повільної MA">
+            <Field label={language === "uk" ? "Повільна MA" : "Slow MA"}>
               <Select
                 value={condition.subfields?.["Slow MA"] || 28}
                 onChange={(val) => handleChange("Slow MA", parseInt(val))}
                 options={[25, 50, 75, 100, 150, 200, 250].map(v => ({ value: v, label: String(v) }))}
                 size="sm"
-                className="w-16"
               />
             </Field>
-            <Field label="Signal" labelUk="Сигнал" tip="Cross direction" tipUk="Напрямок перетину">
-              <Select
-                value={condition.subfields?.Condition || "Crossing Up"}
-                onChange={(val) => handleChange("Condition", val)}
-                options={CONDITIONS.map(c => ({ value: c, label: language === "uk" ? (c === "Crossing Up" ? "↑ Вгору" : c === "Crossing Down" ? "↓ Вниз" : c) : (c === "Crossing Up" ? "↑ Up" : c === "Crossing Down" ? "↓ Down" : c) }))}
-                size="sm"
-                className="w-20"
-              />
-            </Field>
-          </>
-        )}
+          </div>
+          <Field label={language === "uk" ? "Сигнал перетину" : "Cross Signal"} className="max-w-[200px] mx-auto">
+            <Select
+              value={condition.subfields?.Condition || "Crossing Up"}
+              onChange={(val) => handleChange("Condition", val)}
+              options={[
+                { value: "Crossing Up", label: language === "uk" ? "Перетин вгору ↑" : "Crossing Up ↑" },
+                { value: "Crossing Down", label: language === "uk" ? "Перетин вниз ↓" : "Crossing Down ↓" },
+              ]}
+              size="sm"
+            />
+          </Field>
+        </div>
+      )}
 
-        {/* MACD Indicator */}
-        {condition.indicator === "MACD" && (
-          <>
-            <Field label="Preset" labelUk="Пресет" tip="MACD settings" tipUk="Налаштування MACD">
+      {/* MACD Indicator - 2 columns */}
+      {condition.indicator === "MACD" && (
+        <div className="space-y-3">
+          <div className="grid grid-cols-2 gap-3">
+            <Field label={language === "uk" ? "Таймфрейм" : "Timeframe"}>
+              <Select
+                value={condition.subfields?.Timeframe || TIMEFRAMES[0]}
+                onChange={(val) => handleChange("Timeframe", val)}
+                options={TIMEFRAMES.map(tf => ({ value: tf, label: tf }))}
+                size="sm"
+              />
+            </Field>
+            <Field label={language === "uk" ? "Пресет MACD" : "MACD Preset"}>
               <Select
                 value={condition.subfields?.["MACD Preset"] || "12,26,9"}
                 onChange={(val) => handleChange("MACD Preset", val)}
                 options={MACD_PRESETS}
                 size="sm"
-                className="w-24"
               />
             </Field>
-            <Field label="Trigger" labelUk="Тригер" tip="Cross direction" tipUk="Напрямок перетину">
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label={language === "uk" ? "Тригер" : "Trigger"}>
               <Select
                 value={condition.subfields?.["MACD Trigger"] || "Crossing Up"}
                 onChange={(val) => handleChange("MACD Trigger", val)}
                 options={[
-                  { value: "Crossing Up", label: language === "uk" ? "↑ Вгору" : "↑ Up" }, 
-                  { value: "Crossing Down", label: language === "uk" ? "↓ Вниз" : "↓ Down" }
+                  { value: "Crossing Up", label: language === "uk" ? "Перетин вгору ↑" : "Crossing Up ↑" }, 
+                  { value: "Crossing Down", label: language === "uk" ? "Перетин вниз ↓" : "Crossing Down ↓" }
                 ]}
                 size="sm"
-                className="w-20"
               />
             </Field>
-            <Field label="Filter" labelUk="Фільтр" tip="Position filter" tipUk="Фільтр позиції">
+            <Field label={language === "uk" ? "Фільтр" : "Filter"}>
               <Select
                 value={condition.subfields?.["Line Trigger"] || ""}
                 onChange={(val) => handleChange("Line Trigger", val)}
@@ -265,149 +283,197 @@ function ConditionBuilder({ condition, onChange, onRemove, language = "en" }) {
                   { value: "Less Than 0", label: "< 0" }
                 ]}
                 size="sm"
-                className="w-20"
               />
             </Field>
-          </>
-        )}
+          </div>
+        </div>
+      )}
 
-        {/* Bollinger Bands Indicator */}
-        {condition.indicator === "BollingerBands" && (
-          <>
-            <Field label="Period" labelUk="Період" tip="BB calculation period" tipUk="Період розрахунку BB">
+      {/* Bollinger Bands - 2 columns */}
+      {condition.indicator === "BollingerBands" && (
+        <div className="space-y-3">
+          <div className="grid grid-cols-2 gap-3">
+            <Field label={language === "uk" ? "Таймфрейм" : "Timeframe"}>
+              <Select
+                value={condition.subfields?.Timeframe || TIMEFRAMES[0]}
+                onChange={(val) => handleChange("Timeframe", val)}
+                options={TIMEFRAMES.map(tf => ({ value: tf, label: tf }))}
+                size="sm"
+              />
+            </Field>
+            <Field label={language === "uk" ? "Період BB" : "BB Period"}>
               <Select
                 value={condition.subfields?.["BB% Period"] || 20}
                 onChange={(val) => handleChange("BB% Period", parseInt(val))}
                 options={[10, 14, 20, 50, 100].map(v => ({ value: v, label: String(v) }))}
                 size="sm"
-                className="w-16"
               />
             </Field>
-            <Field label="Dev" labelUk="Відх." tip="Standard deviations" tipUk="Стандартні відхилення">
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label={language === "uk" ? "Відхилення" : "Deviation"}>
               <Select
                 value={condition.subfields?.Deviation || 2}
                 onChange={(val) => handleChange("Deviation", parseFloat(val))}
                 options={[1, 1.5, 2, 2.5, 3].map(v => ({ value: v, label: String(v) }))}
                 size="sm"
-                className="w-14"
               />
             </Field>
-            <Field label="When" labelUk="Коли" tip="Comparison" tipUk="Порівняння">
+            <Field label={language === "uk" ? "Умова" : "Condition"}>
               <Select
                 value={condition.subfields?.Condition || "Less Than"}
                 onChange={(val) => handleChange("Condition", val)}
-                options={CONDITIONS.map(c => ({ value: c, label: c === "Less Than" ? "<" : c === "Greater Than" ? ">" : c }))}
+                options={[
+                  { value: "Less Than", label: language === "uk" ? "Менше ніж" : "Less Than" },
+                  { value: "Greater Than", label: language === "uk" ? "Більше ніж" : "Greater Than" },
+                ]}
                 size="sm"
-                className="w-14"
               />
             </Field>
-            <Field label="%B" labelUk="%B" tip="%B value (0-1)" tipUk="Значення %B (0-1)">
-              <Input
-                type="number"
-                value={condition.subfields?.["Signal Value"] || 0}
-                onChange={(e) => handleChange("Signal Value", parseFloat(e.target.value))}
-                inputSize="sm"
-                className="w-16"
-                step={0.1}
-                min={0}
-                max={1}
-              />
-            </Field>
-          </>
-        )}
+          </div>
+          <Field label={language === "uk" ? "Значення %B (0-1)" : "%B Value (0-1)"} className="max-w-[200px] mx-auto">
+            <Input
+              type="number"
+              value={condition.subfields?.["Signal Value"] || 0}
+              onChange={(e) => handleChange("Signal Value", parseFloat(e.target.value))}
+              inputSize="sm"
+              step={0.1}
+              min={0}
+              max={1}
+            />
+          </Field>
+        </div>
+      )}
 
-        {/* Stochastic Indicator */}
-        {condition.indicator === "Stochastic" && (
-          <>
-            <Field label="Preset" labelUk="Пресет" tip="Stochastic settings" tipUk="Налаштування">
+      {/* Stochastic - 2 columns */}
+      {condition.indicator === "Stochastic" && (
+        <div className="space-y-3">
+          <div className="grid grid-cols-2 gap-3">
+            <Field label={language === "uk" ? "Таймфрейм" : "Timeframe"}>
+              <Select
+                value={condition.subfields?.Timeframe || TIMEFRAMES[0]}
+                onChange={(val) => handleChange("Timeframe", val)}
+                options={TIMEFRAMES.map(tf => ({ value: tf, label: tf }))}
+                size="sm"
+              />
+            </Field>
+            <Field label={language === "uk" ? "Пресет" : "Preset"}>
               <Select
                 value={condition.subfields?.["Stochastic Preset"] || "14,3,3"}
                 onChange={(val) => handleChange("Stochastic Preset", val)}
                 options={STOCHASTIC_PRESETS}
                 size="sm"
-                className="w-20"
               />
             </Field>
-            <Field label="When %K" labelUk="Коли %K" tip="%K condition" tipUk="Умова %K">
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label={language === "uk" ? "Умова %K" : "%K Condition"}>
               <Select
                 value={condition.subfields?.["K Condition"] || "Less Than"}
                 onChange={(val) => handleChange("K Condition", val)}
-                options={CONDITIONS.map(c => ({ value: c, label: c === "Less Than" ? "<" : c === "Greater Than" ? ">" : c }))}
+                options={[
+                  { value: "Less Than", label: language === "uk" ? "Менше ніж" : "Less Than" },
+                  { value: "Greater Than", label: language === "uk" ? "Більше ніж" : "Greater Than" },
+                ]}
                 size="sm"
-                className="w-14"
               />
             </Field>
-            <Field label="Value" labelUk="Знач." tip="%K threshold" tipUk="Поріг %K">
+            <Field label={language === "uk" ? "Значення %K" : "%K Value"}>
               <Input
                 type="number"
                 value={condition.subfields?.["K Signal Value"] || 20}
                 onChange={(e) => handleChange("K Signal Value", parseFloat(e.target.value))}
                 inputSize="sm"
-                className="w-14"
                 min={0}
                 max={100}
               />
             </Field>
-            <Field label="K/D" labelUk="K/D" tip="K/D crossover" tipUk="Перетин K/D">
+          </div>
+          <Field label={language === "uk" ? "Перетин K/D" : "K/D Crossover"} className="max-w-[200px] mx-auto">
+            <Select
+              value={condition.subfields?.Condition || ""}
+              onChange={(val) => handleChange("Condition", val)}
+              options={[
+                { value: "", label: language === "uk" ? "Немає" : "None" }, 
+                { value: "K Crossing Up D", label: "K ↑ D" }, 
+                { value: "K Crossing Down D", label: "K ↓ D" }
+              ]}
+              size="sm"
+            />
+          </Field>
+        </div>
+      )}
+
+      {/* Parabolic SAR - 2 columns */}
+      {condition.indicator === "ParabolicSAR" && (
+        <div className="space-y-3">
+          <div className="grid grid-cols-2 gap-3">
+            <Field label={language === "uk" ? "Таймфрейм" : "Timeframe"}>
               <Select
-                value={condition.subfields?.Condition || ""}
-                onChange={(val) => handleChange("Condition", val)}
-                options={[
-                  { value: "", label: language === "uk" ? "Ні" : "None" }, 
-                  { value: "K Crossing Up D", label: "K↑D" }, 
-                  { value: "K Crossing Down D", label: "K↓D" }
-                ]}
+                value={condition.subfields?.Timeframe || TIMEFRAMES[0]}
+                onChange={(val) => handleChange("Timeframe", val)}
+                options={TIMEFRAMES.map(tf => ({ value: tf, label: tf }))}
                 size="sm"
-                className="w-16"
               />
             </Field>
-          </>
-        )}
-
-        {/* Parabolic SAR Indicator */}
-        {condition.indicator === "ParabolicSAR" && (
-          <>
-            <Field label="Preset" labelUk="Пресет" tip="PSAR settings" tipUk="Налаштування PSAR">
+            <Field label={language === "uk" ? "Пресет PSAR" : "PSAR Preset"}>
               <Select
                 value={condition.subfields?.["PSAR Preset"] || "0.02,0.2"}
                 onChange={(val) => handleChange("PSAR Preset", val)}
                 options={PSAR_PRESETS}
                 size="sm"
-                className="w-24"
               />
             </Field>
-            <Field label="Signal" labelUk="Сигнал" tip="Cross direction" tipUk="Напрямок перетину">
-              <Select
-                value={condition.subfields?.Condition || "Crossing (Long)"}
-                onChange={(val) => handleChange("Condition", val)}
-                options={[
-                  { value: "Crossing (Long)", label: language === "uk" ? "↑ Long" : "↑ Long" },
-                  { value: "Crossing (Short)", label: language === "uk" ? "↓ Short" : "↓ Short" }
-                ]}
-                size="sm"
-                className="w-20"
-              />
-            </Field>
-          </>
-        )}
+          </div>
+          <Field label={language === "uk" ? "Сигнал" : "Signal"} className="max-w-[200px] mx-auto">
+            <Select
+              value={condition.subfields?.Condition || "Crossing (Long)"}
+              onChange={(val) => handleChange("Condition", val)}
+              options={[
+                { value: "Crossing (Long)", label: language === "uk" ? "Long ↑" : "Long ↑" },
+                { value: "Crossing (Short)", label: language === "uk" ? "Short ↓" : "Short ↓" }
+              ]}
+              size="sm"
+            />
+          </Field>
+        </div>
+      )}
 
-        {/* TradingView Signal */}
-        {condition.indicator === "TradingView" && (
-          <Field label="Signal" labelUk="Сигнал" tip="TV recommendation" tipUk="Рекомендація TV">
+      {/* TradingView Signal - 2 columns */}
+      {condition.indicator === "TradingView" && (
+        <div className="grid grid-cols-2 gap-3">
+          <Field label={language === "uk" ? "Таймфрейм" : "Timeframe"}>
+            <Select
+              value={condition.subfields?.Timeframe || TIMEFRAMES[0]}
+              onChange={(val) => handleChange("Timeframe", val)}
+              options={TIMEFRAMES.map(tf => ({ value: tf, label: tf }))}
+              size="sm"
+            />
+          </Field>
+          <Field label={language === "uk" ? "Сигнал" : "Signal"}>
             <Select
               value={condition.subfields?.["Signal Value"] || "Buy"}
               onChange={(val) => handleChange("Signal Value", val)}
               options={TRADINGVIEW_SIGNALS.map(s => ({ value: s, label: s }))}
               size="sm"
-              className="w-28"
             />
           </Field>
-        )}
+        </div>
+      )}
 
-        {/* Heiken Ashi */}
-        {condition.indicator === "HeikenAshi" && (
-          <>
-            <Field label="Candle" labelUk="Свічка" tip="Candle type" tipUk="Тип свічки">
+      {/* Heiken Ashi - 2 columns */}
+      {condition.indicator === "HeikenAshi" && (
+        <div className="space-y-3">
+          <div className="grid grid-cols-2 gap-3">
+            <Field label={language === "uk" ? "Таймфрейм" : "Timeframe"}>
+              <Select
+                value={condition.subfields?.Timeframe || TIMEFRAMES[0]}
+                onChange={(val) => handleChange("Timeframe", val)}
+                options={TIMEFRAMES.map(tf => ({ value: tf, label: tf }))}
+                size="sm"
+              />
+            </Field>
+            <Field label={language === "uk" ? "Тип свічки" : "Candle Type"}>
               <Select
                 value={condition.subfields?.Condition || "Greater Than"}
                 onChange={(val) => handleChange("Condition", val)}
@@ -416,29 +482,19 @@ function ConditionBuilder({ condition, onChange, onRemove, language = "en" }) {
                   { value: "Less Than", label: language === "uk" ? "Ведмежий" : "Bearish" }
                 ]}
                 size="sm"
-                className="w-20"
               />
             </Field>
-            <Field label="Value" labelUk="Знач." tip="Threshold (0)" tipUk="Поріг (0)">
-              <Input
-                type="number"
-                value={condition.subfields?.["Signal Value"] || 0}
-                onChange={(e) => handleChange("Signal Value", parseFloat(e.target.value))}
-                inputSize="sm"
-                className="w-14"
-              />
-            </Field>
-          </>
-        )}
-
-        {/* Remove button - always at end */}
-        <button 
-          onClick={onRemove} 
-          className="px-2 py-1 text-red-500 hover:text-white hover:bg-red-500 text-xs font-bold border border-red-200 hover:border-red-500 transition-all rounded ml-auto flex-shrink-0"
-        >
-          ✕
-        </button>
-      </div>
+          </div>
+          <Field label={language === "uk" ? "Значення" : "Value"} className="max-w-[200px] mx-auto">
+            <Input
+              type="number"
+              value={condition.subfields?.["Signal Value"] || 0}
+              onChange={(e) => handleChange("Signal Value", parseFloat(e.target.value))}
+              inputSize="sm"
+            />
+          </Field>
+        </div>
+      )}
     </div>
   );
 }
