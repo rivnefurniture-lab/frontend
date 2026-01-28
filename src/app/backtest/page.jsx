@@ -5,7 +5,9 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
+import { Select, SelectInline } from "@/components/ui/select";
+import { Checkbox, CheckboxWithLabel } from "@/components/ui/checkbox";
+import { Toggle, ToggleWithLabel } from "@/components/ui/toggle";
 import { TooltipLabel } from "@/components/ui/tooltip";
 import { apiFetch } from "@/lib/api";
 import { useLanguage } from "@/context/LanguageContext";
@@ -111,72 +113,72 @@ function ConditionBuilder({ condition, onChange, onRemove }) {
     });
   };
 
+  // Custom styled select for condition builder
+  const ConditionSelect = ({ value, onChange: onSelectChange, options, className = "" }) => (
+    <Select
+      value={value}
+      onChange={onSelectChange}
+      options={options}
+      size="sm"
+      className={className}
+    />
+  );
+
   return (
     <div className="bg-gray-50 p-4 border-2 border-gray-100" style={{ clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))' }}>
       <div className="flex justify-between items-center mb-3">
-        <select
+        <Select
           value={condition.indicator}
-          onChange={(e) => onChange({ ...condition, indicator: e.target.value, subfields: { Timeframe: TIMEFRAMES[0] } })}
-          className="font-bold bg-white border-2 border-gray-200 px-3 py-2"
-          style={{ clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))' }}
+          onChange={(val) => onChange({ ...condition, indicator: val, subfields: { Timeframe: TIMEFRAMES[0] } })}
+          options={INDICATORS.map(ind => ({ value: ind.id, label: ind.name }))}
+          size="sm"
+          className="min-w-[200px]"
+        />
+        <button 
+          onClick={onRemove} 
+          className="ml-3 px-3 py-1.5 text-red-500 hover:text-white hover:bg-red-500 text-xs font-bold border-2 border-red-200 hover:border-red-500 transition-all"
+          style={{ clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))' }}
         >
-          {INDICATORS.map((ind) => (
-            <option key={ind.id} value={ind.id}>{ind.name}</option>
-          ))}
-        </select>
-        <button onClick={onRemove} className="text-red-500 hover:text-red-700 text-sm font-bold">
           Remove
         </button>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <div>
-          <label className="text-xs text-gray-500 block mb-1">Timeframe</label>
-          <select
+          <label className="text-xs font-medium text-gray-500 block mb-1.5">Timeframe</label>
+          <ConditionSelect
             value={condition.subfields?.Timeframe || TIMEFRAMES[0]}
-            onChange={(e) => handleChange("Timeframe", e.target.value)}
-            className="w-full border rounded px-2 py-1.5 text-sm"
-          >
-            {TIMEFRAMES.map((tf) => (
-              <option key={tf} value={tf}>{tf}</option>
-            ))}
-          </select>
+            onChange={(val) => handleChange("Timeframe", val)}
+            options={TIMEFRAMES.map(tf => ({ value: tf, label: tf }))}
+          />
         </div>
 
         {/* RSI Indicator */}
         {condition.indicator === "RSI" && (
           <>
             <div>
-              <label className="text-xs text-gray-500 block mb-1">RSI Length</label>
-              <select
+              <label className="text-xs font-medium text-gray-500 block mb-1.5">RSI Length</label>
+              <ConditionSelect
                 value={condition.subfields?.["RSI Length"] || 14}
-                onChange={(e) => handleChange("RSI Length", parseInt(e.target.value))}
-                className="w-full border rounded px-2 py-1.5 text-sm"
-              >
-                {RSI_LENGTHS.map((len) => (
-                  <option key={len} value={len}>{len}</option>
-                ))}
-              </select>
+                onChange={(val) => handleChange("RSI Length", parseInt(val))}
+                options={RSI_LENGTHS.map(len => ({ value: len, label: String(len) }))}
+              />
             </div>
             <div>
-              <label className="text-xs text-gray-500 block mb-1">Condition</label>
-              <select
+              <label className="text-xs font-medium text-gray-500 block mb-1.5">Condition</label>
+              <ConditionSelect
                 value={condition.subfields?.Condition || "Less Than"}
-                onChange={(e) => handleChange("Condition", e.target.value)}
-                className="w-full border rounded px-2 py-1.5 text-sm"
-              >
-                {CONDITIONS.map((c) => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
+                onChange={(val) => handleChange("Condition", val)}
+                options={CONDITIONS.map(c => ({ value: c, label: c }))}
+              />
             </div>
             <div>
-              <label className="text-xs text-gray-500 block mb-1">Signal Value</label>
-              <input
+              <label className="text-xs font-medium text-gray-500 block mb-1.5">Signal Value</label>
+              <Input
                 type="number"
                 value={condition.subfields?.["Signal Value"] || 30}
                 onChange={(e) => handleChange("Signal Value", parseFloat(e.target.value))}
-                className="w-full border rounded px-2 py-1.5 text-sm"
+                className="h-9 text-sm"
                 min={0}
                 max={100}
               />
@@ -188,51 +190,36 @@ function ConditionBuilder({ condition, onChange, onRemove }) {
         {condition.indicator === "MA" && (
           <>
             <div>
-              <label className="text-xs text-gray-500 block mb-1">MA Type</label>
-              <select
+              <label className="text-xs font-medium text-gray-500 block mb-1.5">MA Type</label>
+              <ConditionSelect
                 value={condition.subfields?.["MA Type"] || "SMA"}
-                onChange={(e) => handleChange("MA Type", e.target.value)}
-                className="w-full border rounded px-2 py-1.5 text-sm"
-              >
-                <option value="SMA">SMA</option>
-                <option value="EMA">EMA</option>
-              </select>
+                onChange={(val) => handleChange("MA Type", val)}
+                options={[{ value: "SMA", label: "SMA" }, { value: "EMA", label: "EMA" }]}
+              />
             </div>
             <div>
-              <label className="text-xs text-gray-500 block mb-1">Fast MA</label>
-              <select
+              <label className="text-xs font-medium text-gray-500 block mb-1.5">Fast MA</label>
+              <ConditionSelect
                 value={condition.subfields?.["Fast MA"] || 14}
-                onChange={(e) => handleChange("Fast MA", parseInt(e.target.value))}
-                className="w-full border rounded px-2 py-1.5 text-sm"
-              >
-                {[5, 10, 14, 20, 25, 50].map((v) => (
-                  <option key={v} value={v}>{v}</option>
-                ))}
-              </select>
+                onChange={(val) => handleChange("Fast MA", parseInt(val))}
+                options={[5, 10, 14, 20, 25, 50].map(v => ({ value: v, label: String(v) }))}
+              />
             </div>
             <div>
-              <label className="text-xs text-gray-500 block mb-1">Slow MA</label>
-              <select
+              <label className="text-xs font-medium text-gray-500 block mb-1.5">Slow MA</label>
+              <ConditionSelect
                 value={condition.subfields?.["Slow MA"] || 28}
-                onChange={(e) => handleChange("Slow MA", parseInt(e.target.value))}
-                className="w-full border rounded px-2 py-1.5 text-sm"
-              >
-                {[25, 50, 75, 100, 150, 200, 250].map((v) => (
-                  <option key={v} value={v}>{v}</option>
-                ))}
-              </select>
+                onChange={(val) => handleChange("Slow MA", parseInt(val))}
+                options={[25, 50, 75, 100, 150, 200, 250].map(v => ({ value: v, label: String(v) }))}
+              />
             </div>
             <div>
-              <label className="text-xs text-gray-500 block mb-1">Condition</label>
-              <select
+              <label className="text-xs font-medium text-gray-500 block mb-1.5">Condition</label>
+              <ConditionSelect
                 value={condition.subfields?.Condition || "Crossing Up"}
-                onChange={(e) => handleChange("Condition", e.target.value)}
-                className="w-full border rounded px-2 py-1.5 text-sm"
-              >
-                {CONDITIONS.map((c) => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
+                onChange={(val) => handleChange("Condition", val)}
+                options={CONDITIONS.map(c => ({ value: c, label: c }))}
+              />
             </div>
           </>
         )}
@@ -241,39 +228,28 @@ function ConditionBuilder({ condition, onChange, onRemove }) {
         {condition.indicator === "MACD" && (
           <>
             <div>
-              <label className="text-xs text-gray-500 block mb-1">MACD Preset</label>
-              <select
+              <label className="text-xs font-medium text-gray-500 block mb-1.5">MACD Preset</label>
+              <ConditionSelect
                 value={condition.subfields?.["MACD Preset"] || "12,26,9"}
-                onChange={(e) => handleChange("MACD Preset", e.target.value)}
-                className="w-full border rounded px-2 py-1.5 text-sm"
-              >
-                {MACD_PRESETS.map((p) => (
-                  <option key={p.value} value={p.value}>{p.label}</option>
-                ))}
-              </select>
+                onChange={(val) => handleChange("MACD Preset", val)}
+                options={MACD_PRESETS}
+              />
             </div>
             <div>
-              <label className="text-xs text-gray-500 block mb-1">MACD Trigger</label>
-              <select
+              <label className="text-xs font-medium text-gray-500 block mb-1.5">MACD Trigger</label>
+              <ConditionSelect
                 value={condition.subfields?.["MACD Trigger"] || "Crossing Up"}
-                onChange={(e) => handleChange("MACD Trigger", e.target.value)}
-                className="w-full border rounded px-2 py-1.5 text-sm"
-              >
-                <option value="Crossing Up">Crossing Up</option>
-                <option value="Crossing Down">Crossing Down</option>
-              </select>
+                onChange={(val) => handleChange("MACD Trigger", val)}
+                options={[{ value: "Crossing Up", label: "Crossing Up" }, { value: "Crossing Down", label: "Crossing Down" }]}
+              />
             </div>
             <div>
-              <label className="text-xs text-gray-500 block mb-1">Line Trigger</label>
-              <select
+              <label className="text-xs font-medium text-gray-500 block mb-1.5">Line Trigger</label>
+              <ConditionSelect
                 value={condition.subfields?.["Line Trigger"] || ""}
-                onChange={(e) => handleChange("Line Trigger", e.target.value)}
-                className="w-full border rounded px-2 py-1.5 text-sm"
-              >
-                <option value="">Any</option>
-                <option value="Greater Than 0">Above Zero</option>
-                <option value="Less Than 0">Below Zero</option>
-              </select>
+                onChange={(val) => handleChange("Line Trigger", val)}
+                options={[{ value: "", label: "Any" }, { value: "Greater Than 0", label: "Above Zero" }, { value: "Less Than 0", label: "Below Zero" }]}
+              />
             </div>
           </>
         )}
@@ -282,48 +258,36 @@ function ConditionBuilder({ condition, onChange, onRemove }) {
         {condition.indicator === "BollingerBands" && (
           <>
             <div>
-              <label className="text-xs text-gray-500 block mb-1">BB Period</label>
-              <select
+              <label className="text-xs font-medium text-gray-500 block mb-1.5">BB Period</label>
+              <ConditionSelect
                 value={condition.subfields?.["BB% Period"] || 20}
-                onChange={(e) => handleChange("BB% Period", parseInt(e.target.value))}
-                className="w-full border rounded px-2 py-1.5 text-sm"
-              >
-                {[10, 14, 20, 50, 100].map((v) => (
-                  <option key={v} value={v}>{v}</option>
-                ))}
-              </select>
+                onChange={(val) => handleChange("BB% Period", parseInt(val))}
+                options={[10, 14, 20, 50, 100].map(v => ({ value: v, label: String(v) }))}
+              />
             </div>
             <div>
-              <label className="text-xs text-gray-500 block mb-1">Deviation</label>
-              <select
+              <label className="text-xs font-medium text-gray-500 block mb-1.5">Deviation</label>
+              <ConditionSelect
                 value={condition.subfields?.Deviation || 2}
-                onChange={(e) => handleChange("Deviation", parseFloat(e.target.value))}
-                className="w-full border rounded px-2 py-1.5 text-sm"
-              >
-                {[1, 1.5, 2, 2.5, 3].map((v) => (
-                  <option key={v} value={v}>{v}</option>
-                ))}
-              </select>
+                onChange={(val) => handleChange("Deviation", parseFloat(val))}
+                options={[1, 1.5, 2, 2.5, 3].map(v => ({ value: v, label: String(v) }))}
+              />
             </div>
             <div>
-              <label className="text-xs text-gray-500 block mb-1">Condition</label>
-              <select
+              <label className="text-xs font-medium text-gray-500 block mb-1.5">Condition</label>
+              <ConditionSelect
                 value={condition.subfields?.Condition || "Less Than"}
-                onChange={(e) => handleChange("Condition", e.target.value)}
-                className="w-full border rounded px-2 py-1.5 text-sm"
-              >
-                {CONDITIONS.map((c) => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
+                onChange={(val) => handleChange("Condition", val)}
+                options={CONDITIONS.map(c => ({ value: c, label: c }))}
+              />
             </div>
             <div>
-              <label className="text-xs text-gray-500 block mb-1">%B Value (0-1)</label>
-              <input
+              <label className="text-xs font-medium text-gray-500 block mb-1.5">%B Value (0-1)</label>
+              <Input
                 type="number"
                 value={condition.subfields?.["Signal Value"] || 0}
                 onChange={(e) => handleChange("Signal Value", parseFloat(e.target.value))}
-                className="w-full border rounded px-2 py-1.5 text-sm"
+                className="h-9 text-sm"
                 step={0.1}
                 min={0}
                 max={1}
@@ -336,51 +300,39 @@ function ConditionBuilder({ condition, onChange, onRemove }) {
         {condition.indicator === "Stochastic" && (
           <>
             <div>
-              <label className="text-xs text-gray-500 block mb-1">Stochastic Preset</label>
-              <select
+              <label className="text-xs font-medium text-gray-500 block mb-1.5">Stochastic Preset</label>
+              <ConditionSelect
                 value={condition.subfields?.["Stochastic Preset"] || "14,3,3"}
-                onChange={(e) => handleChange("Stochastic Preset", e.target.value)}
-                className="w-full border rounded px-2 py-1.5 text-sm"
-              >
-                {STOCHASTIC_PRESETS.map((p) => (
-                  <option key={p.value} value={p.value}>{p.label}</option>
-                ))}
-              </select>
+                onChange={(val) => handleChange("Stochastic Preset", val)}
+                options={STOCHASTIC_PRESETS}
+              />
             </div>
             <div>
-              <label className="text-xs text-gray-500 block mb-1">K Condition</label>
-              <select
+              <label className="text-xs font-medium text-gray-500 block mb-1.5">K Condition</label>
+              <ConditionSelect
                 value={condition.subfields?.["K Condition"] || "Less Than"}
-                onChange={(e) => handleChange("K Condition", e.target.value)}
-                className="w-full border rounded px-2 py-1.5 text-sm"
-              >
-                {CONDITIONS.map((c) => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
+                onChange={(val) => handleChange("K Condition", val)}
+                options={CONDITIONS.map(c => ({ value: c, label: c }))}
+              />
             </div>
             <div>
-              <label className="text-xs text-gray-500 block mb-1">K Signal Value</label>
-              <input
+              <label className="text-xs font-medium text-gray-500 block mb-1.5">K Signal Value</label>
+              <Input
                 type="number"
                 value={condition.subfields?.["K Signal Value"] || 20}
                 onChange={(e) => handleChange("K Signal Value", parseFloat(e.target.value))}
-                className="w-full border rounded px-2 py-1.5 text-sm"
+                className="h-9 text-sm"
                 min={0}
                 max={100}
               />
             </div>
             <div>
-              <label className="text-xs text-gray-500 block mb-1">K/D Crossover</label>
-              <select
+              <label className="text-xs font-medium text-gray-500 block mb-1.5">K/D Crossover</label>
+              <ConditionSelect
                 value={condition.subfields?.Condition || ""}
-                onChange={(e) => handleChange("Condition", e.target.value)}
-                className="w-full border rounded px-2 py-1.5 text-sm"
-              >
-                <option value="">None</option>
-                <option value="K Crossing Up D">K Crossing Up D</option>
-                <option value="K Crossing Down D">K Crossing Down D</option>
-              </select>
+                onChange={(val) => handleChange("Condition", val)}
+                options={[{ value: "", label: "None" }, { value: "K Crossing Up D", label: "K Crossing Up D" }, { value: "K Crossing Down D", label: "K Crossing Down D" }]}
+              />
             </div>
           </>
         )}
@@ -389,27 +341,23 @@ function ConditionBuilder({ condition, onChange, onRemove }) {
         {condition.indicator === "ParabolicSAR" && (
           <>
             <div>
-              <label className="text-xs text-gray-500 block mb-1">PSAR Preset</label>
-              <select
+              <label className="text-xs font-medium text-gray-500 block mb-1.5">PSAR Preset</label>
+              <ConditionSelect
                 value={condition.subfields?.["PSAR Preset"] || "0.02,0.2"}
-                onChange={(e) => handleChange("PSAR Preset", e.target.value)}
-                className="w-full border rounded px-2 py-1.5 text-sm"
-              >
-                {PSAR_PRESETS.map((p) => (
-                  <option key={p.value} value={p.value}>{p.label}</option>
-                ))}
-              </select>
+                onChange={(val) => handleChange("PSAR Preset", val)}
+                options={PSAR_PRESETS}
+              />
             </div>
             <div className="md:col-span-2">
-              <label className="text-xs text-gray-500 block mb-1">Condition</label>
-              <select
+              <label className="text-xs font-medium text-gray-500 block mb-1.5">Condition</label>
+              <ConditionSelect
                 value={condition.subfields?.Condition || "Crossing (Long)"}
-                onChange={(e) => handleChange("Condition", e.target.value)}
-                className="w-full border rounded px-2 py-1.5 text-sm"
-              >
-                <option value="Crossing (Long)">Crossing (Long) - Price crosses above SAR</option>
-                <option value="Crossing (Short)">Crossing (Short) - Price crosses below SAR</option>
-              </select>
+                onChange={(val) => handleChange("Condition", val)}
+                options={[
+                  { value: "Crossing (Long)", label: "Crossing (Long) - Price crosses above SAR" },
+                  { value: "Crossing (Short)", label: "Crossing (Short) - Price crosses below SAR" }
+                ]}
+              />
             </div>
           </>
         )}
@@ -417,16 +365,12 @@ function ConditionBuilder({ condition, onChange, onRemove }) {
         {/* TradingView Signal */}
         {condition.indicator === "TradingView" && (
           <div className="md:col-span-3">
-            <label className="text-xs text-gray-500 block mb-1">Signal Value</label>
-            <select
+            <label className="text-xs font-medium text-gray-500 block mb-1.5">Signal Value</label>
+            <ConditionSelect
               value={condition.subfields?.["Signal Value"] || "Buy"}
-              onChange={(e) => handleChange("Signal Value", e.target.value)}
-              className="w-full border rounded px-2 py-1.5 text-sm"
-            >
-              {TRADINGVIEW_SIGNALS.map((s) => (
-                <option key={s} value={s}>{s}</option>
-              ))}
-            </select>
+              onChange={(val) => handleChange("Signal Value", val)}
+              options={TRADINGVIEW_SIGNALS.map(s => ({ value: s, label: s }))}
+            />
           </div>
         )}
 
@@ -434,19 +378,16 @@ function ConditionBuilder({ condition, onChange, onRemove }) {
         {condition.indicator === "HeikenAshi" && (
           <>
             <div>
-              <label className="text-xs text-gray-500 block mb-1">Condition</label>
-              <select
+              <label className="text-xs font-medium text-gray-500 block mb-1.5">Condition</label>
+              <ConditionSelect
                 value={condition.subfields?.Condition || "Greater Than"}
-                onChange={(e) => handleChange("Condition", e.target.value)}
-                className="w-full border rounded px-2 py-1.5 text-sm"
-              >
-                <option value="Greater Than">Greater Than</option>
-                <option value="Less Than">Less Than</option>
-              </select>
+                onChange={(val) => handleChange("Condition", val)}
+                options={[{ value: "Greater Than", label: "Greater Than" }, { value: "Less Than", label: "Less Than" }]}
+              />
             </div>
             <div>
-              <label className="text-xs text-gray-500 block mb-1">Signal Value</label>
-              <input
+              <label className="text-xs font-medium text-gray-500 block mb-1.5">Signal Value</label>
+              <Input
                 type="number"
                 value={condition.subfields?.["Signal Value"] || 0}
                 onChange={(e) => handleChange("Signal Value", parseFloat(e.target.value))}
@@ -1257,31 +1198,30 @@ export default function BacktestPage() {
                     </div>
                   </div>
 
-                  {/* Take Profit & Stop Loss - Minimalistic */}
+                  {/* Take Profit & Stop Loss - Professional Design */}
                   <div className="mt-6 pt-4 border-t border-gray-200">
                     <div className="grid md:grid-cols-2 gap-4">
                       {/* Take Profit */}
-                      <div className="bg-gray-50 p-4" style={{ clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))' }}>
+                      <div className="bg-gradient-to-br from-emerald-50 to-white p-4 border-2 border-emerald-100" style={{ clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))' }}>
                         <div className="flex items-center gap-3 mb-3">
-                          <input
-                            type="checkbox"
+                          <Checkbox
                             checked={priceChangeActive}
-                            onChange={(e) => setPriceChangeActive(e.target.checked)}
-                            className="w-4 h-4 rounded"
+                            onChange={setPriceChangeActive}
+                            size="md"
                           />
-                          <label className="font-medium text-sm">Take Profit</label>
+                          <label className="font-bold text-sm text-emerald-800">Take Profit</label>
                         </div>
                         {priceChangeActive && (
-                          <div className="space-y-2 pl-7">
-                            <div className="flex items-center gap-2">
-                              <select
+                          <div className="space-y-3 pl-8">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <SelectInline
                                 value={takeProfitType}
-                                onChange={(e) => setTakeProfitType(e.target.value)}
-                                className="text-xs border rounded px-2 py-1"
-                              >
-                                <option value="percentage-total">% {language === "uk" ? "від загальної" : "of total"}</option>
-                                <option value="percentage-base">% {language === "uk" ? "від базового" : "of base"}</option>
-                              </select>
+                                onChange={setTakeProfitType}
+                                options={[
+                                  { value: "percentage-total", label: `% ${language === "uk" ? "від загальної" : "of total"}` },
+                                  { value: "percentage-base", label: `% ${language === "uk" ? "від базового" : "of base"}` }
+                                ]}
+                              />
                               <Input
                                 type="number"
                                 value={targetProfit}
@@ -1290,16 +1230,15 @@ export default function BacktestPage() {
                                 step={0.1}
                                 className="w-20 h-8 text-sm"
                               />
-                              <span className="text-sm text-gray-500">%</span>
+                              <span className="text-sm font-medium text-gray-500">%</span>
                             </div>
                             <div className="flex items-center gap-2">
-                              <input
-                                type="checkbox"
+                              <Checkbox
                                 checked={trailingToggle}
-                                onChange={(e) => setTrailingToggle(e.target.checked)}
-                                className="w-3 h-3"
+                                onChange={setTrailingToggle}
+                                size="sm"
                               />
-                              <span className="text-xs text-gray-600">Trailing</span>
+                              <span className="text-xs font-medium text-gray-600">Trailing</span>
                               {trailingToggle && (
                                 <>
                                   <Input
@@ -1319,27 +1258,26 @@ export default function BacktestPage() {
                       </div>
 
                       {/* Stop Loss */}
-                      <div className="bg-gray-50 p-4" style={{ clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))' }}>
+                      <div className="bg-gradient-to-br from-red-50 to-white p-4 border-2 border-red-100" style={{ clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))' }}>
                         <div className="flex items-center gap-3 mb-3">
-                          <input
-                            type="checkbox"
+                          <Checkbox
                             checked={stopLossToggle}
-                            onChange={(e) => setStopLossToggle(e.target.checked)}
-                            className="w-4 h-4 rounded"
+                            onChange={setStopLossToggle}
+                            size="md"
                           />
-                          <label className="font-medium text-sm">Stop Loss</label>
+                          <label className="font-bold text-sm text-red-800">Stop Loss</label>
                         </div>
                         {stopLossToggle && (
-                          <div className="space-y-2 pl-7">
-                            <div className="flex items-center gap-2">
-                              <select
+                          <div className="space-y-3 pl-8">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <SelectInline
                                 value={stopLossType}
-                                onChange={(e) => setStopLossType(e.target.value)}
-                                className="text-xs border rounded px-2 py-1"
-                              >
-                                <option value="percentage-base">% {language === "uk" ? "від базового" : "of base"}</option>
-                                <option value="percentage-total">% {language === "uk" ? "від загальної" : "of total"}</option>
-                              </select>
+                                onChange={setStopLossType}
+                                options={[
+                                  { value: "percentage-base", label: `% ${language === "uk" ? "від базового" : "of base"}` },
+                                  { value: "percentage-total", label: `% ${language === "uk" ? "від загальної" : "of total"}` }
+                                ]}
+                              />
                               <Input
                                 type="number"
                                 value={stopLossValue}
@@ -1348,7 +1286,7 @@ export default function BacktestPage() {
                                 step={0.1}
                                 className="w-20 h-8 text-sm"
                               />
-                              <span className="text-sm text-gray-500">%</span>
+                              <span className="text-sm font-medium text-gray-500">%</span>
                             </div>
                           </div>
                         )}
@@ -1356,21 +1294,16 @@ export default function BacktestPage() {
                     </div>
 
                     {/* Reinvest Toggle */}
-                    <div className="mt-4 flex items-center gap-3">
-                      <input
-                        type="checkbox"
+                    <div className="mt-4 p-4 bg-gray-50 border-2 border-gray-100" style={{ clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))' }}>
+                      <ToggleWithLabel
                         checked={reinvestToggle}
-                        onChange={(e) => setReinvestToggle(e.target.checked)}
-                        className="w-4 h-4 rounded"
+                        onChange={setReinvestToggle}
+                        label={language === "uk" ? "Реінвестувати прибуток" : "Reinvest Profits"}
+                        description={language === "uk"
+                          ? "Автоматично додавати прибуток до наступних угод, збільшуючи розмір позицій"
+                          : "Automatically add profits to next trades, increasing position sizes over time"}
+                        labelPosition="right"
                       />
-                      <div>
-                        <label className="font-medium text-sm">{language === "uk" ? "Реінвестувати прибуток" : "Reinvest Profits"}</label>
-                        <p className="text-xs text-gray-500">
-                          {language === "uk"
-                            ? "Автоматично додавати прибуток до наступних угод, збільшуючи розмір позицій"
-                            : "Automatically add profits to next trades, increasing position sizes over time"}
-                        </p>
-                      </div>
                     </div>
                   </div>
                 </CardContent>
@@ -1444,11 +1377,10 @@ export default function BacktestPage() {
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <input
-                      type="checkbox"
+                    <Checkbox
                       checked={conditionsActive}
-                      onChange={(e) => setConditionsActive(e.target.checked)}
-                      className="w-4 h-4 rounded"
+                      onChange={setConditionsActive}
+                      size="md"
                     />
                     <CardTitle className="text-red-600">{t("backtest.exitConditions")}</CardTitle>
                   </div>
@@ -1489,17 +1421,11 @@ export default function BacktestPage() {
                       label={`${t("backtest.safetyOrders")} (DCA)`}
                       tooltip="Safety Orders (Dollar Cost Averaging) automatically buy more when price drops, lowering your average entry price. This helps turn losing positions into winners when price recovers."
                     />
-                    <button
-                      onClick={() => setSafetyOrderToggle(!safetyOrderToggle)}
-                      className={`w-12 h-6 transition ${safetyOrderToggle ? "bg-black" : "bg-gray-300"
-                        }`}
-                      style={{ clipPath: 'polygon(3px 0, calc(100% - 3px) 0, 100% 3px, 100% calc(100% - 3px), calc(100% - 3px) 100%, 3px 100%, 0 calc(100% - 3px), 0 3px)' }}
-                    >
-                      <div
-                        className={`w-5 h-5 bg-white rounded-full shadow transform transition ${safetyOrderToggle ? "translate-x-6" : "translate-x-0.5"
-                          }`}
-                      />
-                    </button>
+                    <Toggle
+                      checked={safetyOrderToggle}
+                      onChange={setSafetyOrderToggle}
+                      size="md"
+                    />
                   </CardTitle>
                 </CardHeader>
                 {safetyOrderToggle && (
@@ -1645,11 +1571,10 @@ export default function BacktestPage() {
                 <CardContent>
                   <div className="grid md:grid-cols-2 gap-4">
                     <div className="flex items-center gap-3">
-                      <input
-                        type="checkbox"
+                      <Checkbox
                         checked={minprofToggle}
-                        onChange={(e) => setMinprofToggle(e.target.checked)}
-                        className="rounded"
+                        onChange={setMinprofToggle}
+                        size="md"
                       />
                       <label className="text-sm font-medium">{language === "uk" ? "Мін. прибуток для виходу" : "Minimum Profit to Exit"}</label>
                       {minprofToggle && (
