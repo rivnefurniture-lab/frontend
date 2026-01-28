@@ -35,10 +35,12 @@ const ExchangeLogo = ({ id, size = "md" }) => {
     xl: "w-20 h-20"
   };
   
-  const logoPath = `/logos/exchanges/${id}.svg`;
+  // Use PNG files (coinbase is webp)
+  const extension = id === "coinbase" ? "webp" : "png";
+  const logoPath = `/logos/exchanges/${id}.${extension}`;
 
   return (
-    <div className={`${sizes[size]} rounded-2xl overflow-hidden flex items-center justify-center shadow-lg bg-white`}>
+    <div className={`${sizes[size]} rounded-2xl overflow-hidden flex items-center justify-center bg-white p-2`}>
       <img 
         src={logoPath} 
         alt={`${id} logo`}

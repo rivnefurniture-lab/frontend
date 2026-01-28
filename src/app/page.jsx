@@ -515,43 +515,43 @@ export default function Page() {
                   style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}
                 >
                   <img 
-                    src="/logos/partners/tradingview.svg" 
+                    src="/logos/partners/tradingview.png" 
                     alt="TradingView" 
                     className="h-8 mb-2 group-hover:scale-110 transition-transform object-contain"
                   />
                   <span className="text-xs font-bold text-gray-700 text-center leading-tight">TradingView</span>
                 </a>
                 
-                {/* CoinGecko */}
+                {/* Polygon.io */}
                 <a 
-                  href="https://www.coingecko.com" 
+                  href="https://polygon.io" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="flex flex-col items-center justify-center p-4 bg-white border-2 border-gray-100 hover:border-green-500 hover:shadow-lg transition-all group"
+                  className="flex flex-col items-center justify-center p-4 bg-white border-2 border-gray-100 hover:border-purple-500 hover:shadow-lg transition-all group"
                   style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}
                 >
                   <img 
-                    src="/logos/partners/coingecko.svg" 
-                    alt="CoinGecko" 
+                    src="/logos/partners/polygon.png" 
+                    alt="Polygon.io" 
                     className="h-8 mb-2 group-hover:scale-110 transition-transform object-contain"
                   />
-                  <span className="text-xs font-bold text-gray-700">CoinGecko</span>
+                  <span className="text-xs font-bold text-gray-700">Polygon.io</span>
                 </a>
                 
-                {/* CoinMarketCap */}
+                {/* Alpha Vantage */}
                 <a 
-                  href="https://coinmarketcap.com" 
+                  href="https://www.alphavantage.co" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="flex flex-col items-center justify-center p-4 bg-white border-2 border-gray-100 hover:border-blue-600 hover:shadow-lg transition-all group"
+                  className="flex flex-col items-center justify-center p-4 bg-white border-2 border-gray-100 hover:border-emerald-500 hover:shadow-lg transition-all group"
                   style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}
                 >
                   <img 
-                    src="/logos/partners/coinmarketcap.svg" 
-                    alt="CoinMarketCap" 
+                    src="/logos/partners/alpha-vantage.png" 
+                    alt="Alpha Vantage" 
                     className="h-8 mb-2 group-hover:scale-110 transition-transform object-contain"
                   />
-                  <span className="text-xs font-bold text-gray-700 text-center leading-tight">CoinMarketCap</span>
+                  <span className="text-xs font-bold text-gray-700 text-center leading-tight">Alpha Vantage</span>
                 </a>
                 
                 {/* Yahoo Finance */}
@@ -563,27 +563,27 @@ export default function Page() {
                   style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}
                 >
                   <img 
-                    src="/logos/partners/yahoo-finance.svg" 
+                    src="/logos/partners/yahoo-finance.png" 
                     alt="Yahoo Finance" 
                     className="h-8 mb-2 group-hover:scale-110 transition-transform object-contain"
                   />
-                  <span className="text-xs font-bold text-gray-700 text-center leading-tight">Yahoo<br/>Finance</span>
+                  <span className="text-xs font-bold text-gray-700 text-center leading-tight">Yahoo Finance</span>
                 </a>
                 
-                {/* Bloomberg */}
+                {/* Quandl */}
                 <a 
-                  href="https://www.bloomberg.com" 
+                  href="https://www.quandl.com" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="flex flex-col items-center justify-center p-4 bg-white border-2 border-gray-100 hover:border-black hover:shadow-lg transition-all group"
+                  className="flex flex-col items-center justify-center p-4 bg-white border-2 border-gray-100 hover:border-orange-500 hover:shadow-lg transition-all group"
                   style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}
                 >
                   <img 
-                    src="/logos/partners/bloomberg.svg" 
-                    alt="Bloomberg" 
+                    src="/logos/partners/quandl.png" 
+                    alt="Quandl" 
                     className="h-8 mb-2 group-hover:scale-110 transition-transform object-contain"
                   />
-                  <span className="text-xs font-bold text-gray-700">Bloomberg</span>
+                  <span className="text-xs font-bold text-gray-700">Quandl</span>
                 </a>
               </>
             )}
