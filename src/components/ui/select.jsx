@@ -85,7 +85,7 @@ export const Select = forwardRef(({
       {/* Dropdown menu */}
       {isOpen && !disabled && (
         <div 
-          className="absolute z-[100] w-full mt-1 bg-white border-2 border-gray-200 shadow-xl max-h-60 overflow-auto"
+          className="absolute z-[200] w-full mt-1 bg-white border-2 border-gray-200 shadow-xl max-h-60 overflow-auto"
           style={{ clipPath: `polygon(0 0, calc(100% - ${dropdownCut}) 0, 100% ${dropdownCut}, 100% 100%, ${dropdownCut} 100%, 0 calc(100% - ${dropdownCut}))` }}
         >
           {options.map((opt, idx) => {
@@ -185,7 +185,7 @@ export const SelectInline = forwardRef(({
       {/* Dropdown menu */}
       {isOpen && !disabled && (
         <div 
-          className="absolute z-[100] w-full min-w-[140px] mt-1 bg-white border-2 border-gray-200 shadow-lg max-h-48 overflow-auto"
+          className="absolute z-[200] w-full min-w-[140px] mt-1 bg-white border-2 border-gray-200 shadow-lg max-h-48 overflow-auto"
           style={{ clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))' }}
         >
           {options.map((opt) => {

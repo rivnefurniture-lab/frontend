@@ -21,7 +21,7 @@ export function InfoTooltip({ text, textUk, language = "en", children }) {
         {children}
       </span>
       {isVisible && displayText && (
-        <div className="absolute z-50 w-72 p-3 mt-2 text-sm text-gray-700 bg-white rounded-lg shadow-xl border border-gray-200 left-0 top-full">
+        <div className="absolute z-[200] w-72 p-3 mt-2 text-sm text-gray-700 bg-white rounded-lg shadow-xl border border-gray-200 left-0 top-full">
           <div className="absolute -top-2 left-4 w-3 h-3 bg-white border-l border-t border-gray-200 transform rotate-45"></div>
           <p className="leading-relaxed font-normal">{displayText}</p>
         </div>
@@ -53,7 +53,7 @@ export function TooltipLabel({ label, tooltip, tooltipUk, language = "en", class
       </span>
       <HelpCircle className="w-3.5 h-3.5 text-gray-400" />
       {isVisible && displayTooltip && (
-        <div className="absolute z-50 w-72 p-3 mt-2 text-sm text-gray-700 bg-white rounded-xl shadow-xl border border-gray-100 left-0 top-full" style={{ marginTop: '24px' }}>
+        <div className="absolute z-[200] w-72 p-3 mt-2 text-sm text-gray-700 bg-white rounded-xl shadow-xl border border-gray-100 left-0 top-full" style={{ marginTop: '24px' }}>
           <div className="absolute -top-2 left-4 w-3 h-3 bg-white border-l border-t border-gray-100 transform rotate-45"></div>
           <p className="leading-relaxed font-normal">{displayTooltip}</p>
         </div>

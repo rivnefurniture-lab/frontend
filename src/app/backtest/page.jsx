@@ -721,9 +721,39 @@ export default function BacktestPage() {
   // Success modal state
   const [successModal, setSuccessModal] = useState({ open: false, position: 1, wait: 10 });
 
-  // Notification preferences
-  const [notifyVia, setNotifyVia] = useState('email'); // 'email', 'telegram', 'both'
+  // Notification preferences - load from localStorage
+  const [notifyVia, setNotifyVia] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('algotcha_notify_preference') || 'email';
+    }
+    return 'email';
+  });
   const [userProfile, setUserProfile] = useState(null);
+  const [showNotifyConfigModal, setShowNotifyConfigModal] = useState(false);
+  const [pendingNotifyChannel, setPendingNotifyChannel] = useState(null);
+  
+  // Save notification preference to localStorage
+  const handleNotifyChange = (channel) => {
+    // Check if channel is configured
+    if (channel === 'telegram' || channel === 'whatsapp' || channel === 'both' || channel === 'all') {
+      const needsTelegram = channel === 'telegram' || channel === 'both' || channel === 'all';
+      const needsWhatsapp = channel === 'whatsapp' || channel === 'all';
+      
+      if (needsTelegram && !userProfile?.telegramId) {
+        setPendingNotifyChannel(channel);
+        setShowNotifyConfigModal(true);
+        return;
+      }
+      if (needsWhatsapp && !userProfile?.whatsappNumber) {
+        setPendingNotifyChannel(channel);
+        setShowNotifyConfigModal(true);
+        return;
+      }
+    }
+    
+    setNotifyVia(channel);
+    localStorage.setItem('algotcha_notify_preference', channel);
+  };
   
   // Load user profile for notification settings
   useEffect(() => {
@@ -1188,119 +1218,80 @@ export default function BacktestPage() {
       <div className={`grid gap-8 ${results ? "lg:grid-cols-3" : "lg:grid-cols-1 max-w-4xl mx-auto"}`}>
         {/* Configuration Panel */}
         <div className={`${results ? "lg:col-span-2" : ""} space-y-6`}>
-          {/* Modern Stepper Navigation */}
-          <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm mb-8">
-            <div className="flex items-center justify-between">
-              {[
-                {
-                  id: "settings",
-                  step: 1,
-                  label: language === "uk" ? "Налаштування" : "Configuration",
-                  desc: language === "uk" ? "Активи та час" : "Assets & Time",
-                  icon: <Settings2 className="w-5 h-5" />
-                },
-                {
-                  id: "conditions",
-                  step: 2,
-                  label: language === "uk" ? "Логіка" : "Strategy Logic",
-                  desc: language === "uk" ? "Вхід та вихід" : "Entry & Exit",
-                  icon: <GitGraph className="w-5 h-5" />
-                },
-                {
-                  id: "advanced",
-                  step: 3,
-                  label: language === "uk" ? "Ризики" : "Risk Management",
-                  desc: language === "uk" ? "Захист капіталу" : "Capital Protection",
-                  icon: <ShieldCheck className="w-5 h-5" />
-                },
-              ].map((step, idx, arr) => {
-                const isActive = activeConfigTab === step.id;
-                const isCompleted =
-                  (step.id === "settings" && activeConfigTab !== "settings") ||
-                  (step.id === "conditions" && activeConfigTab === "advanced");
+          {/* Clean Stepper Navigation */}
+          <div className="flex items-center justify-center gap-1 mb-6">
+            {[
+              { id: "settings", step: 1, label: language === "uk" ? "Налаштування" : "Configuration" },
+              { id: "conditions", step: 2, label: language === "uk" ? "Логіка" : "Strategy" },
+              { id: "advanced", step: 3, label: language === "uk" ? "Ризики" : "Risk" },
+            ].map((step, idx, arr) => {
+              const isActive = activeConfigTab === step.id;
+              const isCompleted =
+                (step.id === "settings" && activeConfigTab !== "settings") ||
+                (step.id === "conditions" && activeConfigTab === "advanced");
 
-                return (
-                  <div key={step.id} className="flex items-center flex-1">
-                    <button
-                      onClick={() => setActiveConfigTab(step.id)}
-                      className={`flex items-center gap-4 flex-1 p-3 rounded-xl transition-all ${
-                        isActive 
-                          ? "bg-black text-white" 
-                          : isCompleted 
-                            ? "bg-emerald-50 text-emerald-700 hover:bg-emerald-100" 
-                            : "hover:bg-gray-50"
-                      }`}
-                    >
-                      <div
-                        className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                          isActive
-                            ? "bg-white/20"
-                            : isCompleted
-                              ? "bg-emerald-500 text-white"
-                              : "bg-gray-100 text-gray-400"
-                        }`}
-                      >
-                        {isCompleted && !isActive ? <CheckCircle2 className="w-6 h-6" /> : step.icon}
-                      </div>
-                      <div className="text-left hidden sm:block">
-                        <span className={`text-xs font-medium uppercase tracking-wider block ${
-                          isActive ? "text-white/70" : "text-gray-400"
-                        }`}>
-                          {language === "uk" ? "Крок" : "Step"} {step.step}
-                        </span>
-                        <span className={`text-sm font-bold ${isActive ? "text-white" : ""}`}>
-                          {step.label}
-                        </span>
-                      </div>
-                    </button>
-                    {idx < arr.length - 1 && (
-                      <div className={`w-8 h-0.5 mx-2 flex-shrink-0 ${
-                        isCompleted ? "bg-emerald-500" : "bg-gray-200"
-                      }`} />
-                    )}
-                  </div>
-                );
-              })}
-            </div>
+              return (
+                <div key={step.id} className="flex items-center">
+                  <button
+                    onClick={() => setActiveConfigTab(step.id)}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all text-sm font-medium ${
+                      isActive 
+                        ? "bg-black text-white shadow-md" 
+                        : isCompleted 
+                          ? "bg-gray-100 text-gray-700 hover:bg-gray-200" 
+                          : "text-gray-400 hover:text-gray-600 hover:bg-gray-50"
+                    }`}
+                  >
+                    <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                      isActive
+                        ? "bg-white text-black"
+                        : isCompleted
+                          ? "bg-emerald-500 text-white"
+                          : "bg-gray-200 text-gray-500"
+                    }`}>
+                      {isCompleted && !isActive ? "✓" : step.step}
+                    </span>
+                    <span className="hidden sm:inline">{step.label}</span>
+                  </button>
+                  {idx < arr.length - 1 && (
+                    <div className={`w-6 h-px mx-1 ${isCompleted ? "bg-emerald-400" : "bg-gray-200"}`} />
+                  )}
+                </div>
+              );
+            })}
           </div>
 
           {/* Settings Tab */}
           {activeConfigTab === "settings" && (
             <>
-              {/* Basic Settings */}
+              {/* Basic Settings - Compact Layout */}
               <Card>
-                <CardHeader>
-                  <CardTitle>{t("backtest.strategySettings")}</CardTitle>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base">{t("backtest.strategySettings")}</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    {/* Strategy Name */}
-                    <div id="field-strategyName">
-                      <label className="text-sm font-medium block mb-1.5 flex items-center gap-1">
-                        {t("backtest.strategyName")}
-                        <span className="text-red-500">*</span>
+                <CardContent className="space-y-4">
+                  {/* Row 1: Name, Deals, Budget, Base Size, Fee */}
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+                    <div id="field-strategyName" className="col-span-2 sm:col-span-1">
+                      <label className="text-xs font-medium block mb-1 text-gray-600">
+                        {t("backtest.strategyName")} <span className="text-red-500">*</span>
                       </label>
                       <Input
                         value={strategyName}
                         onChange={(e) => { setStrategyName(e.target.value); setFormErrors(prev => ({...prev, strategyName: null})); }}
                         placeholder={language === "uk" ? "Моя стратегія" : "My Strategy"}
                         error={!!formErrors.strategyName}
+                        inputSize="sm"
                       />
-                      {formErrors.strategyName && (
-                        <p className="text-xs text-red-500 mt-1 font-medium">{formErrors.strategyName}</p>
-                      )}
                     </div>
-                    
-                    {/* Max Active Deals */}
                     <div id="field-maxActiveDeals">
-                      <label className="text-sm font-medium block mb-1.5 flex items-center gap-1">
+                      <label className="text-xs font-medium block mb-1 text-gray-600">
                         <TooltipLabel
-                          label={t("backtest.maxActiveDeals")}
-                          tooltip="Maximum positions held at once. More deals = more diversification but capital is split across them."
-                          tooltipUk="Максимальна кількість позицій одночасно. Більше угод = більша диверсифікація, але капітал розділяється між ними."
+                          label={language === "uk" ? "Макс. угод" : "Max Deals"}
+                          tooltip="Maximum positions held at once"
+                          tooltipUk="Максимальна кількість позицій одночасно"
                           language={language}
-                        />
-                        <span className="text-red-500">*</span>
+                        /> <span className="text-red-500">*</span>
                       </label>
                       <Input
                         type="number"
@@ -1309,41 +1300,32 @@ export default function BacktestPage() {
                         min={1}
                         max={20}
                         error={!!formErrors.maxActiveDeals}
+                        inputSize="sm"
                       />
-                      {formErrors.maxActiveDeals && (
-                        <p className="text-xs text-red-500 mt-1 font-medium">{formErrors.maxActiveDeals}</p>
-                      )}
                     </div>
-                    
-                    {/* Initial Balance */}
                     <div id="field-initialBalance">
-                      <label className="text-sm font-medium block mb-1.5 flex items-center gap-1">
+                      <label className="text-xs font-medium block mb-1 text-gray-600">
                         <TooltipLabel
-                          label={t("backtest.initialBalance")}
-                          tooltip="Starting capital for the backtest. Results scale proportionally to this amount."
-                          tooltipUk="Початковий капітал для бектесту. Результати масштабуються пропорційно цій сумі."
+                          label={language === "uk" ? "Бюджет ($)" : "Budget ($)"}
+                          tooltip="Starting capital for the backtest"
+                          tooltipUk="Початковий капітал для бектесту"
                           language={language}
-                        />
-                        <span className="text-red-500">*</span>
+                        /> <span className="text-red-500">*</span>
                       </label>
                       <Input
                         type="number"
                         value={initialBalance}
                         onChange={(e) => { setInitialBalance(parseFloat(e.target.value) || 0); setFormErrors(prev => ({...prev, initialBalance: null})); }}
                         error={!!formErrors.initialBalance}
+                        inputSize="sm"
                       />
-                      {formErrors.initialBalance && (
-                        <p className="text-xs text-red-500 mt-1 font-medium">{formErrors.initialBalance}</p>
-                      )}
                     </div>
-                    
-                    {/* Base Order Size (auto-calculated) */}
                     <div>
-                      <label className="text-sm font-medium block mb-1.5">
+                      <label className="text-xs font-medium block mb-1 text-gray-600">
                         <TooltipLabel
-                          label={t("backtest.baseOrderSize")}
-                          tooltip="Auto-calculated as Initial Balance ÷ Max Active Deals. This ensures you have enough capital for all positions."
-                          tooltipUk="Автоматично розраховується як Початковий баланс ÷ Макс. активних угод. Це гарантує достатній капітал для всіх позицій."
+                          label={language === "uk" ? "Розмір ($)" : "Order Size"}
+                          tooltip="Auto: Budget ÷ Max Deals"
+                          tooltipUk="Авто: Бюджет ÷ Макс. угод"
                           language={language}
                         />
                       </label>
@@ -1352,17 +1334,15 @@ export default function BacktestPage() {
                         value={baseOrderSize}
                         readOnly
                         className="bg-gray-50 cursor-not-allowed"
+                        inputSize="sm"
                       />
-                      <p className="text-xs text-gray-500 mt-1">= ${initialBalance.toLocaleString()} ÷ {maxActiveDeals}</p>
                     </div>
-                    
-                    {/* Trading Fee */}
                     <div>
-                      <label className="text-sm font-medium block mb-1.5">
+                      <label className="text-xs font-medium block mb-1 text-gray-600">
                         <TooltipLabel
-                          label={language === "uk" ? "Комісія (%)" : "Trading Fee (%)"}
-                          tooltip="Exchange fee per trade. Binance: 0.1%, Bybit: 0.075%. Applied to every buy and sell."
-                          tooltipUk="Комісія біржі за угоду. Binance: 0.1%, Bybit: 0.075%. Застосовується до кожної покупки і продажу."
+                          label={language === "uk" ? "Комісія (%)" : "Fee (%)"}
+                          tooltip="Exchange fee per trade"
+                          tooltipUk="Комісія біржі за угоду"
                           language={language}
                         />
                       </label>
@@ -1373,65 +1353,60 @@ export default function BacktestPage() {
                         step={0.01}
                         min={0}
                         max={1}
+                        inputSize="sm"
                       />
                     </div>
-                    
-                    {/* Date Range with Quick Periods */}
-                    <div className="md:col-span-2">
-                      <label className="text-sm font-medium block mb-2">
+                  </div>
+                  
+                  {/* Row 2: Period presets and dates */}
+                  <div className="flex flex-wrap items-end gap-3">
+                    <div className="flex-1 min-w-[200px]">
+                      <label className="text-xs font-medium block mb-1 text-gray-600">
                         <TooltipLabel
-                          label={language === "uk" ? "Період тестування" : "Testing Period"}
-                          tooltip="Select backtest period. More history = more reliable results but longer processing time."
-                          tooltipUk="Оберіть період бектесту. Більше історії = надійніші результати, але довша обробка."
+                          label={language === "uk" ? "Період" : "Period"}
+                          tooltip="Select backtest period"
+                          tooltipUk="Оберіть період бектесту"
                           language={language}
-                        />
-                        <span className="text-red-500 ml-1">*</span>
+                        /> <span className="text-red-500">*</span>
                       </label>
-                      <div className="flex flex-wrap gap-2 mb-3">
+                      <div className="flex flex-wrap gap-1">
                         {PERIOD_PRESETS.map((preset) => (
                           <button
                             key={preset.months}
                             onClick={() => { setDatePeriod(preset.months); setFormErrors(prev => ({...prev, startDate: null, endDate: null})); }}
-                            className={`px-4 py-2 text-sm font-bold transition ${selectedPeriod === preset.months
+                            className={`px-3 py-1.5 text-xs font-bold transition rounded ${selectedPeriod === preset.months
                               ? "bg-black text-white"
-                              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                               }`}
-                            style={{ clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))' }}
                           >
                             {language === "uk" ? preset.labelUk : preset.label}
                           </button>
                         ))}
                       </div>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div id="field-startDate">
-                          <label className="text-xs font-medium text-gray-600 block mb-1.5 flex gap-1">
-                            {t("backtest.startDate")} <span className="text-red-500">*</span>
-                          </label>
-                          <Input
-                            type="date"
-                            value={startDate}
-                            onChange={(e) => { setStartDate(e.target.value); setSelectedPeriod(null); setFormErrors(prev => ({...prev, startDate: null})); }}
-                            error={!!formErrors.startDate}
-                          />
-                          {formErrors.startDate && (
-                            <p className="text-xs text-red-500 mt-1 font-medium">{formErrors.startDate}</p>
-                          )}
-                        </div>
-                        <div id="field-endDate">
-                          <label className="text-xs font-medium text-gray-600 block mb-1.5 flex gap-1">
-                            {t("backtest.endDate")} <span className="text-red-500">*</span>
-                          </label>
-                          <Input
-                            type="date"
-                            value={endDate}
-                            onChange={(e) => { setEndDate(e.target.value); setSelectedPeriod(null); setFormErrors(prev => ({...prev, endDate: null})); }}
-                            error={!!formErrors.endDate}
-                          />
-                          {formErrors.endDate && (
-                            <p className="text-xs text-red-500 mt-1 font-medium">{formErrors.endDate}</p>
-                          )}
-                        </div>
-                      </div>
+                    </div>
+                    <div id="field-startDate" className="w-32">
+                      <label className="text-xs font-medium text-gray-600 block mb-1">
+                        {language === "uk" ? "Від" : "From"} <span className="text-red-500">*</span>
+                      </label>
+                      <Input
+                        type="date"
+                        value={startDate}
+                        onChange={(e) => { setStartDate(e.target.value); setSelectedPeriod(null); setFormErrors(prev => ({...prev, startDate: null})); }}
+                        error={!!formErrors.startDate}
+                        inputSize="sm"
+                      />
+                    </div>
+                    <div id="field-endDate" className="w-32">
+                      <label className="text-xs font-medium text-gray-600 block mb-1">
+                        {language === "uk" ? "До" : "To"} <span className="text-red-500">*</span>
+                      </label>
+                      <Input
+                        type="date"
+                        value={endDate}
+                        onChange={(e) => { setEndDate(e.target.value); setSelectedPeriod(null); setFormErrors(prev => ({...prev, endDate: null})); }}
+                        error={!!formErrors.endDate}
+                        inputSize="sm"
+                      />
                     </div>
                   </div>
 
@@ -1665,116 +1640,108 @@ export default function BacktestPage() {
           {/* Conditions Tab */}
           {activeConfigTab === "conditions" && (
             <>
-              {/* Video Tutorial for Conditions */}
-              <VideoPlaceholder
-                title="Understanding Entry & Exit Conditions"
-                titleUk="Розуміння умов входу та виходу"
-                description="Learn how to combine indicators for powerful strategies"
-                descriptionUk="Навчіться комбінувати індикатори для потужних стратегій"
-                duration="4:30"
-                topic="advanced"
-                language={language}
-                variant="inline"
-                className="mb-6"
-              />
-
-              {/* Entry Conditions */}
-              <Card id="field-entryConditions" className={formErrors.entryConditions ? "border-red-300" : ""}>
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <div>
-                    <CardTitle className="text-green-600 flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center">
-                        <TrendingUp className="w-4 h-4 text-green-600" />
-                      </div>
-                      <TooltipLabel
-                        label={t("backtest.entryConditions")}
-                        tooltip="Conditions that trigger buying. All conditions must be met (AND logic). At least one entry condition is required."
-                        tooltipUk="Умови для входу в позицію. Всі умови повинні виконатися одночасно (логіка І). Потрібна хоча б одна умова входу."
-                        language={language}
-                      />
-                      <span className="text-red-500">*</span>
-                    </CardTitle>
+              {/* Entry & Exit Conditions - Side by Side */}
+              <div className="grid md:grid-cols-2 gap-4">
+                {/* Entry Conditions */}
+                <Card id="field-entryConditions" className={`${formErrors.entryConditions ? "border-red-300" : ""}`}>
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-green-600 flex items-center gap-2 text-base">
+                        <div className="w-6 h-6 rounded bg-green-100 flex items-center justify-center">
+                          <TrendingUp className="w-3.5 h-3.5 text-green-600" />
+                        </div>
+                        <TooltipLabel
+                          label={t("backtest.entryConditions")}
+                          tooltip="Conditions that trigger buying (AND logic)"
+                          tooltipUk="Умови для входу в позицію (логіка І)"
+                          language={language}
+                        />
+                        <span className="text-red-500 text-sm">*</span>
+                      </CardTitle>
+                      <Button size="sm" variant="outline" className="text-xs h-7 px-2" onClick={() => { addCondition("entry"); setFormErrors(prev => ({...prev, entryConditions: null})); }}>
+                        + {language === "uk" ? "Додати" : "Add"}
+                      </Button>
+                    </div>
                     {formErrors.entryConditions && (
                       <p className="text-xs text-red-500 mt-1 font-medium">{formErrors.entryConditions}</p>
                     )}
-                  </div>
-                  <Button size="sm" variant="outline" onClick={() => { addCondition("entry"); setFormErrors(prev => ({...prev, entryConditions: null})); }}>
-                    {t("backtest.addCondition")}
-                  </Button>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {entryConditions.map((cond, i) => (
-                    <ConditionBuilder
-                      key={i}
-                      condition={cond}
-                      language={language}
-                      onChange={(updated) => {
-                        const newConds = [...entryConditions];
-                        newConds[i] = updated;
-                        setEntryConditions(newConds);
-                      }}
-                      onRemove={() => setEntryConditions(entryConditions.filter((_, j) => j !== i))}
-                    />
-                  ))}
-                  {entryConditions.length === 0 && (
-                    <div className={`text-center py-4 ${formErrors.entryConditions ? "bg-red-50 border-2 border-red-200 rounded-lg" : ""}`}>
-                      <p className={`text-sm ${formErrors.entryConditions ? "text-red-600 font-medium" : "text-gray-500"}`}>
-                        {formErrors.entryConditions 
-                          ? formErrors.entryConditions
-                          : t("backtest.noEntryConditions")}
-                      </p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Exit Conditions - with toggle */}
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Checkbox
-                      checked={conditionsActive}
-                      onChange={setConditionsActive}
-                      size="md"
-                    />
-                    <CardTitle className="text-red-600 flex items-center gap-2">
-                      <TooltipLabel
-                        label={t("backtest.exitConditions")}
-                        tooltip="Conditions to exit a position (sell). Optional - can rely on Take Profit/Stop Loss instead. All conditions must be met (AND logic)."
-                        tooltipUk="Умови для виходу з позиції (продажу). Необов'язкові - можна покладатися на Take Profit/Stop Loss. Всі умови повинні виконатися (логіка І)."
-                        language={language}
-                      />
-                    </CardTitle>
-                  </div>
-                  {conditionsActive && (
-                    <Button size="sm" variant="outline" onClick={() => addCondition("exit")}>
-                      {t("backtest.addCondition")}
-                    </Button>
-                  )}
-                </CardHeader>
-                {conditionsActive && (
-                  <CardContent className="space-y-3">
-                    {exitConditions.map((cond, i) => (
+                  </CardHeader>
+                  <CardContent className="space-y-2 pt-0">
+                    {entryConditions.map((cond, i) => (
                       <ConditionBuilder
                         key={i}
                         condition={cond}
                         language={language}
                         onChange={(updated) => {
-                          const newConds = [...exitConditions];
+                          const newConds = [...entryConditions];
                           newConds[i] = updated;
-                          setExitConditions(newConds);
+                          setEntryConditions(newConds);
                         }}
-                        onRemove={() => setExitConditions(exitConditions.filter((_, j) => j !== i))}
+                        onRemove={() => setEntryConditions(entryConditions.filter((_, j) => j !== i))}
                       />
                     ))}
-                    {exitConditions.length === 0 && (
-                      <p className="text-gray-500 text-sm text-center py-4">
-                        {t("backtest.noExitConditions")}
-                      </p>
+                    {entryConditions.length === 0 && (
+                      <div className={`text-center py-3 ${formErrors.entryConditions ? "bg-red-50 border border-red-200 rounded" : "bg-gray-50 rounded"}`}>
+                        <p className={`text-xs ${formErrors.entryConditions ? "text-red-600" : "text-gray-500"}`}>
+                          {language === "uk" ? "Натисніть + щоб додати умову входу" : "Click + to add entry condition"}
+                        </p>
+                      </div>
                     )}
                   </CardContent>
-                )}
-              </Card>
+                </Card>
+
+                {/* Exit Conditions */}
+                <Card>
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Checkbox
+                          checked={conditionsActive}
+                          onChange={setConditionsActive}
+                          size="sm"
+                        />
+                        <CardTitle className="text-red-600 flex items-center gap-2 text-base">
+                          <TooltipLabel
+                            label={t("backtest.exitConditions")}
+                            tooltip="Conditions to exit (optional, can use TP/SL)"
+                            tooltipUk="Умови виходу (необов'язкові, можна використовувати TP/SL)"
+                            language={language}
+                          />
+                        </CardTitle>
+                      </div>
+                      {conditionsActive && (
+                        <Button size="sm" variant="outline" className="text-xs h-7 px-2" onClick={() => addCondition("exit")}>
+                          + {language === "uk" ? "Додати" : "Add"}
+                        </Button>
+                      )}
+                    </div>
+                  </CardHeader>
+                  {conditionsActive && (
+                    <CardContent className="space-y-2 pt-0">
+                      {exitConditions.map((cond, i) => (
+                        <ConditionBuilder
+                          key={i}
+                          condition={cond}
+                          language={language}
+                          onChange={(updated) => {
+                            const newConds = [...exitConditions];
+                            newConds[i] = updated;
+                            setExitConditions(newConds);
+                          }}
+                          onRemove={() => setExitConditions(exitConditions.filter((_, j) => j !== i))}
+                        />
+                      ))}
+                      {exitConditions.length === 0 && (
+                        <div className="text-center py-3 bg-gray-50 rounded">
+                          <p className="text-xs text-gray-500">
+                            {language === "uk" ? "Натисніть + щоб додати умову виходу" : "Click + to add exit condition"}
+                          </p>
+                        </div>
+                      )}
+                    </CardContent>
+                  )}
+                </Card>
+              </div>
 
               {/* Safety Orders (DCA) */}
               <Card>
@@ -2042,104 +2009,86 @@ export default function BacktestPage() {
               </Card>
 
 
-              {/* Notification Preferences */}
-              <Card className="bg-gray-50 border-2 border-gray-100" style={{ clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))' }}>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                    </svg>
-                    {language === "uk" ? "Сповіщення по завершенню" : "Completion Notification"}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <div className="flex flex-wrap gap-2">
+              {/* Notification Preferences - Compact */}
+              <div className="flex items-center justify-between bg-gray-50 rounded-lg p-3 border border-gray-200">
+                <span className="text-sm font-medium text-gray-700">
+                  {language === "uk" ? "Сповістити:" : "Notify via:"}
+                </span>
+                <div className="flex gap-1">
+                  {[
+                    { id: 'email', label: 'Email', icon: '✉️', configured: true },
+                    { id: 'telegram', label: 'TG', icon: '📱', configured: !!userProfile?.telegramId },
+                    { id: 'whatsapp', label: 'WA', icon: '💬', configured: !!userProfile?.whatsappNumber },
+                  ].map((channel) => (
                     <button
+                      key={channel.id}
                       type="button"
-                      onClick={() => setNotifyVia('email')}
-                      className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg border-2 transition-all ${
-                        notifyVia === 'email' 
-                          ? 'bg-black text-white border-black' 
-                          : 'bg-white text-gray-700 border-gray-200 hover:border-gray-400'
+                      onClick={() => handleNotifyChange(channel.id)}
+                      className={`px-3 py-1.5 text-xs font-medium rounded transition-all flex items-center gap-1 ${
+                        notifyVia === channel.id 
+                          ? 'bg-black text-white' 
+                          : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-400'
                       }`}
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                      </svg>
-                      Email
+                      <span>{channel.icon}</span>
+                      <span className="hidden sm:inline">{channel.label}</span>
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => setNotifyVia('telegram')}
-                      disabled={!userProfile?.telegramId}
-                      className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg border-2 transition-all ${
-                        notifyVia === 'telegram' 
-                          ? 'bg-blue-500 text-white border-blue-500' 
-                          : userProfile?.telegramId 
-                            ? 'bg-white text-gray-700 border-gray-200 hover:border-blue-400' 
-                            : 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
-                      }`}
-                    >
-                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
-                      </svg>
-                      Telegram
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setNotifyVia('both')}
-                      disabled={!userProfile?.telegramId}
-                      className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg border-2 transition-all ${
-                        notifyVia === 'both' 
-                          ? 'bg-gradient-to-r from-black to-blue-500 text-white border-black' 
-                          : userProfile?.telegramId 
-                            ? 'bg-white text-gray-700 border-gray-200 hover:border-gray-400' 
-                            : 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
-                      }`}
-                    >
-                      {language === "uk" ? "Обидва" : "Both"}
-                    </button>
-                  </div>
-                  {!userProfile?.telegramId && (
-                    <p className="text-xs text-gray-500 mt-2">
-                      {language === "uk" 
-                        ? "💡 Налаштуйте Telegram в профілі для отримання миттєвих сповіщень" 
-                        : "💡 Set up Telegram in your profile to receive instant notifications"}
+                  ))}
+                </div>
+              </div>
+              
+              {/* Configuration Modal */}
+              {showNotifyConfigModal && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                  <div className="bg-white rounded-xl p-6 max-w-md w-full shadow-xl">
+                    <h3 className="font-bold text-lg mb-2">
+                      {language === "uk" ? "Налаштування сповіщень" : "Configure Notifications"}
+                    </h3>
+                    <p className="text-gray-600 text-sm mb-4">
+                      {pendingNotifyChannel === 'telegram' || pendingNotifyChannel === 'both' || pendingNotifyChannel === 'all'
+                        ? (language === "uk" 
+                          ? "Для отримання сповіщень у Telegram, перейдіть до налаштувань профілю та підключіть бота."
+                          : "To receive Telegram notifications, go to your profile settings and connect the bot.")
+                        : (language === "uk"
+                          ? "Для отримання сповіщень у WhatsApp, перейдіть до налаштувань профілю та додайте номер телефону."
+                          : "To receive WhatsApp notifications, go to your profile settings and add your phone number.")
+                      }
                     </p>
-                  )}
-                </CardContent>
-              </Card>
+                    <div className="flex gap-2">
+                      <Link href="/account?tab=settings" className="flex-1">
+                        <button className="w-full py-2 bg-black text-white rounded-lg font-medium text-sm hover:bg-gray-800">
+                          {language === "uk" ? "Перейти до профілю" : "Go to Profile"}
+                        </button>
+                      </Link>
+                      <button 
+                        onClick={() => { setShowNotifyConfigModal(false); setPendingNotifyChannel(null); }}
+                        className="px-4 py-2 text-gray-600 border border-gray-200 rounded-lg font-medium text-sm hover:bg-gray-50"
+                      >
+                        {language === "uk" ? "Пізніше" : "Later"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Run Button */}
               <button
-                className="w-full py-4 bg-gradient-to-r from-black via-gray-900 to-black text-white font-bold text-lg relative overflow-hidden group disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{ clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))' }}
+                className="w-full py-3 bg-black text-white font-bold text-base hover:bg-gray-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))' }}
                 onClick={runBacktest}
                 disabled={loading}
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-emerald-600/20 via-transparent to-emerald-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-emerald-400 to-transparent opacity-50"></div>
-                <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-emerald-400 to-transparent opacity-50"></div>
-                <div className="relative flex items-center justify-center gap-3">
+                <div className="flex items-center justify-center gap-2">
                   {loading ? (
                     <>
-                      <svg className="animate-spin h-5 w-5 text-emerald-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
                       <span>{t("backtest.runningBacktest")}</span>
-                      <div className="flex gap-1">
-                        <div className="w-1.5 h-1.5 bg-emerald-400 animate-pulse"></div>
-                        <div className="w-1.5 h-1.5 bg-emerald-400 animate-pulse delay-100"></div>
-                        <div className="w-1.5 h-1.5 bg-emerald-400 animate-pulse delay-200"></div>
-                      </div>
                     </>
                   ) : (
-                    <>
-                      <PlayCircle className="w-5 h-5 text-emerald-400" />
-                      <span>{t("backtest.runBacktest")}</span>
-                      <div className="w-4 h-4" /> {/* Spacer to center text with icon */}
-                    </>
+                    <span>{t("backtest.runBacktest")}</span>
                   )}
                 </div>
               </button>
