@@ -331,13 +331,6 @@ export default function ConnectPage() {
               >
                 {t.manageConnection}
               </Button>
-              <Button 
-                variant="outline"
-                onClick={() => setStep(1)}
-                className="flex-1"
-              >
-                {t.changeExchange}
-              </Button>
             </div>
           </div>
         )}
@@ -677,17 +670,6 @@ export default function ConnectPage() {
               </Button>
             </div>
 
-            {/* Back to exchange selection */}
-            <Button 
-              variant="ghost" 
-              onClick={() => {
-                setSelectedExchange(null);
-                setStep(1);
-              }}
-              className="w-full"
-            >
-              {t.changeExchange}
-            </Button>
           </div>
         )}
 

@@ -417,7 +417,7 @@ export default function Page() {
         </div>
       </section>
 
-      {/* Trusted Partners - Simple two-row sliding logos */}
+      {/* Trusted Partners - Two-row sliding logos */}
       <section className="py-16 border-t border-gray-100 bg-gradient-to-b from-gray-50 to-white overflow-hidden">
         <p className="text-center text-gray-400 mb-10 text-sm uppercase tracking-widest font-medium">
           {language === "uk" 
@@ -431,71 +431,98 @@ export default function Page() {
           <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
           
           {/* Row 1 - slides left */}
-          <div className="flex overflow-hidden mb-8">
-            <div className="flex items-center animate-slide-left">
-              {[
-                { name: "tradingview", ext: "png", url: "https://www.tradingview.com", height: "h-12" },
-                { name: "coingecko", ext: "png", url: "https://www.coingecko.com", height: "h-12" },
-                { name: "coinmarketcap", ext: "svg", url: "https://coinmarketcap.com", height: "h-8" },
-                { name: "glassnode", ext: "png", url: "https://glassnode.com", height: "h-7" },
-                { name: "messari", ext: "webp", url: "https://messari.io", height: "h-8" },
-                { name: "dune", ext: "png", url: "https://dune.com", height: "h-8" },
-                { name: "defillama", ext: "webp", url: "https://defillama.com", height: "h-8" },
-                { name: "nansen", ext: "png", url: "https://nansen.ai", height: "h-8" },
-              ].map((p) => (
-                <a key={p.name} href={p.url} target="_blank" rel="noopener noreferrer" className="mx-10 flex-shrink-0 opacity-40 hover:opacity-100 grayscale hover:grayscale-0 transition-all duration-300">
-                  <img src={`/logos/partners/${p.name}.${p.ext}`} alt={p.name} className={`${p.height} w-auto object-contain`} />
-                </a>
-              ))}
-              {[
-                { name: "tradingview", ext: "png", url: "https://www.tradingview.com", height: "h-12" },
-                { name: "coingecko", ext: "png", url: "https://www.coingecko.com", height: "h-12" },
-                { name: "coinmarketcap", ext: "svg", url: "https://coinmarketcap.com", height: "h-8" },
-                { name: "glassnode", ext: "png", url: "https://glassnode.com", height: "h-7" },
-                { name: "messari", ext: "webp", url: "https://messari.io", height: "h-8" },
-                { name: "dune", ext: "png", url: "https://dune.com", height: "h-8" },
-                { name: "defillama", ext: "webp", url: "https://defillama.com", height: "h-8" },
-                { name: "nansen", ext: "png", url: "https://nansen.ai", height: "h-8" },
-              ].map((p) => (
-                <a key={`${p.name}-2`} href={p.url} target="_blank" rel="noopener noreferrer" className="mx-10 flex-shrink-0 opacity-40 hover:opacity-100 grayscale hover:grayscale-0 transition-all duration-300">
-                  <img src={`/logos/partners/${p.name}.${p.ext}`} alt={p.name} className={`${p.height} w-auto object-contain`} />
-                </a>
+          <div className="overflow-hidden mb-6">
+            <div 
+              className="flex items-center"
+              style={{
+                animation: 'slideLeft 25s linear infinite',
+                width: 'max-content'
+              }}
+            >
+              {[...Array(2)].map((_, setIdx) => (
+                <div key={setIdx} className="flex items-center">
+                  {[
+                    { name: "tradingview", ext: "png", url: "https://www.tradingview.com", h: 28 },
+                    { name: "coingecko", ext: "png", url: "https://www.coingecko.com", h: 28 },
+                    { name: "coinmarketcap", ext: "svg", url: "https://coinmarketcap.com", h: 24 },
+                    { name: "glassnode", ext: "png", url: "https://glassnode.com", h: 22 },
+                    { name: "messari", ext: "webp", url: "https://messari.io", h: 24 },
+                    { name: "dune", ext: "png", url: "https://dune.com", h: 24 },
+                    { name: "defillama", ext: "webp", url: "https://defillama.com", h: 24 },
+                    { name: "nansen", ext: "png", url: "https://nansen.ai", h: 24 },
+                  ].map((p) => (
+                    <a 
+                      key={`${p.name}-${setIdx}`} 
+                      href={p.url} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="mx-8 flex-shrink-0 opacity-50 hover:opacity-100 grayscale hover:grayscale-0 transition-all duration-300"
+                    >
+                      <img 
+                        src={`/logos/partners/${p.name}.${p.ext}`} 
+                        alt={p.name} 
+                        style={{ height: `${p.h}px`, width: 'auto' }}
+                        className="object-contain"
+                      />
+                    </a>
+                  ))}
+                </div>
               ))}
             </div>
           </div>
           
           {/* Row 2 - slides right */}
-          <div className="flex overflow-hidden">
-            <div className="flex items-center animate-slide-right">
-              {[
-                { name: "santiment", ext: "png", url: "https://santiment.net", height: "h-7" },
-                { name: "cryptoquant", ext: "jpg", url: "https://cryptoquant.com", height: "h-8" },
-                { name: "blockchain", ext: "webp", url: "https://www.blockchain.com", height: "h-6" },
-                { name: "polygon", ext: "png", url: "https://polygon.io", height: "h-8" },
-                { name: "alpha-vantage", ext: "png", url: "https://www.alphavantage.co", height: "h-8" },
-                { name: "yahoo-finance", ext: "png", url: "https://finance.yahoo.com", height: "h-8" },
-                { name: "quandl", ext: "png", url: "https://www.quandl.com", height: "h-8" },
-              ].map((p) => (
-                <a key={p.name} href={p.url} target="_blank" rel="noopener noreferrer" className="mx-10 flex-shrink-0 opacity-40 hover:opacity-100 grayscale hover:grayscale-0 transition-all duration-300">
-                  <img src={`/logos/partners/${p.name}.${p.ext}`} alt={p.name} className={`${p.height} w-auto object-contain`} />
-                </a>
-              ))}
-              {[
-                { name: "santiment", ext: "png", url: "https://santiment.net", height: "h-7" },
-                { name: "cryptoquant", ext: "jpg", url: "https://cryptoquant.com", height: "h-8" },
-                { name: "blockchain", ext: "webp", url: "https://www.blockchain.com", height: "h-6" },
-                { name: "polygon", ext: "png", url: "https://polygon.io", height: "h-8" },
-                { name: "alpha-vantage", ext: "png", url: "https://www.alphavantage.co", height: "h-8" },
-                { name: "yahoo-finance", ext: "png", url: "https://finance.yahoo.com", height: "h-8" },
-                { name: "quandl", ext: "png", url: "https://www.quandl.com", height: "h-8" },
-              ].map((p) => (
-                <a key={`${p.name}-2`} href={p.url} target="_blank" rel="noopener noreferrer" className="mx-10 flex-shrink-0 opacity-40 hover:opacity-100 grayscale hover:grayscale-0 transition-all duration-300">
-                  <img src={`/logos/partners/${p.name}.${p.ext}`} alt={p.name} className={`${p.height} w-auto object-contain`} />
-                </a>
+          <div className="overflow-hidden">
+            <div 
+              className="flex items-center"
+              style={{
+                animation: 'slideRight 30s linear infinite',
+                width: 'max-content'
+              }}
+            >
+              {[...Array(2)].map((_, setIdx) => (
+                <div key={setIdx} className="flex items-center">
+                  {[
+                    { name: "santiment", ext: "png", url: "https://santiment.net", h: 22 },
+                    { name: "cryptoquant", ext: "jpg", url: "https://cryptoquant.com", h: 24 },
+                    { name: "blockchain", ext: "webp", url: "https://www.blockchain.com", h: 20 },
+                    { name: "polygon", ext: "png", url: "https://polygon.io", h: 24 },
+                    { name: "alpha-vantage", ext: "png", url: "https://www.alphavantage.co", h: 24 },
+                    { name: "yahoo-finance", ext: "png", url: "https://finance.yahoo.com", h: 24 },
+                    { name: "quandl", ext: "png", url: "https://www.quandl.com", h: 24 },
+                  ].map((p) => (
+                    <a 
+                      key={`${p.name}-${setIdx}`} 
+                      href={p.url} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="mx-8 flex-shrink-0 opacity-50 hover:opacity-100 grayscale hover:grayscale-0 transition-all duration-300"
+                    >
+                      <img 
+                        src={`/logos/partners/${p.name}.${p.ext}`} 
+                        alt={p.name} 
+                        style={{ height: `${p.h}px`, width: 'auto' }}
+                        className="object-contain"
+                      />
+                    </a>
+                  ))}
+                </div>
               ))}
             </div>
           </div>
         </div>
+        
+        {/* Inline keyframes for animation */}
+        <style jsx>{`
+          @keyframes slideLeft {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+          }
+          @keyframes slideRight {
+            0% { transform: translateX(-50%); }
+            100% { transform: translateX(0); }
+          }
+        `}</style>
       </section>
 
       {/* CTA */}
