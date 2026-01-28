@@ -975,22 +975,15 @@ export default function BacktestPage() {
         }
       />
 
-      {/* Clean Header */}
-      <div className="mb-8">
-        <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold">{t("backtest.title")}</h1>
-            <p className="text-gray-600 mt-1">{t("backtest.subtitle")}</p>
+      {/* Professional Header */}
+      <div className="mb-10">
+        <div className="text-center max-w-2xl mx-auto">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-700 text-sm font-medium rounded-full mb-4">
+            <Sparkles className="w-4 h-4" />
+            {language === "uk" ? "Візуальний конструктор стратегій" : "Visual Strategy Builder"}
           </div>
-          
-          {/* Quick help link */}
-          <button 
-            onClick={() => {/* Future: open help modal */}}
-            className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:text-black hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <HelpCircle className="w-4 h-4" />
-            {language === "uk" ? "Як це працює?" : "How does it work?"}
-          </button>
+          <h1 className="text-4xl font-bold mb-3">{t("backtest.title")}</h1>
+          <p className="text-gray-600 text-lg">{t("backtest.subtitle")}</p>
         </div>
       </div>
 
@@ -1020,70 +1013,80 @@ export default function BacktestPage() {
         </div>
       )}
 
-      <div className="grid lg:grid-cols-3 gap-6">
+      <div className="grid lg:grid-cols-3 gap-8">
         {/* Configuration Panel */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Tab Navigation */}
-          {/* Stepper Navigation */}
-          <div className="mb-8 relative">
-            <div className="absolute top-1/2 left-0 w-full h-1 bg-gray-100 -z-10 rounded-full" />
-            <div className="grid grid-cols-3 gap-4">
+          {/* Modern Stepper Navigation */}
+          <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm mb-8">
+            <div className="flex items-center justify-between">
               {[
                 {
                   id: "settings",
                   step: 1,
-                  label: "Configuration",
-                  desc: "Assets & Time",
+                  label: language === "uk" ? "Налаштування" : "Configuration",
+                  desc: language === "uk" ? "Активи та час" : "Assets & Time",
                   icon: <Settings2 className="w-5 h-5" />
                 },
                 {
                   id: "conditions",
                   step: 2,
-                  label: "Strategy Logic",
-                  desc: "Entry & Exit",
+                  label: language === "uk" ? "Логіка" : "Strategy Logic",
+                  desc: language === "uk" ? "Вхід та вихід" : "Entry & Exit",
                   icon: <GitGraph className="w-5 h-5" />
                 },
                 {
                   id: "advanced",
                   step: 3,
-                  label: "Risk & Execution",
-                  desc: "Safety Orders",
+                  label: language === "uk" ? "Ризики" : "Risk Management",
+                  desc: language === "uk" ? "Захист капіталу" : "Capital Protection",
                   icon: <ShieldCheck className="w-5 h-5" />
                 },
-              ].map((step, idx) => {
+              ].map((step, idx, arr) => {
                 const isActive = activeConfigTab === step.id;
                 const isCompleted =
                   (step.id === "settings" && activeConfigTab !== "settings") ||
                   (step.id === "conditions" && activeConfigTab === "advanced");
 
                 return (
-                  <button
-                    key={step.id}
-                    onClick={() => setActiveConfigTab(step.id)}
-                    className={`relative flex flex-col items-center group`}
-                  >
-                    <div
-                      className={`w-12 h-12 rounded-xl flex items-center justify-center border-2 transition-all duration-300 z-10 ${isActive
-                        ? "bg-black text-white border-black shadow-lg scale-110"
-                        : isCompleted
-                          ? "bg-emerald-500 text-white border-emerald-500"
-                          : "bg-white text-gray-400 border-gray-200 group-hover:border-gray-300"
-                        }`}
-                      style={isActive ? { clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))' } : {}}
+                  <div key={step.id} className="flex items-center flex-1">
+                    <button
+                      onClick={() => setActiveConfigTab(step.id)}
+                      className={`flex items-center gap-4 flex-1 p-3 rounded-xl transition-all ${
+                        isActive 
+                          ? "bg-black text-white" 
+                          : isCompleted 
+                            ? "bg-emerald-50 text-emerald-700 hover:bg-emerald-100" 
+                            : "hover:bg-gray-50"
+                      }`}
                     >
-                      {isCompleted ? <CheckCircle2 className="w-6 h-6" /> : step.icon}
-                    </div>
-                    <div className="mt-3 text-center">
-                      <span className={`text-xs font-bold uppercase tracking-wider block mb-0.5 ${isActive ? "text-emerald-600" : "text-gray-400"
+                      <div
+                        className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                          isActive
+                            ? "bg-white/20"
+                            : isCompleted
+                              ? "bg-emerald-500 text-white"
+                              : "bg-gray-100 text-gray-400"
+                        }`}
+                      >
+                        {isCompleted && !isActive ? <CheckCircle2 className="w-6 h-6" /> : step.icon}
+                      </div>
+                      <div className="text-left hidden sm:block">
+                        <span className={`text-xs font-medium uppercase tracking-wider block ${
+                          isActive ? "text-white/70" : "text-gray-400"
                         }`}>
-                        Step {step.step}
-                      </span>
-                      <span className={`text-sm font-bold ${isActive ? "text-black" : "text-gray-500"
-                        }`}>
-                        {step.label}
-                      </span>
-                    </div>
-                  </button>
+                          {language === "uk" ? "Крок" : "Step"} {step.step}
+                        </span>
+                        <span className={`text-sm font-bold ${isActive ? "text-white" : ""}`}>
+                          {step.label}
+                        </span>
+                      </div>
+                    </button>
+                    {idx < arr.length - 1 && (
+                      <div className={`w-8 h-0.5 mx-2 flex-shrink-0 ${
+                        isCompleted ? "bg-emerald-500" : "bg-gray-200"
+                      }`} />
+                    )}
+                  </div>
                 );
               })}
             </div>
