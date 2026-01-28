@@ -64,10 +64,13 @@ export const Select = forwardRef(({
     return () => document.removeEventListener("keydown", handleEscape);
   }, [isOpen]);
 
-  // Close on scroll
+  // Close on scroll (but not when scrolling inside dropdown)
   useEffect(() => {
     if (!isOpen) return;
-    const handleScroll = () => setIsOpen(false);
+    const handleScroll = (e) => {
+      if (dropdownRef.current?.contains(e.target)) return;
+      setIsOpen(false);
+    };
     window.addEventListener("scroll", handleScroll, true);
     return () => window.removeEventListener("scroll", handleScroll, true);
   }, [isOpen]);
@@ -180,7 +183,10 @@ export const SelectInline = forwardRef(({
 
   useEffect(() => {
     if (!isOpen) return;
-    const handleScroll = () => setIsOpen(false);
+    const handleScroll = (e) => {
+      if (dropdownRef.current?.contains(e.target)) return;
+      setIsOpen(false);
+    };
     window.addEventListener("scroll", handleScroll, true);
     return () => window.removeEventListener("scroll", handleScroll, true);
   }, [isOpen]);
