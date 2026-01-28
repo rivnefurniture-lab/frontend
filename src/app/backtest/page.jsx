@@ -461,7 +461,11 @@ export default function BacktestPage() {
   const router = useRouter();
   const [strategyName, setStrategyName] = useState("My Strategy");
   const [selectedPairs, setSelectedPairs] = useState(DEFAULT_SELECTED_PAIRS);
+  const [useAllPairs, setUseAllPairs] = useState(true); // Default: use all pairs
   const [maxActiveDeals, setMaxActiveDeals] = useState(1);
+  
+  // Form validation errors
+  const [formErrors, setFormErrors] = useState({});
   const [initialBalance, setInitialBalance] = useState(10000);
 
   // Base order size is auto-calculated: initialBalance / maxActiveDeals
@@ -665,52 +669,115 @@ export default function BacktestPage() {
     }
   };
 
-  const runBacktest = async () => {
-    setLoading(true);
-    setError(null);
-    setSaved(false);
-
-    // ========== VALIDATION ==========
-    const validationErrors = [];
-
-    // 1. Check if pairs are selected
-    if (!selectedPairs || selectedPairs.length === 0) {
-      validationErrors.push(language === "uk"
-        ? "Оберіть хоча б один актив для бектесту"
-        : "Select at least one asset for backtesting");
+  // Validate form and return errors object
+  const validateForm = () => {
+    const errors = {};
+    
+    // Strategy name required
+    if (!strategyName || strategyName.trim() === "") {
+      errors.strategyName = language === "uk" 
+        ? "Введіть назву стратегії" 
+        : "Enter strategy name";
     }
-
-    // 2. Check if entry conditions exist (required for backtest to make trades)
-    const hasEntryConditions = entryConditions.length > 0 ||
-      (useMarketState && (bullishEntryConditions.length > 0 || bearishEntryConditions.length > 0));
-    if (!hasEntryConditions) {
-      validationErrors.push(language === "uk"
-        ? "Додайте хоча б одну умову входу. Без умов входу бектест не зможе відкрити жодної угоди."
-        : "Add at least one entry condition. Without entry conditions, the backtest cannot open any trades.");
+    
+    // Max active deals required and valid
+    if (!maxActiveDeals || maxActiveDeals < 1) {
+      errors.maxActiveDeals = language === "uk"
+        ? "Мінімум 1 активна угода"
+        : "Minimum 1 active deal";
     }
-
-    // 3. Check date range
+    
+    // Initial balance required
+    if (!initialBalance || initialBalance < 100) {
+      errors.initialBalance = language === "uk"
+        ? "Мінімальний баланс $100"
+        : "Minimum balance $100";
+    }
+    
+    // Pairs required (only if useAllPairs is off)
+    const effectivePairs = useAllPairs ? PAIRS : selectedPairs;
+    if (!effectivePairs || effectivePairs.length === 0) {
+      errors.pairs = language === "uk"
+        ? "Оберіть хоча б один актив"
+        : "Select at least one asset";
+    }
+    
+    // Date range validation
     const start = new Date(startDate);
     const end = new Date(endDate);
     const now = new Date();
-
-    if (start >= end) {
-      validationErrors.push(language === "uk"
-        ? "Дата початку повинна бути раніше дати закінчення"
-        : "Start date must be before end date");
+    
+    if (!startDate) {
+      errors.startDate = language === "uk" ? "Оберіть дату початку" : "Select start date";
+    } else if (start >= end) {
+      errors.startDate = language === "uk" 
+        ? "Дата початку повинна бути раніше дати закінчення" 
+        : "Start date must be before end date";
     }
-
-    if (end > now) {
-      validationErrors.push(language === "uk"
-        ? "Дата закінчення не може бути в майбутньому"
-        : "End date cannot be in the future");
+    
+    if (!endDate) {
+      errors.endDate = language === "uk" ? "Оберіть дату закінчення" : "Select end date";
+    } else if (end > now) {
+      errors.endDate = language === "uk"
+        ? "Дата не може бути в майбутньому"
+        : "Date cannot be in the future";
     }
+    
+    // Entry conditions required
+    const hasEntryConditions = entryConditions.length > 0 ||
+      (useMarketState && (bullishEntryConditions.length > 0 || bearishEntryConditions.length > 0));
+    if (!hasEntryConditions) {
+      errors.entryConditions = language === "uk"
+        ? "Додайте хоча б одну умову входу"
+        : "Add at least one entry condition";
+    }
+    
+    return errors;
+  };
+  
+  // Scroll to first error field
+  const scrollToFirstError = (errors) => {
+    const fieldOrder = ['strategyName', 'maxActiveDeals', 'initialBalance', 'startDate', 'endDate', 'pairs', 'entryConditions'];
+    for (const field of fieldOrder) {
+      if (errors[field]) {
+        const element = document.getElementById(`field-${field}`);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          // Switch to correct tab if needed
+          if (['strategyName', 'maxActiveDeals', 'initialBalance', 'startDate', 'endDate', 'pairs'].includes(field)) {
+            setActiveConfigTab('settings');
+          } else if (field === 'entryConditions') {
+            setActiveConfigTab('conditions');
+          }
+        }
+        break;
+      }
+    }
+  };
 
-    // 4. Check data availability based on mode
+  const runBacktest = async () => {
+    // Clear previous errors
+    setFormErrors({});
+    setError(null);
+    
+    // Validate form
+    const errors = validateForm();
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      scrollToFirstError(errors);
+      return;
+    }
+    
+    setLoading(true);
+    setSaved(false);
+
+    // Additional validation for data availability
+    const validationErrors = [];
+    const start = new Date(startDate);
     const isCrypto = isCryptoMode();
     const minDataDate = isCrypto
-      ? new Date('2020-01-01') // Crypto data from 2020
-      : new Date('2022-01-01'); // Stocks data from 2022 (Yahoo 2y limit for hourly)
+      ? new Date('2020-01-01')
+      : new Date('2022-01-01');
 
     if (start < minDataDate) {
       validationErrors.push(language === "uk"
@@ -718,22 +785,6 @@ export default function BacktestPage() {
         : `Data is only available from ${minDataDate.toLocaleDateString()}. Please select a later start date.`);
     }
 
-    // 5. Check initial balance
-    if (initialBalance < 100) {
-      validationErrors.push(language === "uk"
-        ? "Початковий баланс повинен бути не менше $100"
-        : "Initial balance must be at least $100");
-    }
-
-    // 6. Check if date range is too short (less than 1 day)
-    const daysDiff = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
-    if (daysDiff < 1) {
-      validationErrors.push(language === "uk"
-        ? "Період бектесту повинен бути не менше 1 дня"
-        : "Backtest period must be at least 1 day");
-    }
-
-    // If validation errors, show them and stop
     if (validationErrors.length > 0) {
       setError(validationErrors.join('\n'));
       setLoading(false);
@@ -742,9 +793,10 @@ export default function BacktestPage() {
 
     try {
       // Build payload matching backtest2.py EXACTLY
+      const effectivePairs = useAllPairs ? PAIRS : selectedPairs;
       const payload = {
         strategy_name: strategyName,
-        pairs: selectedPairs,
+        pairs: effectivePairs,
         max_active_deals: maxActiveDeals,
         initial_balance: initialBalance,
         base_order_size: baseOrderSize,
@@ -1043,94 +1095,124 @@ export default function BacktestPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="grid md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-sm font-medium block mb-1 flex items-center gap-1">
-                        <TooltipLabel
-                          label={t("backtest.strategyName")}
-                          tooltip="Give your strategy a unique name to identify it later in your dashboard and strategy list."
-                        />
+                    {/* Strategy Name */}
+                    <div id="field-strategyName">
+                      <label className="text-sm font-medium block mb-1.5 flex items-center gap-1">
+                        {t("backtest.strategyName")}
                         <span className="text-red-500">*</span>
                       </label>
                       <Input
                         value={strategyName}
-                        onChange={(e) => setStrategyName(e.target.value)}
-                        placeholder="My Strategy"
+                        onChange={(e) => { setStrategyName(e.target.value); setFormErrors(prev => ({...prev, strategyName: null})); }}
+                        placeholder={language === "uk" ? "Моя стратегія" : "My Strategy"}
+                        error={!!formErrors.strategyName}
                       />
+                      {formErrors.strategyName && (
+                        <p className="text-xs text-red-500 mt-1 font-medium">{formErrors.strategyName}</p>
+                      )}
                     </div>
-                    <div>
-                      <label className="text-sm font-medium block mb-1 flex items-center gap-1">
+                    
+                    {/* Max Active Deals */}
+                    <div id="field-maxActiveDeals">
+                      <label className="text-sm font-medium block mb-1.5 flex items-center gap-1">
                         <TooltipLabel
                           label={t("backtest.maxActiveDeals")}
                           tooltip="Maximum positions held at once. More deals = more diversification but capital is split across them."
+                          tooltipUk="Максимальна кількість позицій одночасно. Більше угод = більша диверсифікація, але капітал розділяється між ними."
+                          language={language}
                         />
                         <span className="text-red-500">*</span>
                       </label>
                       <Input
                         type="number"
                         value={maxActiveDeals}
-                        onChange={(e) => setMaxActiveDeals(parseInt(e.target.value))}
+                        onChange={(e) => { setMaxActiveDeals(parseInt(e.target.value) || 1); setFormErrors(prev => ({...prev, maxActiveDeals: null})); }}
                         min={1}
                         max={20}
+                        error={!!formErrors.maxActiveDeals}
                       />
+                      {formErrors.maxActiveDeals && (
+                        <p className="text-xs text-red-500 mt-1 font-medium">{formErrors.maxActiveDeals}</p>
+                      )}
                     </div>
-                    <div>
-                      <label className="text-sm font-medium block mb-1 flex items-center gap-1">
+                    
+                    {/* Initial Balance */}
+                    <div id="field-initialBalance">
+                      <label className="text-sm font-medium block mb-1.5 flex items-center gap-1">
                         <TooltipLabel
                           label={t("backtest.initialBalance")}
                           tooltip="Starting capital for the backtest. Results scale proportionally to this amount."
+                          tooltipUk="Початковий капітал для бектесту. Результати масштабуються пропорційно цій сумі."
+                          language={language}
                         />
                         <span className="text-red-500">*</span>
                       </label>
                       <Input
                         type="number"
                         value={initialBalance}
-                        onChange={(e) => setInitialBalance(parseFloat(e.target.value))}
+                        onChange={(e) => { setInitialBalance(parseFloat(e.target.value) || 0); setFormErrors(prev => ({...prev, initialBalance: null})); }}
+                        error={!!formErrors.initialBalance}
                       />
+                      {formErrors.initialBalance && (
+                        <p className="text-xs text-red-500 mt-1 font-medium">{formErrors.initialBalance}</p>
+                      )}
                     </div>
+                    
+                    {/* Base Order Size (auto-calculated) */}
                     <div>
-                      <label className="text-sm font-medium block mb-1">
+                      <label className="text-sm font-medium block mb-1.5">
                         <TooltipLabel
                           label={t("backtest.baseOrderSize")}
                           tooltip="Auto-calculated as Initial Balance ÷ Max Active Deals. This ensures you have enough capital for all positions."
+                          tooltipUk="Автоматично розраховується як Початковий баланс ÷ Макс. активних угод. Це гарантує достатній капітал для всіх позицій."
+                          language={language}
                         />
                       </label>
                       <Input
                         type="number"
                         value={baseOrderSize}
                         readOnly
-                        className="bg-gray-50"
+                        className="bg-gray-50 cursor-not-allowed"
                       />
                       <p className="text-xs text-gray-500 mt-1">= ${initialBalance.toLocaleString()} ÷ {maxActiveDeals}</p>
                     </div>
+                    
+                    {/* Trading Fee */}
                     <div>
-                      <label className="text-sm font-medium block mb-1">
+                      <label className="text-sm font-medium block mb-1.5">
                         <TooltipLabel
-                          label="Trading Fee (%)"
+                          label={language === "uk" ? "Комісія (%)" : "Trading Fee (%)"}
                           tooltip="Exchange fee per trade. Binance: 0.1%, Bybit: 0.075%. Applied to every buy and sell."
+                          tooltipUk="Комісія біржі за угоду. Binance: 0.1%, Bybit: 0.075%. Застосовується до кожної покупки і продажу."
+                          language={language}
                         />
                       </label>
                       <Input
                         type="number"
                         value={tradingFee}
-                        onChange={(e) => setTradingFee(parseFloat(e.target.value))}
+                        onChange={(e) => setTradingFee(parseFloat(e.target.value) || 0)}
                         step={0.01}
                         min={0}
                         max={1}
                       />
                     </div>
+                    
                     {/* Date Range with Quick Periods */}
                     <div className="md:col-span-2">
                       <label className="text-sm font-medium block mb-2">
                         <TooltipLabel
-                          label={language === "uk" ? "Період" : "Period"}
-                          tooltip="Select backtest period. More history = more reliable results but longer processing."
+                          label={language === "uk" ? "Період тестування" : "Testing Period"}
+                          tooltip="Select backtest period. More history = more reliable results but longer processing time."
+                          tooltipUk="Оберіть період бектесту. Більше історії = надійніші результати, але довша обробка."
+                          language={language}
                         />
+                        <span className="text-red-500 ml-1">*</span>
                       </label>
                       <div className="flex flex-wrap gap-2 mb-3">
                         {PERIOD_PRESETS.map((preset) => (
                           <button
                             key={preset.months}
-                            onClick={() => setDatePeriod(preset.months)}
+                            onClick={() => { setDatePeriod(preset.months); setFormErrors(prev => ({...prev, startDate: null, endDate: null})); }}
                             className={`px-4 py-2 text-sm font-bold transition ${selectedPeriod === preset.months
                               ? "bg-black text-white"
                               : "bg-gray-100 text-gray-700 hover:bg-gray-200"
@@ -1142,60 +1224,104 @@ export default function BacktestPage() {
                         ))}
                       </div>
                       <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <label className="text-xs text-gray-500 block mb-1 flex gap-1">
+                        <div id="field-startDate">
+                          <label className="text-xs font-medium text-gray-600 block mb-1.5 flex gap-1">
                             {t("backtest.startDate")} <span className="text-red-500">*</span>
                           </label>
                           <Input
                             type="date"
                             value={startDate}
-                            onChange={(e) => { setStartDate(e.target.value); setSelectedPeriod(null); }}
+                            onChange={(e) => { setStartDate(e.target.value); setSelectedPeriod(null); setFormErrors(prev => ({...prev, startDate: null})); }}
+                            error={!!formErrors.startDate}
                           />
+                          {formErrors.startDate && (
+                            <p className="text-xs text-red-500 mt-1 font-medium">{formErrors.startDate}</p>
+                          )}
                         </div>
-                        <div>
-                          <label className="text-xs text-gray-500 block mb-1 flex gap-1">
+                        <div id="field-endDate">
+                          <label className="text-xs font-medium text-gray-600 block mb-1.5 flex gap-1">
                             {t("backtest.endDate")} <span className="text-red-500">*</span>
                           </label>
                           <Input
                             type="date"
                             value={endDate}
-                            onChange={(e) => { setEndDate(e.target.value); setSelectedPeriod(null); }}
+                            onChange={(e) => { setEndDate(e.target.value); setSelectedPeriod(null); setFormErrors(prev => ({...prev, endDate: null})); }}
+                            error={!!formErrors.endDate}
                           />
+                          {formErrors.endDate && (
+                            <p className="text-xs text-red-500 mt-1 font-medium">{formErrors.endDate}</p>
+                          )}
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  {/* Trading Pairs */}
-                  <div className="mt-4">
-                    <label className="text-sm font-medium block mb-2 flex items-center gap-1">
-                      <TooltipLabel
-                        label={t("backtest.tradingPairs")}
-                        tooltip="Select which pairs to trade. More pairs = more opportunities but strategy will run across all of them."
+                  {/* Trading Pairs with "Use All" toggle */}
+                  <div className="mt-6 pt-4 border-t border-gray-200" id="field-pairs">
+                    <div className="flex items-center justify-between mb-3">
+                      <label className="text-sm font-medium flex items-center gap-1">
+                        <TooltipLabel
+                          label={t("backtest.tradingPairs")}
+                          tooltip="Assets to test your strategy on. 'Use all' includes all available pairs. Uncheck to manually select specific pairs."
+                          tooltipUk="Активи для тестування вашої стратегії. 'Використати всі' включає всі доступні пари. Зніміть прапорець для ручного вибору."
+                          language={language}
+                        />
+                        <span className="text-red-500">*</span>
+                      </label>
+                      <ToggleWithLabel
+                        checked={useAllPairs}
+                        onChange={(val) => { setUseAllPairs(val); setFormErrors(prev => ({...prev, pairs: null})); }}
+                        label={language === "uk" ? "Використати всі" : "Use all pairs"}
+                        labelPosition="left"
+                        size="sm"
                       />
-                      <span className="text-red-500">*</span>
-                    </label>
-                    <div className="flex flex-wrap gap-2">
-                      {PAIRS.map((pair) => (
-                        <button
-                          key={pair}
-                          onClick={() => {
-                            if (selectedPairs.includes(pair)) {
-                              setSelectedPairs(selectedPairs.filter((p) => p !== pair));
-                            } else {
-                              setSelectedPairs([...selectedPairs, pair]);
-                            }
-                          }}
-                          className={`px-3 py-1.5 text-sm font-medium transition ${selectedPairs.includes(pair)
-                            ? "bg-black text-white"
-                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                            }`}
-                          style={{ clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))' }}
-                        >
-                          {pair}
-                        </button>
-                      ))}
                     </div>
+                    
+                    {/* Show count when using all */}
+                    {useAllPairs && (
+                      <div className="bg-emerald-50 border-2 border-emerald-100 p-3 text-sm text-emerald-700 font-medium" style={{ clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))' }}>
+                        {language === "uk" 
+                          ? `✓ Буде використано всі ${PAIRS.length} доступних ${isCryptoMode() ? "криптопар" : "акцій"}`
+                          : `✓ Will use all ${PAIRS.length} available ${isCryptoMode() ? "crypto pairs" : "stocks"}`}
+                      </div>
+                    )}
+                    
+                    {/* Show pair selection only when useAllPairs is off */}
+                    {!useAllPairs && (
+                      <>
+                        <div className="flex flex-wrap gap-2">
+                          {PAIRS.map((pair) => (
+                            <button
+                              key={pair}
+                              onClick={() => {
+                                if (selectedPairs.includes(pair)) {
+                                  setSelectedPairs(selectedPairs.filter((p) => p !== pair));
+                                } else {
+                                  setSelectedPairs([...selectedPairs, pair]);
+                                }
+                                setFormErrors(prev => ({...prev, pairs: null}));
+                              }}
+                              className={`px-3 py-1.5 text-sm font-medium transition ${selectedPairs.includes(pair)
+                                ? "bg-black text-white"
+                                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                }`}
+                              style={{ clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))' }}
+                            >
+                              {pair}
+                            </button>
+                          ))}
+                        </div>
+                        <p className="text-xs text-gray-500 mt-2">
+                          {language === "uk" 
+                            ? `Обрано: ${selectedPairs.length} з ${PAIRS.length}` 
+                            : `Selected: ${selectedPairs.length} of ${PAIRS.length}`}
+                        </p>
+                      </>
+                    )}
+                    
+                    {formErrors.pairs && (
+                      <p className="text-xs text-red-500 mt-2 font-medium">{formErrors.pairs}</p>
+                    )}
                   </div>
 
                   {/* Take Profit & Stop Loss - Professional Design */}
@@ -1317,7 +1443,7 @@ export default function BacktestPage() {
                   className="px-8 py-3 bg-black text-white font-bold flex items-center gap-2 group hover:bg-gray-800 transition-all"
                   style={{ clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))' }}
                 >
-                  Step 2: Strategy Logic
+                  {language === "uk" ? "Крок 2: Логіка стратегії" : "Step 2: Strategy Logic"}
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </button>
               </div>
@@ -1340,15 +1466,26 @@ export default function BacktestPage() {
               />
 
               {/* Entry Conditions */}
-              <Card>
+              <Card id="field-entryConditions" className={formErrors.entryConditions ? "border-red-300" : ""}>
                 <CardHeader className="flex flex-row items-center justify-between">
-                  <CardTitle className="text-green-600 flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center">
-                      <TrendingUp className="w-4 h-4 text-green-600" />
-                    </div>
-                    {t("backtest.entryConditions")} <span className="text-red-500">*</span>
-                  </CardTitle>
-                  <Button size="sm" variant="outline" onClick={() => addCondition("entry")}>
+                  <div>
+                    <CardTitle className="text-green-600 flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center">
+                        <TrendingUp className="w-4 h-4 text-green-600" />
+                      </div>
+                      <TooltipLabel
+                        label={t("backtest.entryConditions")}
+                        tooltip="Conditions that trigger buying. All conditions must be met (AND logic). At least one entry condition is required."
+                        tooltipUk="Умови для входу в позицію. Всі умови повинні виконатися одночасно (логіка І). Потрібна хоча б одна умова входу."
+                        language={language}
+                      />
+                      <span className="text-red-500">*</span>
+                    </CardTitle>
+                    {formErrors.entryConditions && (
+                      <p className="text-xs text-red-500 mt-1 font-medium">{formErrors.entryConditions}</p>
+                    )}
+                  </div>
+                  <Button size="sm" variant="outline" onClick={() => { addCondition("entry"); setFormErrors(prev => ({...prev, entryConditions: null})); }}>
                     {t("backtest.addCondition")}
                   </Button>
                 </CardHeader>
@@ -1366,9 +1503,13 @@ export default function BacktestPage() {
                     />
                   ))}
                   {entryConditions.length === 0 && (
-                    <p className="text-gray-500 text-sm text-center py-4">
-                      {t("backtest.noEntryConditions")}
-                    </p>
+                    <div className={`text-center py-4 ${formErrors.entryConditions ? "bg-red-50 border-2 border-red-200 rounded-lg" : ""}`}>
+                      <p className={`text-sm ${formErrors.entryConditions ? "text-red-600 font-medium" : "text-gray-500"}`}>
+                        {formErrors.entryConditions 
+                          ? formErrors.entryConditions
+                          : t("backtest.noEntryConditions")}
+                      </p>
+                    </div>
                   )}
                 </CardContent>
               </Card>
@@ -1382,7 +1523,14 @@ export default function BacktestPage() {
                       onChange={setConditionsActive}
                       size="md"
                     />
-                    <CardTitle className="text-red-600">{t("backtest.exitConditions")}</CardTitle>
+                    <CardTitle className="text-red-600 flex items-center gap-2">
+                      <TooltipLabel
+                        label={t("backtest.exitConditions")}
+                        tooltip="Conditions to exit a position (sell). Optional - can rely on Take Profit/Stop Loss instead. All conditions must be met (AND logic)."
+                        tooltipUk="Умови для виходу з позиції (продажу). Необов'язкові - можна покладатися на Take Profit/Stop Loss. Всі умови повинні виконатися (логіка І)."
+                        language={language}
+                      />
+                    </CardTitle>
                   </div>
                   {conditionsActive && (
                     <Button size="sm" variant="outline" onClick={() => addCondition("exit")}>
@@ -1420,6 +1568,8 @@ export default function BacktestPage() {
                     <TooltipLabel
                       label={`${t("backtest.safetyOrders")} (DCA)`}
                       tooltip="Safety Orders (Dollar Cost Averaging) automatically buy more when price drops, lowering your average entry price. This helps turn losing positions into winners when price recovers."
+                      tooltipUk="Safety Orders (усереднення долара) автоматично докуповують при падінні ціни, знижуючи середню ціну входу. Це допомагає перетворити збиткові позиції на прибуткові при відновленні ціни."
+                      language={language}
                     />
                     <Toggle
                       checked={safetyOrderToggle}
@@ -1432,10 +1582,12 @@ export default function BacktestPage() {
                   <CardContent className="space-y-4">
                     <div className="grid md:grid-cols-3 gap-4">
                       <div>
-                        <label className="text-sm font-medium block mb-1">
+                        <label className="text-sm font-medium block mb-1.5">
                           <TooltipLabel
-                            label="Safety Order Size ($)"
+                            label={language === "uk" ? "Розмір SO ($)" : "Safety Order Size ($)"}
                             tooltip="Amount in USD for each safety order. Larger orders = faster recovery but more capital needed."
+                            tooltipUk="Сума в USD для кожного safety order. Більші ордери = швидше відновлення, але потрібно більше капіталу."
+                            language={language}
                           />
                         </label>
                         <Input
@@ -1446,10 +1598,12 @@ export default function BacktestPage() {
                         />
                       </div>
                       <div>
-                        <label className="text-sm font-medium block mb-1">
+                        <label className="text-sm font-medium block mb-1.5">
                           <TooltipLabel
-                            label="Max Safety Orders"
+                            label={language === "uk" ? "Макс. SO" : "Max Safety Orders"}
                             tooltip="Maximum number of safety orders per deal. More orders = can handle deeper dips but requires more capital. Common range: 1-7."
+                            tooltipUk="Максимальна кількість safety orders на угоду. Більше ордерів = можна витримати глибші падіння, але потрібно більше капіталу. Типовий діапазон: 1-7."
+                            language={language}
                           />
                         </label>
                         <Input
@@ -1461,10 +1615,12 @@ export default function BacktestPage() {
                         />
                       </div>
                       <div>
-                        <label className="text-sm font-medium block mb-1">
+                        <label className="text-sm font-medium block mb-1.5">
                           <TooltipLabel
-                            label="Price Deviation (%)"
+                            label={language === "uk" ? "Відхилення ціни (%)" : "Price Deviation (%)"}
                             tooltip="Price drop percentage to trigger the first safety order. Smaller = more frequent orders. Typical: 1-3%."
+                            tooltipUk="Відсоток падіння ціни для активації першого safety order. Менше = частіші ордери. Типово: 1-3%."
+                            language={language}
                           />
                         </label>
                         <Input
@@ -1474,10 +1630,16 @@ export default function BacktestPage() {
                           min={0.5}
                           step={0.5}
                         />
-                        <p className="text-xs text-gray-500 mt-1">% drop to trigger SO</p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium block mb-1">Volume Scale</label>
+                        <label className="text-sm font-medium block mb-1.5">
+                          <TooltipLabel
+                            label={language === "uk" ? "Масштаб обсягу" : "Volume Scale"}
+                            tooltip="Multiplier for each subsequent safety order size. 1.5 = each SO is 50% larger than previous. Higher = more aggressive averaging."
+                            tooltipUk="Множник для розміру кожного наступного SO. 1.5 = кожен SO на 50% більший за попередній. Вище = агресивніше усереднення."
+                            language={language}
+                          />
+                        </label>
                         <Input
                           type="number"
                           value={safetyOrderVolumeScale}
@@ -1485,10 +1647,16 @@ export default function BacktestPage() {
                           min={1}
                           step={0.1}
                         />
-                        <p className="text-xs text-gray-500 mt-1">Multiply SO size each order</p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium block mb-1">Step Scale</label>
+                        <label className="text-sm font-medium block mb-1.5">
+                          <TooltipLabel
+                            label={language === "uk" ? "Масштаб кроку" : "Step Scale"}
+                            tooltip="Multiplier for deviation between safety orders. 1.0 = equal spacing, 1.2 = each SO triggered at 20% larger deviation. Helps handle accelerating dips."
+                            tooltipUk="Множник для відстані між safety orders. 1.0 = рівні інтервали, 1.2 = кожен SO активується на 20% більшому падінні. Допомагає при прискорених падіннях."
+                            language={language}
+                          />
+                        </label>
                         <Input
                           type="number"
                           value={safetyOrderStepScale}
@@ -1496,7 +1664,6 @@ export default function BacktestPage() {
                           min={1}
                           step={0.1}
                         />
-                        <p className="text-xs text-gray-500 mt-1">Multiply deviation each order</p>
                       </div>
                     </div>
 
@@ -1533,7 +1700,7 @@ export default function BacktestPage() {
                   className="px-8 py-3 bg-black text-white font-bold flex items-center gap-2 group hover:bg-gray-800 transition-all"
                   style={{ clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))' }}
                 >
-                  Step 3: Risk & Execution
+                  {language === "uk" ? "Крок 3: Ризики та виконання" : "Step 3: Risk & Execution"}
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </button>
               </div>
