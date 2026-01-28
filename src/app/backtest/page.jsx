@@ -565,7 +565,7 @@ export default function BacktestPage() {
   const [safetyOrderStepScale, setSafetyOrderStepScale] = useState(1.0); // safety_order_step_scale
 
   // === OTHER SETTINGS (matching backtest2.py) ===
-  const [reinvestToggle, setReinvestToggle] = useState(false); // reinvest profits toggle
+  const [reinvestToggle, setReinvestToggle] = useState(true); // reinvest profits toggle - default ON
   const [minDailyVolume, setMinDailyVolume] = useState(0); // min_daily_volume
   const [cooldownBetweenDeals, setCooldownBetweenDeals] = useState(0); // cooldown_between_deals (minutes)
   const [closeDealAfterTimeout, setCloseDealAfterTimeout] = useState(0); // close_deal_after_timeout (minutes)
@@ -975,61 +975,22 @@ export default function BacktestPage() {
         }
       />
 
-      {/* Hero Header with Gradient */}
-      <div className="relative mb-8 overflow-hidden rounded-2xl bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-8">
-        {/* Animated background elements */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-24 -right-24 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl animate-pulse" />
-          <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-          {/* Grid pattern */}
-          <div className="absolute inset-0 opacity-5" style={{
-            backgroundImage: 'linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px)',
-            backgroundSize: '32px 32px'
-          }} />
-        </div>
-        
-        <div className="relative flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+      {/* Clean Header */}
+      <div className="mb-8">
+        <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
           <div>
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/25">
-                <Sparkles className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-2xl lg:text-3xl font-bold text-white">{t("backtest.title")}</h1>
-                <p className="text-gray-400">{t("backtest.subtitle")}</p>
-              </div>
-            </div>
-            
-            {/* Quick stats */}
-            <div className="flex flex-wrap gap-4 mt-4">
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-lg border border-white/10">
-                <Zap className="w-4 h-4 text-yellow-400" />
-                <span className="text-sm text-gray-300">{language === "uk" ? "Швидкий аналіз" : "Fast Analysis"}</span>
-              </div>
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-lg border border-white/10">
-                <TrendingUp className="w-4 h-4 text-emerald-400" />
-                <span className="text-sm text-gray-300">{language === "uk" ? "Реальні дані" : "Real Data"}</span>
-              </div>
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-lg border border-white/10">
-                <Target className="w-4 h-4 text-blue-400" />
-                <span className="text-sm text-gray-300">{language === "uk" ? "Точні метрики" : "Precise Metrics"}</span>
-              </div>
-            </div>
+            <h1 className="text-3xl font-bold">{t("backtest.title")}</h1>
+            <p className="text-gray-600 mt-1">{t("backtest.subtitle")}</p>
           </div>
           
-          {/* Video tutorial card */}
-          <div className="lg:w-80">
-            <VideoPlaceholder
-              title="How to Create Your First Backtest"
-              titleUk="Як створити перший бектест"
-              description="Learn the basics in 3 minutes"
-              descriptionUk="Вивчіть основи за 3 хвилини"
-              duration="3:00"
-              topic="tutorial"
-              language={language}
-              variant="banner"
-            />
-          </div>
+          {/* Quick help link */}
+          <button 
+            onClick={() => {/* Future: open help modal */}}
+            className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:text-black hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <HelpCircle className="w-4 h-4" />
+            {language === "uk" ? "Як це працює?" : "How does it work?"}
+          </button>
         </div>
       </div>
 

@@ -2,482 +2,144 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { apiFetch } from "@/lib/api";
 import { useAuth } from "@/context/AuthProvider";
 import { useLanguage } from "@/context/LanguageContext";
 import Link from "next/link";
-import { TRADING_MODE, getExchanges, isCryptoMode } from "@/config/tradingMode";
+import { getExchanges, isCryptoMode } from "@/config/tradingMode";
 import { showToast } from "@/components/Toast";
-import VideoPlaceholder from "@/components/VideoPlaceholder";
+import { 
+  ChevronRight, 
+  ChevronLeft, 
+  Check, 
+  Shield, 
+  Eye, 
+  EyeOff, 
+  AlertCircle,
+  CheckCircle2,
+  ExternalLink,
+  Copy,
+  Zap,
+  Lock,
+  RefreshCw
+} from "lucide-react";
 
-// Broker/Exchange Icons
-const BrokerIcon = ({ id, className = "w-6 h-6" }) => {
-  switch (id) {
-    case "interactive_brokers":
-      return (
-        <div className={`${className} flex items-center justify-center font-black text-red-700`}>
-          <span className="text-lg">IB</span>
-        </div>
-      );
-    case "thinkorswim":
-      return (
-        <svg className={`${className} text-green-600`} viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-        </svg>
-      );
-    case "alpaca":
-      return (
-        <div className={`${className} flex items-center justify-center font-black text-yellow-600`}>
-          <span className="text-lg">🦙</span>
-        </div>
-      );
-    case "tradier":
-      return (
-        <svg className={`${className} text-purple-600`} viewBox="0 0 24 24" fill="currentColor">
-          <circle cx="12" cy="12" r="10"/>
-          <path fill="white" d="M8 8h8v2H8zM8 12h8v2H8zM8 16h5v2H8z"/>
-        </svg>
-      );
-    case "tradestation":
-      return (
-        <svg className={`${className} text-blue-700`} viewBox="0 0 24 24" fill="currentColor">
-          <rect x="3" y="3" width="18" height="18" rx="2"/>
-          <path fill="white" d="M7 7h10v2H7zM7 11h7v2H7zM7 15h10v2H7z"/>
-        </svg>
-      );
-    case "firstrade":
-      return (
-        <div className={`${className} flex items-center justify-center font-black text-orange-600`}>
-          <span className="text-lg">F</span>
-        </div>
-      );
-    // Crypto exchanges
-    case "binance":
-      return (
-        <svg className={`${className} text-yellow-500`} viewBox="0 0 126 126" fill="currentColor">
-          <path d="M63 0L78.75 25.2H47.25L63 0Z"/>
-          <path d="M63 126L47.25 100.8H78.75L63 126Z"/>
-          <path d="M31.5 37.8L0 63L31.5 88.2V63V37.8Z"/>
-          <path d="M94.5 37.8V63V88.2L126 63L94.5 37.8Z"/>
-          <path d="M31.5 63L63 37.8L94.5 63L63 88.2L31.5 63Z"/>
-        </svg>
-      );
-    case "bybit":
-      return (
-        <svg className={`${className} text-orange-500`} viewBox="0 0 32 32" fill="currentColor">
-          <path d="M16 2L2 9v7l14 7 14-7V9L16 2zm0 4l9 4.5-9 4.5-9-4.5L16 6z"/>
-        </svg>
-      );
-    case "okx":
-      return <div className={`${className} flex items-center justify-center text-xl font-black text-gray-700`}>OKX</div>;
-    case "kraken":
-      return (
-        <svg className={`${className} text-gray-800`} fill="currentColor" viewBox="0 0 24 24">
-          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
-          <path d="M12 6c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6z"/>
-        </svg>
-      );
-    case "kucoin":
-      return (
-        <svg className={`${className} text-green-500`} fill="currentColor" viewBox="0 0 24 24">
-          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-        </svg>
-      );
-    case "coinbase":
-      return (
-        <svg className={`${className} text-gray-800`} fill="currentColor" viewBox="0 0 24 24">
-          <circle cx="12" cy="12" r="10"/>
-          <path fill="white" d="M12 7a5 5 0 100 10 5 5 0 000-10z"/>
-        </svg>
-      );
-    default:
-      return (
-        <svg className={`${className} text-gray-500`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z"/>
-        </svg>
-      );
-  }
-};
-
-// Get data sources based on mode
-const getDataSources = () => {
-  const exchanges = getExchanges();
-  return exchanges.map(ex => ({
-    ...ex,
-    icon: <BrokerIcon id={ex.id} className="w-6 h-6" />
-  }));
-};
-
-function DataSourceCard({ exchange, onConnect, onDisconnect, isConnected, t, language }) {
-  const [form, setForm] = useState({ testnet: false });
-  const [loading, setLoading] = useState(false);
-  const [testing, setTesting] = useState(false);
-  const [disconnecting, setDisconnecting] = useState(false);
-  const [status, setStatus] = useState(null);
-  const [balance, setBalance] = useState(null);
-  const [showForm, setShowForm] = useState(!isConnected);
-  const [showKey, setShowKey] = useState(false);
-  const [showSecret, setShowSecret] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-
-  useEffect(() => {
-    setShowForm(!isConnected);
-  }, [isConnected]);
-
-  const handle = (k, v) => setForm((prev) => ({ ...prev, [k]: v }));
-
-  const submit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setStatus(null);
-    
-    try {
-      const payload = {
-        exchange: exchange.id,
-        apiKey: form.apiKey,
-        secret: form.secret,
-        testnet: form.testnet,
-      };
-      
-      if (exchange.fields.includes("password") && form.password) {
-        payload.password = form.password;
-      }
-      if (exchange.fields.includes("accountId") && form.accountId) {
-        payload.accountId = form.accountId;
-      }
-      if (exchange.fields.includes("refreshToken") && form.refreshToken) {
-        payload.refreshToken = form.refreshToken;
-      }
-      
-      const result = await apiFetch("/exchange/connect", {
-        method: "POST",
-        body: payload,
-      });
-      
-      if (result?.ok) {
-        setStatus({ ok: true, msg: t.connectedSuccess });
-        setShowForm(false);
-        setForm({ testnet: false });
-        onConnect?.(exchange.id);
-      } else {
-        throw new Error(result?.message || t.connectionFailed);
-      }
-    } catch (e) {
-      console.error("Exchange connection error:", e);
-      let errorMsg = e.message || t.connectionFailed;
-      
-      if (errorMsg.includes("401") || errorMsg.includes("Unauthorized")) {
-        errorMsg = t.loginFirst;
-      } else if (errorMsg.includes("Invalid") || errorMsg.includes("authentication")) {
-        errorMsg = t.invalidCredentials;
-      } else if (errorMsg.includes("network") || errorMsg.includes("fetch")) {
-        errorMsg = t.networkError;
-      }
-      
-      setStatus({ ok: false, msg: errorMsg });
-    } finally {
-      setLoading(false);
-    }
+// Exchange logo component - uses images from public/logos/exchanges/
+const ExchangeLogo = ({ id, size = "md" }) => {
+  const sizes = {
+    sm: "w-8 h-8",
+    md: "w-12 h-12",
+    lg: "w-16 h-16",
+    xl: "w-20 h-20"
   };
-
-  const disconnect = async () => {
-    setDisconnecting(true);
-    try {
-      await apiFetch(`/exchange/disconnect/${exchange.id}`, {
-        method: "POST",
-      });
-      setShowForm(true);
-      setBalance(null);
-      setStatus({ ok: true, msg: t.disconnected });
-      onDisconnect?.(exchange.id);
-    } catch (e) {
-      setStatus({ ok: false, msg: e.message });
-    } finally {
-      setDisconnecting(false);
-    }
+  
+  const logoPath = `/logos/exchanges/${id}.svg`;
+  
+  // Fallback colors for exchanges
+  const fallbackColors = {
+    binance: "from-yellow-400 to-yellow-600",
+    bybit: "from-orange-400 to-orange-600",
+    okx: "from-gray-700 to-gray-900",
+    kraken: "from-purple-500 to-purple-700",
+    kucoin: "from-green-400 to-green-600",
+    coinbase: "from-blue-500 to-blue-700",
   };
-
-  const testBalance = async () => {
-    setTesting(true);
-    try {
-      const res = await apiFetch(`/exchange/balance?exchange=${exchange.id}`);
-      const assets = Object.entries(res.total || {})
-        .filter(([_, v]) => v > 0)
-        .slice(0, 5);
-      
-      if (assets.length === 0) {
-        setBalance(t.noAssets);
-      } else {
-        setBalance(assets.map(([k, v]) => `${k}: ${v}`).join(", "));
-      }
-      setStatus({ ok: true, msg: t.balanceFetched });
-    } catch (e) {
-      setStatus({ ok: false, msg: e.message });
-    } finally {
-      setTesting(false);
-    }
+  
+  const fallbackLabels = {
+    binance: "BN",
+    bybit: "BY",
+    okx: "OKX",
+    kraken: "KR",
+    kucoin: "KC",
+    coinbase: "CB",
   };
-
-  // Get field labels based on field type
-  const getFieldLabel = (field) => {
-    switch (field) {
-      case "apiKey": return t.apiKey;
-      case "secret": return t.apiSecret;
-      case "password": return t.passphrase;
-      case "accountId": return language === "uk" ? "ID Акаунту" : "Account ID";
-      case "refreshToken": return language === "uk" ? "Refresh Token" : "Refresh Token";
-      case "username": return language === "uk" ? "Ім'я користувача" : "Username";
-      default: return field;
-    }
-  };
-
-  const getFieldPlaceholder = (field) => {
-    switch (field) {
-      case "apiKey": return t.enterApiKey;
-      case "secret": return t.enterApiSecret;
-      case "password": return t.enterPassphrase;
-      case "accountId": return language === "uk" ? "Введіть ID акаунту" : "Enter account ID";
-      case "refreshToken": return language === "uk" ? "Введіть refresh token" : "Enter refresh token";
-      case "username": return language === "uk" ? "Введіть ім'я користувача" : "Enter username";
-      default: return `Enter ${field}`;
-    }
-  };
-
-  // Check if this broker is coming soon
-  const isComingSoon = exchange.comingSoon === true;
 
   return (
-    <div className={`bg-white border-2 overflow-hidden ${isComingSoon ? 'border-gray-200 opacity-75' : isConnected ? 'border-emerald-500' : 'border-gray-100 hover:border-black'} transition-all relative`} style={{clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))'}}>
-      {isComingSoon && (
-        <div className="absolute top-4 right-4 z-10">
-          <span className="px-3 py-1 bg-amber-500 text-white text-xs font-bold" style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'}}>
-            {language === "uk" ? "НЕЗАБАРОМ" : "COMING SOON"}
-          </span>
-        </div>
-      )}
-      <div className={`h-2 bg-gradient-to-r ${exchange.color} ${isComingSoon ? 'opacity-50' : ''}`}></div>
-      <div className="p-6">
-        <div className="flex items-center gap-3 mb-4">
-          <div className={`w-12 h-12 bg-gradient-to-br ${exchange.color} flex items-center justify-center flex-shrink-0 ${isComingSoon ? 'opacity-50' : ''}`} style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}>
-            {exchange.icon}
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className={`font-bold ${isComingSoon ? 'text-gray-500' : ''}`}>{exchange.name}</span>
-              {isConnected && !isComingSoon && (
-                <span className="px-2 py-0.5 bg-emerald-500 text-white text-xs font-bold flex items-center gap-1" style={{clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'}}>
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  {t.connected}
-                </span>
-              )}
-            </div>
-            <p className="text-sm font-normal text-gray-500 truncate">{exchange.description[language]}</p>
-          </div>
-        </div>
-        
-        {/* Coming Soon Message */}
-        {isComingSoon ? (
-          <div className="space-y-4">
-            <div className="bg-amber-50 border-2 border-amber-200 p-4" style={{clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))'}}>
-              <div className="flex items-start gap-3">
-                <svg className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <div>
-                  <p className="text-amber-800 font-medium text-sm">
-                    {language === "uk" ? "Інтеграція в розробці" : "Integration in Development"}
-                  </p>
-                  <p className="text-amber-700 text-xs mt-1">
-                    {language === "uk" 
-                      ? "Підключення брокера буде доступне найближчим часом. Поки що ви можете використовувати бектестинг з історичними даними." 
-                      : "Broker connection will be available soon. In the meantime, you can use backtesting with historical data."}
-                  </p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="flex gap-2">
-              <a 
-                href="/backtest" 
-                className="flex-1 px-4 py-2.5 bg-black text-white font-bold hover:bg-gray-800 transition-all text-center"
-                style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}
-              >
-                {language === "uk" ? "Спробувати бектест" : "Try Backtesting"}
-              </a>
-            </div>
-          </div>
-        ) : isConnected && !showForm ? (
-          <div className="space-y-4">
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-start gap-3">
-              <svg className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <div>
-                <p className="text-green-700 text-sm font-medium">
-                  {t.exchangeConnectedInfo}
-                </p>
-                <p className="text-green-600 text-xs mt-1">{t.keysSecure}</p>
-              </div>
-            </div>
-            
-            {balance && (
-              <div className="p-3 bg-gray-50 rounded-lg text-sm">
-                <p className="font-medium text-gray-700">{t.balance}:</p>
-                <p className="text-gray-600">{balance}</p>
-              </div>
-            )}
-            
-            <div className="flex gap-2">
-              <button 
-                type="button" 
-                onClick={testBalance}
-                disabled={testing}
-                className="flex-1 px-4 py-2.5 bg-emerald-500 text-white font-bold hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
-                style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}
-              >
-                {testing && <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>}
-                {testing ? t.testing : t.testBalance}
-              </button>
-              <button 
-                type="button" 
-                onClick={() => setShowForm(true)}
-                className="px-4 py-2.5 bg-white border-2 border-gray-200 text-gray-700 font-bold hover:border-black hover:text-black transition-all"
-                style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}
-              >
-                {t.updateKeys}
-              </button>
-              <button 
-                type="button" 
-                onClick={disconnect}
-                disabled={disconnecting}
-                className="px-4 py-2.5 bg-red-500 text-white font-bold hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}
-              >
-                {disconnecting ? "..." : t.disconnect}
-              </button>
-            </div>
-            
-            {status && (
-              <p className={`text-sm ${status.ok ? "text-green-600" : "text-red-600"}`}>
-                {status.msg}
-              </p>
-            )}
-          </div>
-        ) : (
-          <form onSubmit={submit} className="space-y-4">
-            {isConnected && (
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-sm text-yellow-700">
-                {t.updateKeysInfo}
-              </div>
-            )}
-            
-            {exchange.fields.map((field) => (
-              <div key={field}>
-                <label className="text-sm font-medium block mb-1">{getFieldLabel(field)}</label>
-                <div className="relative">
-                  <Input
-                    type={field === "apiKey" ? (showKey ? "text" : "password") : 
-                          field === "secret" ? (showSecret ? "text" : "password") :
-                          field === "password" ? (showPassword ? "text" : "password") : "text"}
-                    placeholder={getFieldPlaceholder(field)}
-                    value={form[field] || ""}
-                    onChange={(e) => handle(field, e.target.value)}
-                    required={field !== "refreshToken"}
-                    className="pr-10"
-                  />
-                  {(field === "apiKey" || field === "secret" || field === "password") && (
-                  <button
-                    type="button"
-                      onClick={() => {
-                        if (field === "apiKey") setShowKey(!showKey);
-                        else if (field === "secret") setShowSecret(!showSecret);
-                        else setShowPassword(!showPassword);
-                      }}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                  >
-                      {(field === "apiKey" && showKey) || (field === "secret" && showSecret) || (field === "password" && showPassword) ? "🙈" : "👁️"}
-                  </button>
-                  )}
-                </div>
-              </div>
-            ))}
-            
-            <label className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={form.testnet}
-              onChange={(e) => handle("testnet", e.target.checked)}
-                className="rounded"
-              />
-              <span>{t.useTestnet}</span>
-          </label>
-            
-            <div className="flex gap-2">
-              <button type="submit" disabled={loading} className="flex-1 px-4 py-2.5 bg-black text-white font-bold hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2" style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}>
-                {loading && <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>}
-                {loading ? t.connecting : isConnected ? t.updateAndSave : t.connect}
-              </button>
-              {isConnected && (
-                <button 
-                  type="button" 
-                  onClick={() => setShowForm(false)}
-                  className="px-4 py-2.5 bg-white border-2 border-gray-200 text-gray-700 font-bold hover:border-black hover:text-black transition-all"
-                  style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}
-                >
-                  {t.cancel}
-                </button>
-              )}
-          </div>
-            
-          {status && (
-              <p className={`text-sm ${status.ok ? "text-green-600" : "text-red-600"}`}>
-              {status.msg}
-            </p>
-          )}
-        </form>
-        )}
-        
-        {/* Footer links - hide for coming soon */}
-        {!isComingSoon && (
-        <div className="mt-4 pt-4 border-t-2 border-gray-100 flex gap-4 text-xs">
-          <a 
-            href={exchange.docsUrl} 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="text-black font-bold hover:underline"
-          >
-            {t.howToCreate} →
-          </a>
-          {!isConnected && exchange.testnetUrl && (
-            <a 
-              href={exchange.testnetUrl} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-black font-bold hover:underline"
-            >
-              {t.getTestnet} →
-            </a>
-          )}
-        </div>
-        )}
-      </div>
+    <div className={`${sizes[size]} rounded-2xl bg-gradient-to-br ${fallbackColors[id] || 'from-gray-400 to-gray-600'} flex items-center justify-center text-white font-bold shadow-lg`}>
+      <span className={size === 'xl' ? 'text-2xl' : size === 'lg' ? 'text-xl' : 'text-sm'}>
+        {fallbackLabels[id] || id?.slice(0, 2).toUpperCase()}
+      </span>
     </div>
   );
-}
+};
 
 export default function ConnectPage() {
   const { user, loading: authLoading } = useAuth();
   const { language } = useLanguage();
   const router = useRouter();
+  
+  // Wizard state
+  const [step, setStep] = useState(1); // 1: Select Exchange, 2: Enter Credentials, 3: Confirm
+  const [selectedExchange, setSelectedExchange] = useState(null);
   const [connectedExchanges, setConnectedExchanges] = useState([]);
   const [loadingConnections, setLoadingConnections] = useState(true);
+  
+  // Form state
+  const [form, setForm] = useState({
+    apiKey: "",
+    secret: "",
+    password: "",
+    testnet: false,
+  });
+  const [showApiKey, setShowApiKey] = useState(false);
+  const [showSecret, setShowSecret] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [connecting, setConnecting] = useState(false);
+  const [testing, setTesting] = useState(false);
+  const [connectionStatus, setConnectionStatus] = useState(null);
+  const [copied, setCopied] = useState(false);
 
-  const DATA_SOURCES = getDataSources();
+  const exchanges = getExchanges();
+  const SERVER_IP = "62.171.183.32";
+
+  // Translations
+  const t = {
+    title: language === "uk" ? "Підключення біржі" : "Connect Exchange",
+    subtitle: language === "uk" 
+      ? "Підключіть вашу біржу для автоматичного аналізу" 
+      : "Connect your exchange for automated analysis",
+    step1Title: language === "uk" ? "Оберіть біржу" : "Select Exchange",
+    step1Subtitle: language === "uk" ? "Виберіть біржу, яку хочете підключити" : "Choose the exchange you want to connect",
+    step2Title: language === "uk" ? "Введіть дані" : "Enter Credentials",
+    step2Subtitle: language === "uk" ? "Введіть ваші API ключі" : "Enter your API keys",
+    step3Title: language === "uk" ? "Підключення" : "Connection",
+    step3Subtitle: language === "uk" ? "Перевірте та підтвердіть" : "Review and confirm",
+    apiKey: language === "uk" ? "API Ключ" : "API Key",
+    apiSecret: language === "uk" ? "API Секрет" : "API Secret",
+    passphrase: language === "uk" ? "Пароль/Passphrase" : "Passphrase",
+    testnet: language === "uk" ? "Тестове середовище" : "Test Environment",
+    testnetDesc: language === "uk" ? "Рекомендовано для початку" : "Recommended for getting started",
+    connect: language === "uk" ? "Підключити" : "Connect",
+    back: language === "uk" ? "Назад" : "Back",
+    next: language === "uk" ? "Далі" : "Next",
+    connected: language === "uk" ? "Підключено" : "Connected",
+    changeExchange: language === "uk" ? "Змінити біржу" : "Change Exchange",
+    securityNote: language === "uk" 
+      ? "Ваші ключі зашифровані та ніколи не передаються третім особам" 
+      : "Your keys are encrypted and never shared with third parties",
+    ipWhitelist: language === "uk" ? "Білий список IP" : "IP Whitelist",
+    ipWhitelistDesc: language === "uk" 
+      ? "Додайте цю IP адресу до білого списку на біржі для максимальної безпеки" 
+      : "Add this IP to your exchange whitelist for maximum security",
+    howToCreate: language === "uk" ? "Як створити API ключі" : "How to create API keys",
+    testConnection: language === "uk" ? "Тест з'єднання" : "Test Connection",
+    connectionSuccess: language === "uk" ? "З'єднання успішне!" : "Connection successful!",
+    connectionFailed: language === "uk" ? "Помилка з'єднання" : "Connection failed",
+    readOnlyNote: language === "uk" 
+      ? "Створюйте ключі тільки з правами на читання (read-only)" 
+      : "Create keys with read-only permissions only",
+    loginRequired: language === "uk" ? "Потрібна авторизація" : "Login Required",
+    loginText: language === "uk" ? "Увійдіть, щоб підключити біржу" : "Sign in to connect your exchange",
+    login: language === "uk" ? "Увійти" : "Sign In",
+    manageConnection: language === "uk" ? "Керування підключенням" : "Manage Connection",
+    disconnect: language === "uk" ? "Відключити" : "Disconnect",
+    reconnect: language === "uk" ? "Перепідключити" : "Reconnect",
+    popular: language === "uk" ? "Популярні" : "Popular",
+    allExchanges: language === "uk" ? "Всі біржі" : "All Exchanges",
+    comingSoon: language === "uk" ? "Скоро" : "Coming Soon",
+  };
 
   useEffect(() => {
     if (user) {
@@ -491,14 +153,10 @@ export default function ConnectPage() {
     try {
       const result = await apiFetch("/exchange/connections");
       if (Array.isArray(result)) {
-        const connected = result
-          .filter(c => c.isConnected || c.isActive)
-          .map(c => c.exchange);
+        const connected = result.filter(c => c.isConnected || c.isActive).map(c => c.exchange);
         setConnectedExchanges(connected);
       } else if (result?.connections) {
-        const connected = result.connections
-          .filter(c => c.isConnected || c.isActive)
-          .map(c => c.exchange);
+        const connected = result.connections.filter(c => c.isConnected || c.isActive).map(c => c.exchange);
         setConnectedExchanges(connected);
       }
     } catch (e) {
@@ -508,249 +166,533 @@ export default function ConnectPage() {
     }
   };
 
-  const brokerLabel = isCryptoMode() 
-    ? (language === "uk" ? "біржі" : "exchange")
-    : (language === "uk" ? "брокера" : "broker");
-
-  const t = {
-    title: language === "uk" ? `Підключення ${brokerLabel}` : `Connect ${brokerLabel.charAt(0).toUpperCase() + brokerLabel.slice(1)}`,
-    subtitle: language === "uk" 
-      ? `Підключіть ${brokerLabel} для автоматичного аналізу. Нам потрібні лише права на читання - ніколи на запис.` 
-      : `Connect your ${brokerLabel} to start automated analysis. We only need read-only permissions - never write access.`,
-    securityTitle: language === "uk" ? "🔒 Безпека насамперед" : "🔒 Security First",
-    securityItem1: language === "uk" ? "API ключі зберігаються зашифрованими і ніколи не передаються" : "API keys are stored encrypted and never shared",
-    securityItem2: language === "uk" ? "Створюйте ключі лише з правами на читання" : "Create keys with read-only permissions",
-    securityItem3: language === "uk" ? "Використовуйте тестове середовище для тестування перед запуском" : "Use test environment for testing before going live",
-    securityItem4: language === "uk" ? "Ви можете відкликати доступ у будь-який час від провайдера" : "You can revoke access anytime from your provider",
-    ipTitle: language === "uk" ? "🌐 Білий список IP (Рекомендовано)" : "🌐 IP Whitelisting (Recommended)",
-    ipText: language === "uk" 
-      ? `Для максимальної безпеки додайте IP нашого сервера у білий список у ${brokerLabel}:` 
-      : `For maximum security, whitelist our server IP on your ${brokerLabel}:`,
-    ipNote: language === "uk" 
-      ? "Це гарантує, що тільки наш сервер може отримувати дані з вашими API ключами." 
-      : "This ensures only our server can access data with your API keys.",
-    copy: language === "uk" ? "Копіювати" : "Copy",
-    copied: language === "uk" ? "Скопійовано!" : "Copied!",
-    loginRequired: language === "uk" ? "Потрібна авторизація" : "Login Required",
-    loginText: language === "uk" 
-      ? `Щоб підключити ${brokerLabel}, потрібно увійти в обліковий запис.` 
-      : `You need to be logged in to connect your ${brokerLabel}.`,
-    login: language === "uk" ? "Увійти / Зареєструватись" : "Login / Sign Up",
-    loading: language === "uk" ? "Завантаження..." : "Loading...",
-    connected: language === "uk" ? "Підключено" : "Connected",
-    apiKey: language === "uk" ? "API Ключ" : "API Key",
-    apiSecret: language === "uk" ? "API Секрет" : "API Secret",
-    passphrase: language === "uk" ? "Пароль" : "Passphrase",
-    enterApiKey: language === "uk" ? "Введіть API ключ" : "Enter your API key",
-    enterApiSecret: language === "uk" ? "Введіть API секрет" : "Enter your API secret",
-    enterPassphrase: language === "uk" ? "Введіть пароль" : "Enter your passphrase",
-    useTestnet: language === "uk" ? "Використовувати тестове середовище (рекомендовано для тестування)" : "Use Test Environment (recommended for testing)",
-    connect: language === "uk" ? "Підключити" : "Connect",
-    reconnect: language === "uk" ? "Перепідключити" : "Reconnect",
-    connecting: language === "uk" ? "Підключення..." : "Connecting...",
-    testBalance: language === "uk" ? "Перевірити підключення" : "Test Connection",
-    testing: language === "uk" ? "Перевірка..." : "Testing...",
-    balance: language === "uk" ? "Дані" : "Data",
-    howToCreate: language === "uk" ? "Як створити API ключі" : "How to create API keys",
-    getTestnet: language === "uk" ? "Отримати тестовий акаунт" : "Get test account",
-    connectedSuccess: language === "uk" ? "Підключено успішно!" : "Connected successfully!",
-    connectionFailed: language === "uk" ? "Помилка підключення" : "Connection failed",
-    loginFirst: language === "uk" ? `Спочатку увійдіть, щоб підключити ${brokerLabel}` : `Please login first to connect your ${brokerLabel}`,
-    invalidCredentials: language === "uk" ? "Невірний API ключ або секрет. Перевірте дані." : "Invalid API key or secret. Please check your credentials.",
-    networkError: language === "uk" ? "Помилка мережі. Перевірте з'єднання і спробуйте ще раз." : "Network error. Please check your connection and try again.",
-    noAssets: language === "uk" ? "Дані недоступні" : "No data available",
-    balanceFetched: language === "uk" ? "Підключення успішне" : "Connection successful",
-    exchangeConnected: language === "uk" ? `${brokerLabel.charAt(0).toUpperCase() + brokerLabel.slice(1)} підключено!` : `${brokerLabel.charAt(0).toUpperCase() + brokerLabel.slice(1)} Connected!`,
-    whatNext: language === "uk" 
-      ? "Ви готові почати аналіз. Ось що можна зробити далі:" 
-      : "You're ready to start analyzing. Here's what you can do next:",
-    createStrategy: language === "uk" ? "Створити модель" : "Create Model",
-    goToDashboard: language === "uk" ? "До панелі управління" : "Go to Dashboard",
-    needHelp: language === "uk" ? "Потрібна допомога? Перегляньте" : "Need help? Check our",
-    faq: language === "uk" ? "FAQ" : "FAQ",
-    or: language === "uk" ? "або" : "or",
-    contactSupport: language === "uk" ? "зв'яжіться з підтримкою" : "contact support",
-    disconnect: language === "uk" ? "Відключити" : "Disconnect",
-    disconnected: language === "uk" ? `${brokerLabel.charAt(0).toUpperCase() + brokerLabel.slice(1)} відключено` : `${brokerLabel.charAt(0).toUpperCase() + brokerLabel.slice(1)} disconnected`,
-    updateKeys: language === "uk" ? "Оновити ключі" : "Update Keys",
-    updateAndSave: language === "uk" ? "Оновити та зберегти" : "Update & Save",
-    cancel: language === "uk" ? "Скасувати" : "Cancel",
-    exchangeConnectedInfo: language === "uk" ? `${brokerLabel.charAt(0).toUpperCase() + brokerLabel.slice(1)} підключено та готово до аналізу` : `${brokerLabel.charAt(0).toUpperCase() + brokerLabel.slice(1)} is connected and ready for analysis`,
-    keysSecure: language === "uk" ? "API ключі зберігаються зашифрованими" : "API keys are stored encrypted",
-    updateKeysInfo: language === "uk" ? "Введіть нові API ключі для оновлення підключення" : "Enter new API keys to update the connection",
+  const handleSelectExchange = (exchange) => {
+    setSelectedExchange(exchange);
+    setForm({ apiKey: "", secret: "", password: "", testnet: false });
+    setConnectionStatus(null);
+    setStep(2);
   };
 
-  const handleConnect = (exchangeId) => {
-    if (!connectedExchanges.includes(exchangeId)) {
-      setConnectedExchanges([...connectedExchanges, exchangeId]);
+  const handleConnect = async () => {
+    if (!selectedExchange) return;
+    
+    setConnecting(true);
+    setConnectionStatus(null);
+    
+    try {
+      const payload = {
+        exchange: selectedExchange.id,
+        apiKey: form.apiKey,
+        secret: form.secret,
+        testnet: form.testnet,
+      };
+      
+      if (selectedExchange.fields?.includes("password") && form.password) {
+        payload.password = form.password;
+      }
+
+      const res = await apiFetch("/exchange/connect", {
+        method: "POST",
+        body: payload,
+      });
+
+      if (res.success || res.connected) {
+        setConnectionStatus({ success: true, message: t.connectionSuccess });
+        setConnectedExchanges([...connectedExchanges, selectedExchange.id]);
+        showToast(t.connectionSuccess, "success");
+        setStep(3);
+      } else {
+        throw new Error(res.error || res.message || "Connection failed");
+      }
+    } catch (e) {
+      setConnectionStatus({ success: false, message: e.message });
+      showToast(e.message, "error");
+    } finally {
+      setConnecting(false);
     }
   };
 
-  const handleDisconnect = (exchangeId) => {
-    setConnectedExchanges(connectedExchanges.filter(id => id !== exchangeId));
+  const handleTestConnection = async () => {
+    setTesting(true);
+    try {
+      const res = await apiFetch(`/exchange/balance?exchange=${selectedExchange.id}`);
+      if (res && !res.error) {
+        setConnectionStatus({ success: true, message: t.connectionSuccess });
+        showToast(t.connectionSuccess, "success");
+      } else {
+        throw new Error(res.error || "Test failed");
+      }
+    } catch (e) {
+      setConnectionStatus({ success: false, message: e.message });
+      showToast(e.message, "error");
+    } finally {
+      setTesting(false);
+    }
   };
 
+  const handleDisconnect = async () => {
+    if (!selectedExchange) return;
+    
+    try {
+      await apiFetch("/exchange/disconnect", {
+        method: "POST",
+        body: { exchange: selectedExchange.id },
+      });
+      setConnectedExchanges(connectedExchanges.filter(id => id !== selectedExchange.id));
+      setSelectedExchange(null);
+      setStep(1);
+      showToast(language === "uk" ? "Біржу відключено" : "Exchange disconnected", "success");
+    } catch (e) {
+      showToast(e.message, "error");
+    }
+  };
+
+  const copyIP = () => {
+    navigator.clipboard.writeText(SERVER_IP);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  // Auth guard
   if (!authLoading && !user) {
     return (
-      <div className="container py-10">
-        <div className="max-w-md mx-auto text-center">
-          <div className="bg-white border-2 border-gray-100 p-8" style={{clipPath: 'polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px))'}}>
-              <div className="w-20 h-20 mx-auto mb-4 bg-black flex items-center justify-center" style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'}}>
-                <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-              </div>
-              <h2 className="text-2xl font-bold mb-2">{t.loginRequired}</h2>
-              <p className="text-gray-600 mb-6">{t.loginText}</p>
-              <Link href="/auth">
-                <Button className="w-full btn-primary">{t.login}</Button>
-              </Link>
+      <div className="min-h-[80vh] flex items-center justify-center p-4">
+        <div className="max-w-md w-full">
+          <div className="bg-white rounded-3xl shadow-2xl p-8 text-center">
+            <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-gray-900 to-gray-700 rounded-2xl flex items-center justify-center">
+              <Lock className="w-10 h-10 text-white" />
+            </div>
+            <h2 className="text-2xl font-bold mb-2">{t.loginRequired}</h2>
+            <p className="text-gray-600 mb-6">{t.loginText}</p>
+            <Link href="/auth">
+              <Button className="w-full h-12 text-lg">{t.login}</Button>
+            </Link>
           </div>
         </div>
       </div>
     );
   }
 
-  if (authLoading) {
+  if (authLoading || loadingConnections) {
     return (
-      <div className="container py-10 text-center">
-        <div className="animate-spin w-8 h-8 border-4 border-black border-t-transparent mx-auto" style={{clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'}}></div>
-        <p className="mt-4 text-gray-600">{t.loading}</p>
+      <div className="min-h-[80vh] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-gray-200 border-t-black rounded-full animate-spin" />
+          <p className="text-gray-500">{language === "uk" ? "Завантаження..." : "Loading..."}</p>
+        </div>
       </div>
     );
   }
+
+  // Check if user has a connected exchange already
+  const hasConnectedExchange = connectedExchanges.length > 0;
+  const connectedExchangeData = hasConnectedExchange 
+    ? exchanges.find(e => connectedExchanges.includes(e.id))
+    : null;
 
   return (
-    <div className="container py-10">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-[80vh] py-8 px-4">
+      <div className="max-w-2xl mx-auto">
+        
+        {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold mb-2">{t.title}</h1>
-          <p className="text-gray-600 max-w-xl mx-auto">{t.subtitle}</p>
+          <p className="text-gray-600">{t.subtitle}</p>
         </div>
 
-        {/* Video Tutorial */}
-        <VideoPlaceholder
-          title="How to Safely Connect Your Exchange"
-          titleUk="Як безпечно підключити біржу"
-          description="Step-by-step guide to creating and configuring API keys"
-          descriptionUk="Покрокова інструкція зі створення та налаштування API ключів"
-          duration="4:00"
-          topic="setup"
-          language={language}
-          variant="banner"
-          className="mb-8"
-        />
-
-        <div className="bg-gray-900 text-white p-5 mb-8" style={{clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))'}}>
-          <h3 className="font-bold text-lg flex items-center gap-2 mb-3">
-            <svg className="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-            </svg>
-            {t.securityTitle.replace("🔒 ", "")}
-          </h3>
-          <ul className="text-sm text-gray-300 space-y-1.5">
-            <li className="flex items-center gap-2"><span className="text-emerald-400">✓</span> {t.securityItem1}</li>
-            <li className="flex items-center gap-2"><span className="text-emerald-400">✓</span> {t.securityItem2}</li>
-            <li className="flex items-center gap-2"><span className="text-emerald-400">✓</span> {t.securityItem3}</li>
-            <li className="flex items-center gap-2"><span className="text-emerald-400">✓</span> {t.securityItem4}</li>
-          </ul>
-        </div>
-
-        <div className="bg-white border-2 border-gray-100 mb-8" style={{clipPath: 'polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px))'}}>
-          <div className="p-6">
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 bg-black flex items-center justify-center flex-shrink-0" style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}>
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-                </svg>
-              </div>
+        {/* Connected Exchange Card */}
+        {hasConnectedExchange && connectedExchangeData && step === 1 && (
+          <div className="mb-8 bg-gradient-to-br from-emerald-50 to-green-50 rounded-3xl p-6 border-2 border-emerald-200">
+            <div className="flex items-center gap-4 mb-4">
+              <ExchangeLogo id={connectedExchangeData.id} size="lg" />
               <div className="flex-1">
-                <h3 className="font-bold text-lg mb-1">{t.ipTitle.replace("🌐 ", "")}</h3>
-                <p className="text-sm text-gray-600">{t.ipText}</p>
+                <div className="flex items-center gap-2 mb-1">
+                  <h3 className="text-xl font-bold">{connectedExchangeData.name}</h3>
+                  <span className="px-2 py-0.5 bg-emerald-500 text-white text-xs font-bold rounded-full flex items-center gap-1">
+                    <CheckCircle2 className="w-3 h-3" />
+                    {t.connected}
+                  </span>
+                </div>
+                <p className="text-gray-600 text-sm">{connectedExchangeData.description?.[language] || connectedExchangeData.description?.en}</p>
               </div>
             </div>
             
-            <div className="mt-5 bg-gray-50 p-4 border-2 border-gray-200" style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'}}>
-              <div className="flex items-center justify-between gap-4 flex-wrap">
-                <div className="flex-1 min-w-[200px]">
-                  <div className="text-xs text-gray-500 font-semibold uppercase tracking-wider mb-1">
-                    {language === "uk" ? "IP-адреса сервера" : "Server IP Address"}
-                  </div>
-                  <code className="text-2xl font-mono font-bold text-black tracking-wide">
-                    46.224.99.27
-                  </code>
-                </div>
-                <button 
-                  onClick={() => {
-                    navigator.clipboard.writeText("46.224.99.27");
-                    showToast(t.copied, "success");
-                  }}
-                  className="px-5 py-2.5 bg-black hover:bg-gray-800 text-white font-bold transition-all flex items-center gap-2"
-                  style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                  </svg>
-                  {t.copy}
-                </button>
-              </div>
+            <div className="flex gap-3">
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setSelectedExchange(connectedExchangeData);
+                  setStep(3);
+                }}
+                className="flex-1"
+              >
+                {t.manageConnection}
+              </Button>
+              <Button 
+                variant="outline"
+                onClick={() => setStep(1)}
+                className="flex-1"
+              >
+                {t.changeExchange}
+              </Button>
             </div>
-            
-            <div className="mt-4 flex items-start gap-2 text-sm text-gray-600 bg-gray-100 p-3" style={{clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'}}>
-              <svg className="w-4 h-4 text-gray-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span>{t.ipNote}</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {loadingConnections ? (
-            <div className="col-span-2 text-center py-8">
-              <div className="animate-spin w-8 h-8 border-4 border-black border-t-transparent mx-auto" style={{clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'}}></div>
-              <p className="mt-4 text-gray-600">{t.loading}</p>
-            </div>
-          ) : (
-            DATA_SOURCES.map((exchange) => (
-              <DataSourceCard 
-                key={exchange.id} 
-                exchange={exchange}
-                isConnected={connectedExchanges.includes(exchange.id)}
-                onConnect={handleConnect}
-                onDisconnect={handleDisconnect}
-                t={t}
-                language={language}
-              />
-            ))
-          )}
-        </div>
-
-        {connectedExchanges.length > 0 && (
-          <div className="bg-emerald-500 text-white p-6" style={{clipPath: 'polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px))'}}>
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-12 h-12 bg-white flex items-center justify-center" style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}>
-                  <svg className="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-                <h3 className="font-bold text-xl">{t.exchangeConnected}</h3>
-              </div>
-              <p className="text-emerald-100 mb-4">{t.whatNext}</p>
-              <div className="flex flex-wrap gap-3">
-                <Link href="/backtest">
-                  <button className="px-5 py-2.5 bg-white text-emerald-600 font-bold hover:bg-gray-100 transition-all" style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}>{t.createStrategy}</button>
-                </Link>
-                <Link href="/dashboard">
-                  <button className="px-5 py-2.5 bg-transparent border-2 border-white text-white font-bold hover:bg-white/10 transition-all" style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}>{t.goToDashboard}</button>
-                </Link>
-              </div>
           </div>
         )}
 
-        <div className="mt-8 text-center text-sm text-gray-500">
-          <p>{t.needHelp} <Link href="/faq" className="text-black font-medium hover:underline">{t.faq}</Link> {t.or} <Link href="/support" className="text-black font-medium hover:underline">{t.contactSupport}</Link>.</p>
+        {/* Step Progress */}
+        <div className="mb-8">
+          <div className="flex items-center justify-center gap-2">
+            {[1, 2, 3].map((s) => (
+              <div key={s} className="flex items-center">
+                <div 
+                  className={`w-10 h-10 rounded-full flex items-center justify-center font-bold transition-all ${
+                    step >= s 
+                      ? 'bg-black text-white' 
+                      : 'bg-gray-100 text-gray-400'
+                  }`}
+                >
+                  {step > s ? <Check className="w-5 h-5" /> : s}
+                </div>
+                {s < 3 && (
+                  <div className={`w-16 h-1 mx-2 rounded-full transition-all ${
+                    step > s ? 'bg-black' : 'bg-gray-200'
+                  }`} />
+                )}
+              </div>
+            ))}
+          </div>
+          <div className="flex justify-center mt-3">
+            <span className="text-sm text-gray-500">
+              {step === 1 && t.step1Title}
+              {step === 2 && t.step2Title}
+              {step === 3 && t.step3Title}
+            </span>
+          </div>
         </div>
+
+        {/* Step 1: Select Exchange */}
+        {step === 1 && (
+          <div className="space-y-6">
+            {/* Popular Exchanges */}
+            <div>
+              <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">{t.popular}</h3>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                {exchanges.filter(e => !e.comingSoon).slice(0, 6).map((exchange) => {
+                  const isConnected = connectedExchanges.includes(exchange.id);
+                  return (
+                    <button
+                      key={exchange.id}
+                      onClick={() => handleSelectExchange(exchange)}
+                      className={`relative p-6 rounded-2xl border-2 transition-all hover:scale-[1.02] active:scale-[0.98] ${
+                        isConnected 
+                          ? 'border-emerald-500 bg-emerald-50' 
+                          : 'border-gray-200 hover:border-black bg-white'
+                      }`}
+                    >
+                      {isConnected && (
+                        <div className="absolute top-2 right-2">
+                          <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                        </div>
+                      )}
+                      <ExchangeLogo id={exchange.id} size="lg" />
+                      <h4 className="mt-3 font-bold">{exchange.name}</h4>
+                      <p className="text-xs text-gray-500 mt-1 line-clamp-1">
+                        {exchange.description?.[language] || exchange.description?.en}
+                      </p>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Coming Soon */}
+            {exchanges.filter(e => e.comingSoon).length > 0 && (
+              <div>
+                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">{t.comingSoon}</h3>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                  {exchanges.filter(e => e.comingSoon).map((exchange) => (
+                    <div
+                      key={exchange.id}
+                      className="relative p-6 rounded-2xl border-2 border-gray-100 bg-gray-50 opacity-60"
+                    >
+                      <div className="absolute top-2 right-2">
+                        <span className="px-2 py-0.5 bg-amber-100 text-amber-700 text-xs font-bold rounded-full">
+                          {t.comingSoon}
+                        </span>
+                      </div>
+                      <ExchangeLogo id={exchange.id} size="lg" />
+                      <h4 className="mt-3 font-bold text-gray-500">{exchange.name}</h4>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Step 2: Enter Credentials */}
+        {step === 2 && selectedExchange && (
+          <div className="space-y-6">
+            {/* Selected Exchange Header */}
+            <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl">
+              <ExchangeLogo id={selectedExchange.id} size="lg" />
+              <div className="flex-1">
+                <h3 className="font-bold text-lg">{selectedExchange.name}</h3>
+                <p className="text-sm text-gray-500">{selectedExchange.description?.[language] || selectedExchange.description?.en}</p>
+              </div>
+              <Button variant="ghost" size="sm" onClick={() => setStep(1)}>
+                {t.changeExchange}
+              </Button>
+            </div>
+
+            {/* Security Notice */}
+            <div className="bg-gray-900 text-white p-5 rounded-2xl">
+              <div className="flex items-start gap-3">
+                <Shield className="w-6 h-6 text-emerald-400 flex-shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="font-bold mb-1">{language === "uk" ? "Безпека" : "Security"}</h4>
+                  <p className="text-sm text-gray-300">{t.securityNote}</p>
+                  <p className="text-sm text-gray-400 mt-2">{t.readOnlyNote}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* IP Whitelist */}
+            <div className="bg-blue-50 p-5 rounded-2xl border border-blue-200">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <Zap className="w-5 h-5 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-bold text-blue-900 mb-1">{t.ipWhitelist}</h4>
+                  <p className="text-sm text-blue-700 mb-3">{t.ipWhitelistDesc}</p>
+                  <div className="flex items-center gap-2">
+                    <code className="px-3 py-2 bg-white rounded-lg font-mono text-lg border border-blue-200">
+                      {SERVER_IP}
+                    </code>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={copyIP}
+                      className="border-blue-300 text-blue-700 hover:bg-blue-100"
+                    >
+                      {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Credentials Form */}
+            <div className="space-y-4">
+              {/* API Key */}
+              <div>
+                <label className="block text-sm font-medium mb-2">{t.apiKey}</label>
+                <div className="relative">
+                  <Input
+                    type={showApiKey ? "text" : "password"}
+                    value={form.apiKey}
+                    onChange={(e) => setForm({ ...form, apiKey: e.target.value })}
+                    placeholder="Enter your API key"
+                    className="h-12 pr-12 font-mono"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowApiKey(!showApiKey)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    {showApiKey ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* API Secret */}
+              <div>
+                <label className="block text-sm font-medium mb-2">{t.apiSecret}</label>
+                <div className="relative">
+                  <Input
+                    type={showSecret ? "text" : "password"}
+                    value={form.secret}
+                    onChange={(e) => setForm({ ...form, secret: e.target.value })}
+                    placeholder="Enter your API secret"
+                    className="h-12 pr-12 font-mono"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowSecret(!showSecret)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    {showSecret ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Passphrase (if required) */}
+              {selectedExchange.fields?.includes("password") && (
+                <div>
+                  <label className="block text-sm font-medium mb-2">{t.passphrase}</label>
+                  <div className="relative">
+                    <Input
+                      type={showPassword ? "text" : "password"}
+                      value={form.password}
+                      onChange={(e) => setForm({ ...form, password: e.target.value })}
+                      placeholder="Enter your passphrase"
+                      className="h-12 pr-12 font-mono"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Testnet Toggle */}
+              <label className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl cursor-pointer hover:bg-gray-100 transition-colors">
+                <input
+                  type="checkbox"
+                  checked={form.testnet}
+                  onChange={(e) => setForm({ ...form, testnet: e.target.checked })}
+                  className="w-5 h-5 rounded"
+                />
+                <div>
+                  <span className="font-medium">{t.testnet}</span>
+                  <p className="text-sm text-gray-500">{t.testnetDesc}</p>
+                </div>
+              </label>
+
+              {/* Help Link */}
+              {selectedExchange.apiDocsUrl && (
+                <a 
+                  href={selectedExchange.apiDocsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  {t.howToCreate}
+                </a>
+              )}
+            </div>
+
+            {/* Error/Success Message */}
+            {connectionStatus && (
+              <div className={`p-4 rounded-xl flex items-center gap-3 ${
+                connectionStatus.success 
+                  ? 'bg-emerald-50 text-emerald-700' 
+                  : 'bg-red-50 text-red-700'
+              }`}>
+                {connectionStatus.success 
+                  ? <CheckCircle2 className="w-5 h-5" /> 
+                  : <AlertCircle className="w-5 h-5" />
+                }
+                <span>{connectionStatus.message}</span>
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="flex gap-3">
+              <Button 
+                variant="outline" 
+                onClick={() => setStep(1)}
+                className="h-12"
+              >
+                <ChevronLeft className="w-4 h-4 mr-2" />
+                {t.back}
+              </Button>
+              <Button 
+                onClick={handleConnect}
+                disabled={!form.apiKey || !form.secret || connecting}
+                className="flex-1 h-12"
+              >
+                {connecting ? (
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <ChevronRight className="w-4 h-4 mr-2" />
+                )}
+                {t.connect}
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Step 3: Success / Manage */}
+        {step === 3 && selectedExchange && (
+          <div className="space-y-6">
+            {/* Success State */}
+            <div className="text-center py-8">
+              <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-full flex items-center justify-center">
+                <CheckCircle2 className="w-10 h-10 text-white" />
+              </div>
+              <ExchangeLogo id={selectedExchange.id} size="xl" />
+              <h2 className="text-2xl font-bold mt-4 mb-2">{selectedExchange.name} {t.connected}!</h2>
+              <p className="text-gray-600">
+                {language === "uk" 
+                  ? "Ваша біржа успішно підключена та готова до аналізу" 
+                  : "Your exchange is successfully connected and ready for analysis"
+                }
+              </p>
+            </div>
+
+            {/* Actions */}
+            <div className="grid grid-cols-2 gap-4">
+              <Link href="/backtest" className="block">
+                <Button variant="outline" className="w-full h-14">
+                  {language === "uk" ? "Створити модель" : "Create Model"}
+                </Button>
+              </Link>
+              <Link href="/dashboard" className="block">
+                <Button className="w-full h-14">
+                  {language === "uk" ? "До панелі" : "Go to Dashboard"}
+                </Button>
+              </Link>
+            </div>
+
+            {/* Test Connection */}
+            <div className="border-t pt-6">
+              <Button 
+                variant="outline" 
+                onClick={handleTestConnection}
+                disabled={testing}
+                className="w-full h-12"
+              >
+                {testing ? (
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Zap className="w-4 h-4 mr-2" />
+                )}
+                {t.testConnection}
+              </Button>
+            </div>
+
+            {/* Disconnect */}
+            <div className="border-t pt-6">
+              <Button 
+                variant="ghost" 
+                onClick={handleDisconnect}
+                className="w-full h-12 text-red-500 hover:text-red-600 hover:bg-red-50"
+              >
+                {t.disconnect}
+              </Button>
+            </div>
+
+            {/* Back to exchange selection */}
+            <Button 
+              variant="ghost" 
+              onClick={() => {
+                setSelectedExchange(null);
+                setStep(1);
+              }}
+              className="w-full"
+            >
+              {t.changeExchange}
+            </Button>
+          </div>
+        )}
+
       </div>
     </div>
   );
