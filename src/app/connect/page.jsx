@@ -366,17 +366,17 @@ export default function ConnectPage() {
             {/* Popular Exchanges */}
             <div>
               <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">{t.popular}</h3>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-3 sm:grid-cols-3 gap-4">
                 {exchanges.filter(e => !e.comingSoon).slice(0, 6).map((exchange) => {
                   const isConnected = connectedExchanges.includes(exchange.id);
                   return (
                     <button
                       key={exchange.id}
                       onClick={() => handleSelectExchange(exchange)}
-                      className={`relative p-6 rounded-2xl border-2 transition-all hover:scale-[1.02] active:scale-[0.98] ${
+                      className={`relative p-6 rounded-2xl border-2 transition-all hover:scale-105 active:scale-95 flex items-center justify-center ${
                         isConnected 
                           ? 'border-emerald-500 bg-emerald-50' 
-                          : 'border-gray-200 hover:border-black bg-white'
+                          : 'border-gray-200 hover:border-black hover:shadow-lg bg-white'
                       }`}
                     >
                       {isConnected && (
@@ -384,11 +384,7 @@ export default function ConnectPage() {
                           <CheckCircle2 className="w-5 h-5 text-emerald-500" />
                         </div>
                       )}
-                      <ExchangeLogo id={exchange.id} size="lg" />
-                      <h4 className="mt-3 font-bold">{exchange.name}</h4>
-                      <p className="text-xs text-gray-500 mt-1 line-clamp-1">
-                        {exchange.description?.[language] || exchange.description?.en}
-                      </p>
+                      <ExchangeLogo id={exchange.id} size="xl" />
                     </button>
                   );
                 })}
@@ -399,19 +395,18 @@ export default function ConnectPage() {
             {exchanges.filter(e => e.comingSoon).length > 0 && (
               <div>
                 <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">{t.comingSoon}</h3>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                <div className="grid grid-cols-3 sm:grid-cols-3 gap-4">
                   {exchanges.filter(e => e.comingSoon).map((exchange) => (
                     <div
                       key={exchange.id}
-                      className="relative p-6 rounded-2xl border-2 border-gray-100 bg-gray-50 opacity-60"
+                      className="relative p-6 rounded-2xl border-2 border-gray-100 bg-gray-50 opacity-60 flex items-center justify-center"
                     >
                       <div className="absolute top-2 right-2">
                         <span className="px-2 py-0.5 bg-amber-100 text-amber-700 text-xs font-bold rounded-full">
                           {t.comingSoon}
                         </span>
                       </div>
-                      <ExchangeLogo id={exchange.id} size="lg" />
-                      <h4 className="mt-3 font-bold text-gray-500">{exchange.name}</h4>
+                      <ExchangeLogo id={exchange.id} size="xl" />
                     </div>
                   ))}
                 </div>
