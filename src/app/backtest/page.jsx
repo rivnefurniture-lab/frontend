@@ -98,9 +98,6 @@ const PERIOD_PRESETS = [
 ];
 
 function ConditionBuilder({ condition, onChange, onRemove }) {
-  const indicatorMeta = INDICATORS.find((ind) => ind.id === condition.indicator);
-  const currentTimeframe = condition.subfields?.Timeframe || TIMEFRAMES[0];
-
   const handleChange = (key, value) => {
     onChange({
       ...condition,
@@ -109,47 +106,28 @@ function ConditionBuilder({ condition, onChange, onRemove }) {
   };
 
   return (
-    <div className="border-2 border-gray-200 bg-white rounded-xl shadow-sm" style={{ clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))' }}>
-      <div className="flex flex-wrap items-center justify-between gap-4 px-4 py-3 border-b border-gray-100 bg-gray-50">
-        <div className="flex items-center gap-3">
-          <div className="px-3 py-1 text-xs font-semibold bg-black text-white uppercase tracking-wide rounded-md">
-            {condition.indicator}
-          </div>
-          <div>
-            <p className="text-sm font-semibold text-gray-900">
-              {indicatorMeta?.name || condition.indicator}
-            </p>
-            <p className="text-xs text-gray-500">
-              Timeframe: <span className="font-semibold text-gray-800">{currentTimeframe}</span>
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <select
-            value={condition.indicator}
-            onChange={(e) => onChange({ ...condition, indicator: e.target.value, subfields: { Timeframe: TIMEFRAMES[0] } })}
-            className="text-sm bg-white border-2 border-gray-200 px-3 py-2 font-semibold"
-            style={{ clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))' }}
-          >
-            {INDICATORS.map((ind) => (
-              <option key={ind.id} value={ind.id}>{ind.name}</option>
-            ))}
-          </select>
-          <button
-            onClick={onRemove}
-            className="text-xs font-bold text-red-500 hover:text-red-700 px-3 py-1 border border-red-100 bg-red-50"
-            style={{ clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))' }}
-          >
-            Remove
-          </button>
-        </div>
+    <div className="bg-gray-50 p-4 border-2 border-gray-100" style={{ clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))' }}>
+      <div className="flex justify-between items-center mb-3">
+        <select
+          value={condition.indicator}
+          onChange={(e) => onChange({ ...condition, indicator: e.target.value, subfields: { Timeframe: TIMEFRAMES[0] } })}
+          className="font-bold bg-white border-2 border-gray-200 px-3 py-2"
+          style={{ clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))' }}
+        >
+          {INDICATORS.map((ind) => (
+            <option key={ind.id} value={ind.id}>{ind.name}</option>
+          ))}
+        </select>
+        <button onClick={onRemove} className="text-red-500 hover:text-red-700 text-sm font-bold">
+          Remove
+        </button>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 p-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <div>
           <label className="text-xs text-gray-500 block mb-1">Timeframe</label>
           <select
-            value={currentTimeframe}
+            value={condition.subfields?.Timeframe || TIMEFRAMES[0]}
             onChange={(e) => handleChange("Timeframe", e.target.value)}
             className="w-full border rounded px-2 py-1.5 text-sm"
           >
@@ -612,14 +590,25 @@ export default function BacktestPage() {
 
   // Success modal state
   const [successModal, setSuccessModal] = useState({ open: false, position: 1, wait: 10 });
-  const [notifyEmail, setNotifyEmail] = useState("");
-  const [notifyTelegram, setNotifyTelegram] = useState("");
-  const [notifyWhatsapp, setNotifyWhatsapp] = useState("");
-  const [notifyChannels, setNotifyChannels] = useState({
-    email: true,
-    telegram: false,
-    whatsapp: false,
-  });
+
+  // Notification preferences
+  const [notifyVia, setNotifyVia] = useState('email'); // 'email', 'telegram', 'both'
+  const [userProfile, setUserProfile] = useState(null);
+  
+  // Load user profile for notification settings
+  useEffect(() => {
+    if (user) {
+      apiFetch("/user/profile").then(profile => {
+        if (profile && !profile.error) {
+          setUserProfile(profile);
+          // Default to 'both' if telegram is set up, otherwise 'email'
+          if (profile.telegramId && profile.telegramEnabled) {
+            setNotifyVia('both');
+          }
+        }
+      }).catch(() => {});
+    }
+  }, [user]);
 
   // Selected period for quick buttons
   const [selectedPeriod, setSelectedPeriod] = useState(6); // default 6 months
@@ -636,12 +625,6 @@ export default function BacktestPage() {
     setEndDate(end.toISOString().split('T')[0]);
     setSelectedPeriod(months);
   };
-
-  useEffect(() => {
-    if (user?.email) {
-      setNotifyEmail(user.email);
-    }
-  }, [user]);
 
   const addCondition = (type) => {
     const newCondition = {
@@ -811,31 +794,6 @@ export default function BacktestPage() {
     }
 
     try {
-      const selectedChannels = Object.entries(notifyChannels)
-        .filter(([_, enabled]) => enabled)
-        .map(([k]) => k);
-
-      if (selectedChannels.length === 0) {
-        setError(language === "uk" ? "Оберіть канал сповіщень" : "Select at least one notification channel");
-        setLoading(false);
-        return;
-      }
-
-      let notifyVia = "email";
-      const hasWhatsApp = selectedChannels.includes("whatsapp");
-      const hasEmail = selectedChannels.includes("email");
-      const hasTelegram = selectedChannels.includes("telegram");
-
-      if (selectedChannels.length === 3 || (hasWhatsApp && (hasEmail || hasTelegram))) {
-        notifyVia = "all";
-      } else if (hasEmail && hasTelegram) {
-        notifyVia = "both";
-      } else if (hasWhatsApp) {
-        notifyVia = "whatsapp";
-      } else if (hasTelegram) {
-        notifyVia = "telegram";
-      }
-
       // Build payload matching backtest2.py EXACTLY
       const payload = {
         strategy_name: strategyName,
@@ -897,10 +855,7 @@ export default function BacktestPage() {
         method: "POST",
         body: {
           payload,
-          notifyVia,
-          notifyEmail: notifyChannels.email ? notifyEmail : '',
-          notifyTelegram: notifyChannels.telegram ? notifyTelegram : '',
-          notifyWhatsapp: notifyChannels.whatsapp ? notifyWhatsapp : '',
+          notifyVia: notifyVia,
         },
       });
 
@@ -948,17 +903,6 @@ export default function BacktestPage() {
   const formatDate = (dateStr) => {
     return new Date(dateStr).toLocaleDateString();
   };
-
-  const periodLabel = `${formatDate(startDate)} - ${formatDate(endDate)}`;
-  const tpLabel = priceChangeActive
-    ? `${targetProfit}% ${takeProfitType === "percentage-total" ? (language === "uk" ? "від загальної" : "of total") : (language === "uk" ? "від базового" : "of base")}${trailingToggle ? ` • ${language === "uk" ? "трейл" : "trail"} ${trailingDeviation}%` : ""}`
-    : language === "uk" ? "Take Profit вимкнено" : "Take Profit off";
-  const slLabel = stopLossToggle
-    ? `${stopLossValue}% ${stopLossType === "percentage-total" ? (language === "uk" ? "загальна" : "total") : (language === "uk" ? "базова" : "base")} SL`
-    : language === "uk" ? "SL вимкнено" : "SL off";
-  const safetyLabel = safetyOrderToggle
-    ? `${maxSafetyOrdersCount} SO • ${priceDeviation}%`
-    : language === "uk" ? "Без SO" : "No safety orders";
 
   // Auth guard - require login
   if (authLoading) {
@@ -1020,8 +964,8 @@ export default function BacktestPage() {
           },
         ]}
         footer={language === "uk"
-          ? "Ви отримаєте email коли бектест завершиться. Слідкуйте за прогресом у плаваючому моніторі!"
-          : "You'll receive an email when complete. Watch the floating monitor for live progress!"
+          ? `Ви отримаєте сповіщення ${notifyVia === 'telegram' ? 'в Telegram' : notifyVia === 'both' ? 'на email і в Telegram' : 'на email'} коли бектест завершиться. Слідкуйте за прогресом у плаваючому моніторі!`
+          : `You'll receive a ${notifyVia === 'telegram' ? 'Telegram message' : notifyVia === 'both' ? 'notification via email and Telegram' : 'notification via email'} when complete. Watch the floating monitor for live progress!`
         }
       />
 
@@ -1289,81 +1233,6 @@ export default function BacktestPage() {
                           {pair}
                         </button>
                       ))}
-                    </div>
-                  </div>
-
-                  {/* Notifications */}
-                  <div className="mt-6 pt-4 border-t border-gray-200">
-                    <label className="text-sm font-medium block mb-2 flex items-center gap-1">
-                      {language === "uk" ? "Сповіщення" : "Notifications"}
-                    </label>
-                    <div className="grid md:grid-cols-3 gap-3">
-                      <label className="flex items-center gap-2 text-sm bg-gray-50 border border-gray-200 px-3 py-2">
-                        <input
-                          type="checkbox"
-                          checked={notifyChannels.email}
-                          onChange={(e) =>
-                            setNotifyChannels((prev) => ({ ...prev, email: e.target.checked }))
-                          }
-                        />
-                        <span>Email</span>
-                      </label>
-                      <label className="flex items-center gap-2 text-sm bg-gray-50 border border-gray-200 px-3 py-2">
-                        <input
-                          type="checkbox"
-                          checked={notifyChannels.telegram}
-                          onChange={(e) =>
-                            setNotifyChannels((prev) => ({ ...prev, telegram: e.target.checked }))
-                          }
-                        />
-                        <span>Telegram</span>
-                      </label>
-                      <label className="flex items-center gap-2 text-sm bg-gray-50 border border-gray-200 px-3 py-2">
-                        <input
-                          type="checkbox"
-                          checked={notifyChannels.whatsapp}
-                          onChange={(e) =>
-                            setNotifyChannels((prev) => ({ ...prev, whatsapp: e.target.checked }))
-                          }
-                        />
-                        <span>WhatsApp</span>
-                      </label>
-                    </div>
-                    <div className="grid md:grid-cols-3 gap-3 mt-3">
-                      <div>
-                        <label className="text-xs text-gray-500 block mb-1">Email</label>
-                        <Input
-                          value={notifyEmail}
-                          onChange={(e) => setNotifyEmail(e.target.value)}
-                          placeholder="you@example.com"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-xs text-gray-500 block mb-1">Telegram ID / @handle</label>
-                        <Input
-                          value={notifyTelegram}
-                          onChange={(e) => setNotifyTelegram(e.target.value)}
-                          placeholder="@username or chat id"
-                        />
-                        <p className="text-[11px] text-gray-500 mt-1">
-                          {language === "uk"
-                            ? "Напишіть /start в боті, щоб отримати chat_id"
-                            : "Send /start to the bot to get your chat_id"}
-                        </p>
-                      </div>
-                      <div>
-                        <label className="text-xs text-gray-500 block mb-1">WhatsApp</label>
-                        <Input
-                          value={notifyWhatsapp}
-                          onChange={(e) => setNotifyWhatsapp(e.target.value)}
-                          placeholder="+123456789"
-                        />
-                        <p className="text-[11px] text-gray-500 mt-1">
-                          {language === "uk"
-                            ? "У форматі +380..."
-                            : "Format: +1... including country code"}
-                        </p>
-                      </div>
                     </div>
                   </div>
 
@@ -1776,121 +1645,118 @@ export default function BacktestPage() {
               </Card>
 
 
-              <p className="text-center text-sm text-gray-500 mt-4">
-                {language === "uk"
-                  ? "Перегляньте підсумки та запустіть бектест у панелі \"Review & Run\""
-                  : "Review settings and launch from the \"Review & Run\" panel."}
-              </p>
+              {/* Notification Preferences */}
+              <Card className="bg-gray-50 border-2 border-gray-100" style={{ clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))' }}>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                    </svg>
+                    {language === "uk" ? "Сповіщення по завершенню" : "Completion Notification"}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setNotifyVia('email')}
+                      className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg border-2 transition-all ${
+                        notifyVia === 'email' 
+                          ? 'bg-black text-white border-black' 
+                          : 'bg-white text-gray-700 border-gray-200 hover:border-gray-400'
+                      }`}
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      </svg>
+                      Email
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setNotifyVia('telegram')}
+                      disabled={!userProfile?.telegramId}
+                      className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg border-2 transition-all ${
+                        notifyVia === 'telegram' 
+                          ? 'bg-blue-500 text-white border-blue-500' 
+                          : userProfile?.telegramId 
+                            ? 'bg-white text-gray-700 border-gray-200 hover:border-blue-400' 
+                            : 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
+                      }`}
+                    >
+                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+                      </svg>
+                      Telegram
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setNotifyVia('both')}
+                      disabled={!userProfile?.telegramId}
+                      className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg border-2 transition-all ${
+                        notifyVia === 'both' 
+                          ? 'bg-gradient-to-r from-black to-blue-500 text-white border-black' 
+                          : userProfile?.telegramId 
+                            ? 'bg-white text-gray-700 border-gray-200 hover:border-gray-400' 
+                            : 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
+                      }`}
+                    >
+                      {language === "uk" ? "Обидва" : "Both"}
+                    </button>
+                  </div>
+                  {!userProfile?.telegramId && (
+                    <p className="text-xs text-gray-500 mt-2">
+                      {language === "uk" 
+                        ? "💡 Налаштуйте Telegram в профілі для отримання миттєвих сповіщень" 
+                        : "💡 Set up Telegram in your profile to receive instant notifications"}
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Run Button */}
+              <button
+                className="w-full py-4 bg-gradient-to-r from-black via-gray-900 to-black text-white font-bold text-lg relative overflow-hidden group disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))' }}
+                onClick={runBacktest}
+                disabled={loading}
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-emerald-600/20 via-transparent to-emerald-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-emerald-400 to-transparent opacity-50"></div>
+                <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-emerald-400 to-transparent opacity-50"></div>
+                <div className="relative flex items-center justify-center gap-3">
+                  {loading ? (
+                    <>
+                      <svg className="animate-spin h-5 w-5 text-emerald-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      <span>{t("backtest.runningBacktest")}</span>
+                      <div className="flex gap-1">
+                        <div className="w-1.5 h-1.5 bg-emerald-400 animate-pulse"></div>
+                        <div className="w-1.5 h-1.5 bg-emerald-400 animate-pulse delay-100"></div>
+                        <div className="w-1.5 h-1.5 bg-emerald-400 animate-pulse delay-200"></div>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <PlayCircle className="w-5 h-5 text-emerald-400" />
+                      <span>{t("backtest.runBacktest")}</span>
+                      <div className="w-4 h-4" /> {/* Spacer to center text with icon */}
+                    </>
+                  )}
+                </div>
+              </button>
+
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                  {error}
+                </div>
+              )}
             </>)}
         </div>
 
         {/* Results Panel */}
         <div className="space-y-6">
-          <div className="sticky top-4 z-10">
-            <Card className="shadow-lg border-gray-200">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <PlayCircle className="w-5 h-5" />
-                  {language === "uk" ? "Перевірити та запустити" : "Review & Run"}
-                </CardTitle>
-                <p className="text-sm text-gray-500">
-                  {language === "uk"
-                    ? "Переконайтесь, що параметри виглядають правильно перед додаванням у чергу."
-                    : "Make sure the setup looks right before queueing your backtest."}
-                </p>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-3 text-sm">
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 bg-gray-900 text-white flex items-center justify-center" style={{ clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))' }}>
-                      <Layers className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <p className="text-xs uppercase text-gray-500 font-semibold">{language === "uk" ? "Активи" : "Assets"}</p>
-                      <p className="font-semibold text-gray-900">{selectedPairs.length} {language === "uk" ? "обрано" : "selected"}</p>
-                      <p className="text-xs text-gray-500 truncate max-w-[160px]">
-                        {selectedPairs.slice(0, 3).join(", ")}{selectedPairs.length > 3 ? ` +${selectedPairs.length - 3}` : ""}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 bg-emerald-500 text-white flex items-center justify-center" style={{ clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))' }}>
-                      <Calendar className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <p className="text-xs uppercase text-gray-500 font-semibold">{language === "uk" ? "Період" : "Period"}</p>
-                      <p className="font-semibold text-gray-900">{periodLabel}</p>
-                      <p className="text-xs text-gray-500">{selectedPeriod ? `${selectedPeriod}m preset` : language === "uk" ? "Кастомний діапазон" : "Custom range"}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 bg-gray-100 text-gray-900 flex items-center justify-center" style={{ clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))' }}>
-                      <Wallet className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <p className="text-xs uppercase text-gray-500 font-semibold">{language === "uk" ? "Розмір угоди" : "Sizing"}</p>
-                      <p className="font-semibold text-gray-900">${baseOrderSize.toLocaleString()} {language === "uk" ? "база" : "base"}</p>
-                      <p className="text-xs text-gray-500">{language === "uk" ? "Угод одночасно" : "Max deals"}: {maxActiveDeals}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 bg-gray-900 text-white flex items-center justify-center" style={{ clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))' }}>
-                      <ShieldCheck className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <p className="text-xs uppercase text-gray-500 font-semibold">{language === "uk" ? "Захист" : "Protection"}</p>
-                      <p className="font-semibold text-gray-900">{tpLabel}</p>
-                      <p className="text-xs text-gray-500">{slLabel} • {safetyLabel}</p>
-                    </div>
-                  </div>
-                </div>
-
-                <button
-                  className="w-full py-4 bg-gradient-to-r from-black via-gray-900 to-black text-white font-bold text-lg relative overflow-hidden group disabled:opacity-50 disabled:cursor-not-allowed"
-                  style={{ clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))' }}
-                  onClick={runBacktest}
-                  disabled={loading}
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-emerald-600/20 via-transparent to-emerald-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-emerald-400 to-transparent opacity-50"></div>
-                  <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-emerald-400 to-transparent opacity-50"></div>
-                  <div className="relative flex items-center justify-center gap-3">
-                    {loading ? (
-                      <>
-                        <svg className="animate-spin h-5 w-5 text-emerald-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        <span>{t("backtest.runningBacktest")}</span>
-                        <div className="flex gap-1">
-                          <div className="w-1.5 h-1.5 bg-emerald-400 animate-pulse"></div>
-                          <div className="w-1.5 h-1.5 bg-emerald-400 animate-pulse delay-100"></div>
-                          <div className="w-1.5 h-1.5 bg-emerald-400 animate-pulse delay-200"></div>
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <PlayCircle className="w-5 h-5 text-emerald-400" />
-                        <span>{t("backtest.runBacktest")}</span>
-                        <div className="w-4 h-4" />
-                      </>
-                    )}
-                  </div>
-                </button>
-
-                {error && (
-                  <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-                    {error}
-                  </div>
-                )}
-                <p className="text-xs text-gray-500">
-                  {language === "uk"
-                    ? "Бектести додаються в чергу. Ми надішлемо email, коли все буде готово."
-                    : "Backtests run in the queue. We'll email you when it's done."}
-                </p>
-              </CardContent>
-            </Card>
-          </div>
           {results ? (
             <>
               {/* Queue Status */}

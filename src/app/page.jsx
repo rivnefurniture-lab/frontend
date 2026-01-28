@@ -5,7 +5,7 @@ import Link from "next/link";
 import HeroSection from "@/components/HeroSection";
 import { apiFetch } from "@/lib/api";
 import { useLanguage } from "@/context/LanguageContext";
-import { Star, Quote, CheckCircle } from "lucide-react";
+import { Star, Quote } from "lucide-react";
 import { isCryptoMode, isStocksMode, getExchanges } from "@/config/tradingMode";
 
 // Testimonial avatar with photo
@@ -44,57 +44,57 @@ export default function Page() {
   const testimonials = [
     {
       id: 1,
-      name: "Maya L.",
-      role: language === "uk" ? "Перевірений користувач" : "Verified user",
-      initials: "ML",
+      name: language === "uk" ? "Олег К." : "Oleg K.",
+      role: language === "uk" ? "Бізнес-аналітик" : "Business Analyst",
+      initials: language === "uk" ? "ОК" : "OK",
       gradient: "from-gray-700 to-gray-900",
       rating: 5,
-      text: "Tried this as a joke. Now it's making more than my side hustle",
+      text: t("testimonialContent.oleg"),
     },
     {
       id: 2,
-      name: "Evan T.",
-      role: language === "uk" ? "Перевірений користувач" : "Verified user",
-      initials: "ET",
+      name: language === "uk" ? "Назар Г." : "Nazar H.",
+      role: language === "uk" ? "Фінансовий аналітик" : "Financial Analyst",
+      initials: language === "uk" ? "НГ" : "NH",
       gradient: "from-purple-500 to-pink-500",
       rating: 5,
-      text: "It's like having that one smart friend who just does all the hard stuff for you",
+      text: t("testimonialContent.nazar"),
     },
     {
       id: 3,
-      name: "Sara P.",
-      role: language === "uk" ? "Перевірений користувач" : "Verified user",
-      initials: "SP",
+      name: language === "uk" ? "Дмитро С." : "Dmytro S.",
+      role: language === "uk" ? "Дослідник даних" : "Data Researcher",
+      initials: language === "uk" ? "ДС" : "DS",
       gradient: "from-amber-500 to-orange-500",
       rating: 5,
-      text: "Can't believe I used to pay someone for this. Algotcha does it better.",
+      text: t("testimonialContent.dmytro"),
     },
     {
       id: 4,
-      name: "Jared C.",
-      role: language === "uk" ? "Перевірений користувач" : "Verified user",
-      initials: "JC",
+      name: language === "uk" ? "Каріна Г." : "Karina H.",
+      role: language === "uk" ? "Приватний аналітик" : "Private Analyst",
+      initials: language === "uk" ? "КГ" : "KH",
       gradient: "from-green-500 to-emerald-500",
       rating: 5,
-      text: "I went from panic-selling every dip to watching my bot stack wins. Feels golden!",
+      text: t("testimonialContent.karina"),
     },
     {
       id: 5,
-      name: "Lena V.",
-      role: language === "uk" ? "Перевірений користувач" : "Verified user",
-      initials: "LV",
-      gradient: "from-blue-500 to-indigo-600",
+      name: language === "uk" ? "Максим Р." : "Maxim R.",
+      role: language === "uk" ? "Трейдер" : "Trader",
+      initials: language === "uk" ? "МР" : "MR",
+      gradient: "from-blue-500 to-cyan-500",
       rating: 5,
-      text: "Why does making profit feel illegal with this bot lol",
+      text: t("testimonialContent.maxim"),
     },
     {
       id: 6,
-      name: "Chris D.",
-      role: language === "uk" ? "Перевірений користувач" : "Verified user",
-      initials: "CD",
-      gradient: "from-rose-500 to-red-500",
+      name: language === "uk" ? "Анна Л." : "Anna L.",
+      role: language === "uk" ? "Інвестор" : "Investor",
+      initials: language === "uk" ? "АЛ" : "AL",
+      gradient: "from-pink-500 to-rose-500",
       rating: 5,
-      text: "Used to panic-sell every dip. Now I just let it cook and it really shows",
+      text: t("testimonialContent.anna"),
     },
   ];
 
@@ -346,34 +346,28 @@ export default function Page() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {testimonials.map((testimonial, index) => (
               <div
                 key={testimonial.id}
-                className="bg-white p-7 shadow-lg border-2 border-gray-100 hover:border-black hover:shadow-2xl transition-all relative group min-h-[260px] flex flex-col justify-between"
+                className="bg-white p-6 shadow-lg border-2 border-gray-100 hover:border-black hover:shadow-2xl transition-all relative group"
                 style={{clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'}}
               >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="inline-flex items-center gap-2 text-xs font-semibold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full">
-                    <CheckCircle className="w-4 h-4" />
-                    <span>{language === "uk" ? "Перевірено" : "Verified"}</span>
-                  </div>
-                  <div className="text-gray-100 group-hover:text-emerald-100 transition-colors">
-                    <Quote className="w-8 h-8" />
-                  </div>
+                <div className="absolute top-4 right-4 text-gray-100 group-hover:text-emerald-100 transition-colors">
+                  <Quote className="w-8 h-8" />
                 </div>
 
-                <div className="flex gap-1 mb-3">
+                <div className="flex gap-1 mb-4">
                   {[...Array(testimonial.rating)].map((_, i) => (
                     <Star key={i} className="w-4 h-4 fill-black text-black" />
                   ))}
                 </div>
 
-                <p className="text-gray-700 text-base leading-relaxed flex-1">
-                  {testimonial.text}
+                <p className="text-gray-600 text-sm mb-6 leading-relaxed">
+                  "{testimonial.text}"
                 </p>
 
-                <div className="flex items-center gap-3 pt-4 border-t-2 border-gray-100 mt-6">
+                <div className="flex items-center gap-3 pt-4 border-t-2 border-gray-100">
                   {testimonial.photo ? (
                     <img 
                       src={testimonial.photo}

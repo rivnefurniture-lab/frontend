@@ -187,10 +187,12 @@ const translations = {
     
     // Testimonials content
     testimonialContent: {
-      oleg: "Before this, analysis honestly felt like throwing darts in the dark. Now I can really tell what looks good before I even commit.",
-      nazar: "I'm sitting here wondering why I ever paid someone to do what this tool does on its own for way less.",
-      dmytro: "Using Algotcha feels like letting your smartest colleague do the hard part while you just focus on decisions.",
-      karina: "Feels like professional analytics on autopilot, but simple enough that even I can run it without overthinking.",
+      oleg: "Tried this as a joke. Now it's making more than my side hustle.",
+      nazar: "Can't believe I used to pay someone for this. Algotcha does it better.",
+      dmytro: "It's like having that one smart friend who just does all the hard stuff for you.",
+      karina: "I went from panic-selling every dip to watching my bot stack wins. Feels golden!",
+      maxim: "Why does making profit feel illegal with this bot lol",
+      anna: "Used to panic-sell every dip. Now I just let it cook and it really shows.",
     },
     
     // Connect page
@@ -617,10 +619,12 @@ const translations = {
     
     // Testimonials content
     testimonialContent: {
-      oleg: "Раніше аналіз чесно відчувався як кидання дротиків наосліп. Тепер я можу реально бачити, що виглядає перспективно, ще до того, як приймаю рішення.",
-      nazar: "Сиджу і думаю, навіщо я раніше платив комусь за те, що цей інструмент робить сам і набагато дешевше.",
-      dmytro: "Користуватись Algotcha — це як дати своєму найрозумнішому колезі зробити всю важку роботу, поки ти просто фокусуєшся на рішеннях.",
-      karina: "Відчуття, ніби професійна аналітика на автопілоті, але настільки просто, що навіть я можу керувати цим без зайвих роздумів.",
+      oleg: "Спробував жартома. Тепер заробляю більше, ніж на підробітку.",
+      nazar: "Не можу повірити, що раніше комусь платив за це. Algotcha робить краще.",
+      dmytro: "Це як мати того розумного друга, який просто робить всю складну роботу за тебе.",
+      karina: "Раніше панікував і продавав на кожному падінні. Тепер дивлюсь як бот збирає прибутки. Кайф!",
+      maxim: "Чому заробляти з цим ботом відчувається майже нелегально лол",
+      anna: "Раніше панікувала на кожному діпі. Тепер просто даю йому працювати і результат видно.",
     },
     
     // Connect page

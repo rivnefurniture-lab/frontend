@@ -165,28 +165,6 @@ export default function StrategyDetailPage() {
             const maxDDPct = (result.maxDrawdown || result.max_drawdown || 0) * 100;
             const netProfitPct = (result.netProfit || result.net_profit || 0) * 100;
 
-            // Normalize chart data for the UI (Recharts expects an array)
-            let parsedChartData = result.chartData ? (typeof result.chartData === 'string' ? JSON.parse(result.chartData) : result.chartData) : null;
-            // Worker returns shape {timestamps, unrealized_balance, bh_timestamps, bh_balance, drawdown}
-            let balanceHistory = [];
-            if (parsedChartData) {
-              if (Array.isArray(parsedChartData.balanceHistory)) {
-                balanceHistory = parsedChartData.balanceHistory;
-              } else if (Array.isArray(parsedChartData.unrealized_balance)) {
-                const ts = Array.isArray(parsedChartData.timestamps) ? parsedChartData.timestamps : [];
-                balanceHistory = parsedChartData.unrealized_balance.map((val, idx) => ({
-                  time: ts[idx] || idx,
-                  value: Number(val),
-                }));
-              } else if (Array.isArray(parsedChartData.bh_balance)) {
-                const ts = Array.isArray(parsedChartData.bh_timestamps) ? parsedChartData.bh_timestamps : [];
-                balanceHistory = parsedChartData.bh_balance.map((val, idx) => ({
-                  time: ts[idx] || idx,
-                  value: Number(val),
-                }));
-              }
-            }
-
             const transformed = {
               id: `backtest-${backtestId}`,
               name: result.name || result.strategy_name || 'Backtest Result',
@@ -208,8 +186,7 @@ export default function StrategyDetailPage() {
               endDate: result.endDate || result.end_date,
               initialBalance: result.initialBalance || result.initial_balance || 10000,
               pairs: result.pairs || [],
-              history: balanceHistory,
-              chartData: { balanceHistory },
+              history: result.chartData ? (typeof result.chartData === 'string' ? JSON.parse(result.chartData) : result.chartData) : [],
               trades: rawTrades,
               recentTrades: formattedTrades,
               config: result.config ? (typeof result.config === 'string' ? JSON.parse(result.config) : result.config) : {},
@@ -1420,3 +1397,4 @@ function ConditionGroup({ title, conditions }) {
     </div>
   );
 }
+
