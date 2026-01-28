@@ -113,468 +113,331 @@ function ConditionBuilder({ condition, onChange, onRemove, language = "en" }) {
     });
   };
 
-  // Custom styled select for condition builder
-  const ConditionSelect = ({ value, onChange: onSelectChange, options, className = "" }) => (
-    <Select
-      value={value}
-      onChange={onSelectChange}
-      options={options}
-      size="sm"
-      className={className}
-    />
-  );
-  
-  // Mini tooltip label for condition builder (compact version)
-  const TipLabel = ({ label, labelUk, tip, tipUk }) => (
-    <TooltipLabel
-      label={language === "uk" && labelUk ? labelUk : label}
-      tooltip={tip}
-      tooltipUk={tipUk}
-      language={language}
-      className="text-xs font-medium text-gray-500"
-    />
+  // Field component with inline label
+  const Field = ({ label, labelUk, tip, tipUk, children, width = "w-auto" }) => (
+    <div className={`flex flex-col ${width}`}>
+      <span className="text-[10px] text-gray-500 mb-0.5 whitespace-nowrap">
+        <TooltipLabel
+          label={language === "uk" && labelUk ? labelUk : label}
+          tooltip={tip}
+          tooltipUk={tipUk}
+          language={language}
+          className="text-[10px] font-medium"
+        />
+      </span>
+      {children}
+    </div>
   );
 
   return (
-    <div className="bg-gray-50 p-4 border-2 border-gray-100" style={{ clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))' }}>
-      <div className="flex justify-between items-center mb-3">
-        <Select
-          value={condition.indicator}
-          onChange={(val) => onChange({ ...condition, indicator: val, subfields: { Timeframe: TIMEFRAMES[0] } })}
-          options={INDICATORS.map(ind => ({ value: ind.id, label: ind.name }))}
-          size="sm"
-          className="min-w-[200px]"
-        />
-        <button 
-          onClick={onRemove} 
-          className="ml-3 px-3 py-1.5 text-red-500 hover:text-white hover:bg-red-500 text-xs font-bold border-2 border-red-200 hover:border-red-500 transition-all"
-          style={{ clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))' }}
-        >
-          {language === "uk" ? "Видалити" : "Remove"}
-        </button>
-      </div>
-
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div>
-          <label className="text-xs font-medium text-gray-500 block mb-1.5">
-            <TipLabel 
-              label="Timeframe" 
-              labelUk="Таймфрейм"
-              tip="Chart interval for indicator calculation. Shorter = more signals but more noise. Longer = fewer but more reliable signals."
-              tipUk="Інтервал графіка для розрахунку індикатора. Коротший = більше сигналів, але більше шуму. Довший = менше, але надійніші сигнали."
-            />
-          </label>
-          <ConditionSelect
+    <div className="bg-white border border-gray-200 rounded-lg p-3 shadow-sm">
+      {/* Single row layout */}
+      <div className="flex flex-wrap items-end gap-2">
+        {/* Indicator selector - wider */}
+        <div className="flex-shrink-0" style={{ minWidth: '160px' }}>
+          <Select
+            value={condition.indicator}
+            onChange={(val) => onChange({ ...condition, indicator: val, subfields: { Timeframe: TIMEFRAMES[0] } })}
+            options={INDICATORS.map(ind => ({ value: ind.id, label: ind.name }))}
+            size="sm"
+          />
+        </div>
+        
+        {/* Timeframe - always shown */}
+        <Field label="TF" labelUk="ТФ" tip="Chart timeframe" tipUk="Таймфрейм графіка">
+          <Select
             value={condition.subfields?.Timeframe || TIMEFRAMES[0]}
             onChange={(val) => handleChange("Timeframe", val)}
             options={TIMEFRAMES.map(tf => ({ value: tf, label: tf }))}
+            size="sm"
+            className="w-16"
           />
-        </div>
+        </Field>
 
         {/* RSI Indicator */}
         {condition.indicator === "RSI" && (
           <>
-            <div>
-              <label className="text-xs font-medium text-gray-500 block mb-1.5">
-                <TipLabel 
-                  label="RSI Length" 
-                  labelUk="Період RSI"
-                  tip="Number of periods for RSI calculation. 14 is standard. Lower = more sensitive, Higher = smoother."
-                  tipUk="Кількість періодів для розрахунку RSI. 14 - стандарт. Менше = чутливіший, Більше = плавніший."
-                />
-              </label>
-              <ConditionSelect
+            <Field label="Period" labelUk="Період" tip="RSI calculation period" tipUk="Період розрахунку RSI">
+              <Select
                 value={condition.subfields?.["RSI Length"] || 14}
                 onChange={(val) => handleChange("RSI Length", parseInt(val))}
                 options={RSI_LENGTHS.map(len => ({ value: len, label: String(len) }))}
+                size="sm"
+                className="w-16"
               />
-            </div>
-            <div>
-              <label className="text-xs font-medium text-gray-500 block mb-1.5">
-                <TipLabel 
-                  label="Condition" 
-                  labelUk="Умова"
-                  tip="How to compare indicator value. 'Less Than' = buy when oversold (<30). 'Greater Than' = sell when overbought (>70)."
-                  tipUk="Як порівнювати значення індикатора. 'Менше' = купити при перепроданості (<30). 'Більше' = продати при перекупленості (>70)."
-                />
-              </label>
-              <ConditionSelect
+            </Field>
+            <Field label="When" labelUk="Коли" tip="Comparison condition" tipUk="Умова порівняння">
+              <Select
                 value={condition.subfields?.Condition || "Less Than"}
                 onChange={(val) => handleChange("Condition", val)}
-                options={CONDITIONS.map(c => ({ value: c, label: c }))}
+                options={CONDITIONS.map(c => ({ value: c, label: language === "uk" ? (c === "Less Than" ? "< Менше" : c === "Greater Than" ? "> Більше" : c) : (c === "Less Than" ? "< Less" : c === "Greater Than" ? "> Greater" : c) }))}
+                size="sm"
+                className="w-24"
               />
-            </div>
-            <div>
-              <label className="text-xs font-medium text-gray-500 block mb-1.5">
-                <TipLabel 
-                  label="Signal Value" 
-                  labelUk="Значення"
-                  tip="RSI threshold (0-100). Common: 30 for oversold entry, 70 for overbought exit. Adjust based on asset volatility."
-                  tipUk="Поріг RSI (0-100). Типово: 30 для перепроданості, 70 для перекупленості. Налаштуйте залежно від волатильності."
-                />
-              </label>
+            </Field>
+            <Field label="Value" labelUk="Знач." tip="RSI threshold (0-100)" tipUk="Поріг RSI (0-100)">
               <Input
                 type="number"
                 value={condition.subfields?.["Signal Value"] || 30}
                 onChange={(e) => handleChange("Signal Value", parseFloat(e.target.value))}
                 inputSize="sm"
+                className="w-16"
                 min={0}
                 max={100}
               />
-            </div>
+            </Field>
           </>
         )}
 
         {/* MA Indicator */}
         {condition.indicator === "MA" && (
           <>
-            <div>
-              <label className="text-xs font-medium text-gray-500 block mb-1.5">
-                <TipLabel 
-                  label="MA Type" 
-                  labelUk="Тип MA"
-                  tip="SMA = Simple Moving Average (equal weight). EMA = Exponential (more weight to recent prices, faster reaction)."
-                  tipUk="SMA = Проста ковзна середня (рівна вага). EMA = Експоненційна (більша вага останнім цінам, швидша реакція)."
-                />
-              </label>
-              <ConditionSelect
+            <Field label="Type" labelUk="Тип" tip="Moving average type" tipUk="Тип ковзної середньої">
+              <Select
                 value={condition.subfields?.["MA Type"] || "SMA"}
                 onChange={(val) => handleChange("MA Type", val)}
                 options={[{ value: "SMA", label: "SMA" }, { value: "EMA", label: "EMA" }]}
+                size="sm"
+                className="w-16"
               />
-            </div>
-            <div>
-              <label className="text-xs font-medium text-gray-500 block mb-1.5">
-                <TipLabel 
-                  label="Fast MA" 
-                  labelUk="Швидка MA"
-                  tip="Short-term moving average period. Reacts faster to price changes. Common: 9, 14, 20."
-                  tipUk="Період короткострокової ковзної середньої. Швидше реагує на зміни ціни. Типово: 9, 14, 20."
-                />
-              </label>
-              <ConditionSelect
+            </Field>
+            <Field label="Fast" labelUk="Швид." tip="Fast MA period" tipUk="Період швидкої MA">
+              <Select
                 value={condition.subfields?.["Fast MA"] || 14}
                 onChange={(val) => handleChange("Fast MA", parseInt(val))}
                 options={[5, 10, 14, 20, 25, 50].map(v => ({ value: v, label: String(v) }))}
+                size="sm"
+                className="w-16"
               />
-            </div>
-            <div>
-              <label className="text-xs font-medium text-gray-500 block mb-1.5">
-                <TipLabel 
-                  label="Slow MA" 
-                  labelUk="Повільна MA"
-                  tip="Long-term moving average period. Represents overall trend. Common: 50, 100, 200."
-                  tipUk="Період довгострокової ковзної середньої. Представляє загальний тренд. Типово: 50, 100, 200."
-                />
-              </label>
-              <ConditionSelect
+            </Field>
+            <Field label="Slow" labelUk="Повіл." tip="Slow MA period" tipUk="Період повільної MA">
+              <Select
                 value={condition.subfields?.["Slow MA"] || 28}
                 onChange={(val) => handleChange("Slow MA", parseInt(val))}
                 options={[25, 50, 75, 100, 150, 200, 250].map(v => ({ value: v, label: String(v) }))}
+                size="sm"
+                className="w-16"
               />
-            </div>
-            <div>
-              <label className="text-xs font-medium text-gray-500 block mb-1.5">
-                <TipLabel 
-                  label="Condition" 
-                  labelUk="Умова"
-                  tip="'Crossing Up' = Fast MA crosses above Slow (bullish). 'Crossing Down' = Fast crosses below Slow (bearish)."
-                  tipUk="'Перетин вгору' = Швидка MA перетинає повільну знизу (бичий). 'Перетин вниз' = перетинає зверху (ведмежий)."
-                />
-              </label>
-              <ConditionSelect
+            </Field>
+            <Field label="Signal" labelUk="Сигнал" tip="Cross direction" tipUk="Напрямок перетину">
+              <Select
                 value={condition.subfields?.Condition || "Crossing Up"}
                 onChange={(val) => handleChange("Condition", val)}
-                options={CONDITIONS.map(c => ({ value: c, label: c }))}
+                options={CONDITIONS.map(c => ({ value: c, label: language === "uk" ? (c === "Crossing Up" ? "↑ Вгору" : c === "Crossing Down" ? "↓ Вниз" : c) : (c === "Crossing Up" ? "↑ Up" : c === "Crossing Down" ? "↓ Down" : c) }))}
+                size="sm"
+                className="w-20"
               />
-            </div>
+            </Field>
           </>
         )}
 
         {/* MACD Indicator */}
         {condition.indicator === "MACD" && (
           <>
-            <div>
-              <label className="text-xs font-medium text-gray-500 block mb-1.5">
-                <TipLabel 
-                  label="MACD Preset" 
-                  labelUk="Пресет MACD"
-                  tip="Fast, Slow, Signal periods. Standard 12,26,9 is most common. Faster presets give more signals."
-                  tipUk="Швидкий, повільний, сигнальний періоди. Стандарт 12,26,9 найпоширеніший. Швидші дають більше сигналів."
-                />
-              </label>
-              <ConditionSelect
+            <Field label="Preset" labelUk="Пресет" tip="MACD settings" tipUk="Налаштування MACD">
+              <Select
                 value={condition.subfields?.["MACD Preset"] || "12,26,9"}
                 onChange={(val) => handleChange("MACD Preset", val)}
                 options={MACD_PRESETS}
+                size="sm"
+                className="w-24"
               />
-            </div>
-            <div>
-              <label className="text-xs font-medium text-gray-500 block mb-1.5">
-                <TipLabel 
-                  label="MACD Trigger" 
-                  labelUk="Тригер MACD"
-                  tip="'Crossing Up' = MACD line crosses above signal (buy). 'Crossing Down' = crosses below (sell)."
-                  tipUk="'Перетин вгору' = лінія MACD перетинає сигнальну знизу (купівля). 'Перетин вниз' = зверху (продаж)."
-                />
-              </label>
-              <ConditionSelect
+            </Field>
+            <Field label="Trigger" labelUk="Тригер" tip="Cross direction" tipUk="Напрямок перетину">
+              <Select
                 value={condition.subfields?.["MACD Trigger"] || "Crossing Up"}
                 onChange={(val) => handleChange("MACD Trigger", val)}
-                options={[{ value: "Crossing Up", label: "Crossing Up" }, { value: "Crossing Down", label: "Crossing Down" }]}
+                options={[
+                  { value: "Crossing Up", label: language === "uk" ? "↑ Вгору" : "↑ Up" }, 
+                  { value: "Crossing Down", label: language === "uk" ? "↓ Вниз" : "↓ Down" }
+                ]}
+                size="sm"
+                className="w-20"
               />
-            </div>
-            <div>
-              <label className="text-xs font-medium text-gray-500 block mb-1.5">
-                <TipLabel 
-                  label="Line Trigger" 
-                  labelUk="Позиція лінії"
-                  tip="Additional filter: 'Above Zero' = only in uptrend. 'Below Zero' = only in downtrend. 'Any' = no filter."
-                  tipUk="Додатковий фільтр: 'Вище нуля' = тільки у висхідному тренді. 'Нижче нуля' = у низхідному. 'Будь-який' = без фільтра."
-                />
-              </label>
-              <ConditionSelect
+            </Field>
+            <Field label="Filter" labelUk="Фільтр" tip="Position filter" tipUk="Фільтр позиції">
+              <Select
                 value={condition.subfields?.["Line Trigger"] || ""}
                 onChange={(val) => handleChange("Line Trigger", val)}
-                options={[{ value: "", label: "Any" }, { value: "Greater Than 0", label: "Above Zero" }, { value: "Less Than 0", label: "Below Zero" }]}
+                options={[
+                  { value: "", label: language === "uk" ? "Будь-який" : "Any" }, 
+                  { value: "Greater Than 0", label: "> 0" }, 
+                  { value: "Less Than 0", label: "< 0" }
+                ]}
+                size="sm"
+                className="w-20"
               />
-            </div>
+            </Field>
           </>
         )}
 
         {/* Bollinger Bands Indicator */}
         {condition.indicator === "BollingerBands" && (
           <>
-            <div>
-              <label className="text-xs font-medium text-gray-500 block mb-1.5">
-                <TipLabel 
-                  label="BB Period" 
-                  labelUk="Період BB"
-                  tip="Number of periods for Bollinger Bands calculation. Standard is 20. Higher = wider bands."
-                  tipUk="Кількість періодів для розрахунку Bollinger Bands. Стандарт 20. Більше = ширші смуги."
-                />
-              </label>
-              <ConditionSelect
+            <Field label="Period" labelUk="Період" tip="BB calculation period" tipUk="Період розрахунку BB">
+              <Select
                 value={condition.subfields?.["BB% Period"] || 20}
                 onChange={(val) => handleChange("BB% Period", parseInt(val))}
                 options={[10, 14, 20, 50, 100].map(v => ({ value: v, label: String(v) }))}
+                size="sm"
+                className="w-16"
               />
-            </div>
-            <div>
-              <label className="text-xs font-medium text-gray-500 block mb-1.5">
-                <TipLabel 
-                  label="Deviation" 
-                  labelUk="Відхилення"
-                  tip="Standard deviations for band width. Standard is 2. Higher = wider bands, fewer signals."
-                  tipUk="Стандартні відхилення для ширини смуг. Стандарт 2. Більше = ширші смуги, менше сигналів."
-                />
-              </label>
-              <ConditionSelect
+            </Field>
+            <Field label="Dev" labelUk="Відх." tip="Standard deviations" tipUk="Стандартні відхилення">
+              <Select
                 value={condition.subfields?.Deviation || 2}
                 onChange={(val) => handleChange("Deviation", parseFloat(val))}
                 options={[1, 1.5, 2, 2.5, 3].map(v => ({ value: v, label: String(v) }))}
+                size="sm"
+                className="w-14"
               />
-            </div>
-            <div>
-              <label className="text-xs font-medium text-gray-500 block mb-1.5">
-                <TipLabel 
-                  label="Condition" 
-                  labelUk="Умова"
-                  tip="How to compare %B value. 'Less Than 0' = below lower band (oversold). 'Greater Than 1' = above upper band."
-                  tipUk="Як порівнювати значення %B. 'Менше 0' = нижче нижньої смуги (перепроданість). 'Більше 1' = вище верхньої смуги."
-                />
-              </label>
-              <ConditionSelect
+            </Field>
+            <Field label="When" labelUk="Коли" tip="Comparison" tipUk="Порівняння">
+              <Select
                 value={condition.subfields?.Condition || "Less Than"}
                 onChange={(val) => handleChange("Condition", val)}
-                options={CONDITIONS.map(c => ({ value: c, label: c }))}
+                options={CONDITIONS.map(c => ({ value: c, label: c === "Less Than" ? "<" : c === "Greater Than" ? ">" : c }))}
+                size="sm"
+                className="w-14"
               />
-            </div>
-            <div>
-              <label className="text-xs font-medium text-gray-500 block mb-1.5">
-                <TipLabel 
-                  label="%B Value (0-1)" 
-                  labelUk="Значення %B"
-                  tip="%B shows price position relative to bands. 0 = at lower band, 0.5 = at middle, 1 = at upper band."
-                  tipUk="%B показує позицію ціни відносно смуг. 0 = на нижній смузі, 0.5 = посередині, 1 = на верхній смузі."
-                />
-              </label>
+            </Field>
+            <Field label="%B" labelUk="%B" tip="%B value (0-1)" tipUk="Значення %B (0-1)">
               <Input
                 type="number"
                 value={condition.subfields?.["Signal Value"] || 0}
                 onChange={(e) => handleChange("Signal Value", parseFloat(e.target.value))}
                 inputSize="sm"
+                className="w-16"
                 step={0.1}
                 min={0}
                 max={1}
               />
-            </div>
+            </Field>
           </>
         )}
 
         {/* Stochastic Indicator */}
         {condition.indicator === "Stochastic" && (
           <>
-            <div>
-              <label className="text-xs font-medium text-gray-500 block mb-1.5">
-                <TipLabel 
-                  label="Stochastic Preset" 
-                  labelUk="Пресет Стохастику"
-                  tip="%K period, %K smoothing, %D smoothing. Standard 14,3,3. Faster presets (9,3,3) give more signals."
-                  tipUk="Період %K, згладжування %K, згладжування %D. Стандарт 14,3,3. Швидші (9,3,3) дають більше сигналів."
-                />
-              </label>
-              <ConditionSelect
+            <Field label="Preset" labelUk="Пресет" tip="Stochastic settings" tipUk="Налаштування">
+              <Select
                 value={condition.subfields?.["Stochastic Preset"] || "14,3,3"}
                 onChange={(val) => handleChange("Stochastic Preset", val)}
                 options={STOCHASTIC_PRESETS}
+                size="sm"
+                className="w-20"
               />
-            </div>
-            <div>
-              <label className="text-xs font-medium text-gray-500 block mb-1.5">
-                <TipLabel 
-                  label="K Condition" 
-                  labelUk="Умова %K"
-                  tip="How to compare %K value. 'Less Than 20' = oversold zone. 'Greater Than 80' = overbought zone."
-                  tipUk="Як порівнювати значення %K. 'Менше 20' = зона перепроданості. 'Більше 80' = зона перекупленості."
-                />
-              </label>
-              <ConditionSelect
+            </Field>
+            <Field label="When %K" labelUk="Коли %K" tip="%K condition" tipUk="Умова %K">
+              <Select
                 value={condition.subfields?.["K Condition"] || "Less Than"}
                 onChange={(val) => handleChange("K Condition", val)}
-                options={CONDITIONS.map(c => ({ value: c, label: c }))}
+                options={CONDITIONS.map(c => ({ value: c, label: c === "Less Than" ? "<" : c === "Greater Than" ? ">" : c }))}
+                size="sm"
+                className="w-14"
               />
-            </div>
-            <div>
-              <label className="text-xs font-medium text-gray-500 block mb-1.5">
-                <TipLabel 
-                  label="K Signal Value" 
-                  labelUk="Значення %K"
-                  tip="Threshold for %K line (0-100). Common levels: 20 for oversold, 80 for overbought."
-                  tipUk="Поріг для лінії %K (0-100). Типові рівні: 20 для перепроданості, 80 для перекупленості."
-                />
-              </label>
+            </Field>
+            <Field label="Value" labelUk="Знач." tip="%K threshold" tipUk="Поріг %K">
               <Input
                 type="number"
                 value={condition.subfields?.["K Signal Value"] || 20}
                 onChange={(e) => handleChange("K Signal Value", parseFloat(e.target.value))}
                 inputSize="sm"
+                className="w-14"
                 min={0}
                 max={100}
               />
-            </div>
-            <div>
-              <label className="text-xs font-medium text-gray-500 block mb-1.5">
-                <TipLabel 
-                  label="K/D Crossover" 
-                  labelUk="Перетин K/D"
-                  tip="Optional crossover signal. '%K Crossing Up %D' = bullish. '%K Crossing Down %D' = bearish."
-                  tipUk="Необов'язковий сигнал перетину. '%K перетинає %D вгору' = бичий. '%K перетинає %D вниз' = ведмежий."
-                />
-              </label>
-              <ConditionSelect
+            </Field>
+            <Field label="K/D" labelUk="K/D" tip="K/D crossover" tipUk="Перетин K/D">
+              <Select
                 value={condition.subfields?.Condition || ""}
                 onChange={(val) => handleChange("Condition", val)}
-                options={[{ value: "", label: "None" }, { value: "K Crossing Up D", label: "K Crossing Up D" }, { value: "K Crossing Down D", label: "K Crossing Down D" }]}
+                options={[
+                  { value: "", label: language === "uk" ? "Ні" : "None" }, 
+                  { value: "K Crossing Up D", label: "K↑D" }, 
+                  { value: "K Crossing Down D", label: "K↓D" }
+                ]}
+                size="sm"
+                className="w-16"
               />
-            </div>
+            </Field>
           </>
         )}
 
         {/* Parabolic SAR Indicator */}
         {condition.indicator === "ParabolicSAR" && (
           <>
-            <div>
-              <label className="text-xs font-medium text-gray-500 block mb-1.5">
-                <TipLabel 
-                  label="PSAR Preset" 
-                  labelUk="Пресет PSAR"
-                  tip="Step and Max values. Standard 0.02, 0.2. Conservative = fewer signals. Aggressive = more signals."
-                  tipUk="Крок і максимальне значення. Стандарт 0.02, 0.2. Консервативний = менше сигналів. Агресивний = більше."
-                />
-              </label>
-              <ConditionSelect
+            <Field label="Preset" labelUk="Пресет" tip="PSAR settings" tipUk="Налаштування PSAR">
+              <Select
                 value={condition.subfields?.["PSAR Preset"] || "0.02,0.2"}
                 onChange={(val) => handleChange("PSAR Preset", val)}
                 options={PSAR_PRESETS}
+                size="sm"
+                className="w-24"
               />
-            </div>
-            <div className="md:col-span-2">
-              <label className="text-xs font-medium text-gray-500 block mb-1.5">
-                <TipLabel 
-                  label="Condition" 
-                  labelUk="Умова"
-                  tip="'Crossing Long' = price moves above SAR dots (uptrend start). 'Crossing Short' = price moves below (downtrend)."
-                  tipUk="'Перетин Long' = ціна рухається вище точок SAR (початок висхідного тренду). 'Перетин Short' = нижче (низхідний)."
-                />
-              </label>
-              <ConditionSelect
+            </Field>
+            <Field label="Signal" labelUk="Сигнал" tip="Cross direction" tipUk="Напрямок перетину">
+              <Select
                 value={condition.subfields?.Condition || "Crossing (Long)"}
                 onChange={(val) => handleChange("Condition", val)}
                 options={[
-                  { value: "Crossing (Long)", label: "Crossing (Long) - Price crosses above SAR" },
-                  { value: "Crossing (Short)", label: "Crossing (Short) - Price crosses below SAR" }
+                  { value: "Crossing (Long)", label: language === "uk" ? "↑ Long" : "↑ Long" },
+                  { value: "Crossing (Short)", label: language === "uk" ? "↓ Short" : "↓ Short" }
                 ]}
+                size="sm"
+                className="w-20"
               />
-            </div>
+            </Field>
           </>
         )}
 
         {/* TradingView Signal */}
         {condition.indicator === "TradingView" && (
-          <div className="md:col-span-3">
-            <label className="text-xs font-medium text-gray-500 block mb-1.5">
-              <TipLabel 
-                label="Signal Value" 
-                labelUk="Значення сигналу"
-                tip="TradingView technical analysis recommendation. Aggregates 26 indicators. 'Strong Buy' = most bullish, 'Strong Sell' = most bearish."
-                tipUk="Рекомендація технічного аналізу TradingView. Агрегує 26 індикаторів. 'Strong Buy' = найбільш бичий, 'Strong Sell' = найбільш ведмежий."
-              />
-            </label>
-            <ConditionSelect
+          <Field label="Signal" labelUk="Сигнал" tip="TV recommendation" tipUk="Рекомендація TV">
+            <Select
               value={condition.subfields?.["Signal Value"] || "Buy"}
               onChange={(val) => handleChange("Signal Value", val)}
               options={TRADINGVIEW_SIGNALS.map(s => ({ value: s, label: s }))}
+              size="sm"
+              className="w-28"
             />
-          </div>
+          </Field>
         )}
 
         {/* Heiken Ashi */}
         {condition.indicator === "HeikenAshi" && (
           <>
-            <div>
-              <label className="text-xs font-medium text-gray-500 block mb-1.5">
-                <TipLabel 
-                  label="Condition" 
-                  labelUk="Умова"
-                  tip="Heiken Ashi smooths candles for trend clarity. 'Greater Than 0' = bullish candles. 'Less Than 0' = bearish."
-                  tipUk="Heiken Ashi згладжує свічки для ясності тренду. 'Більше 0' = бичі свічки. 'Менше 0' = ведмежі."
-                />
-              </label>
-              <ConditionSelect
+            <Field label="Candle" labelUk="Свічка" tip="Candle type" tipUk="Тип свічки">
+              <Select
                 value={condition.subfields?.Condition || "Greater Than"}
                 onChange={(val) => handleChange("Condition", val)}
-                options={[{ value: "Greater Than", label: "Greater Than" }, { value: "Less Than", label: "Less Than" }]}
+                options={[
+                  { value: "Greater Than", label: language === "uk" ? "Бичий" : "Bullish" }, 
+                  { value: "Less Than", label: language === "uk" ? "Ведмежий" : "Bearish" }
+                ]}
+                size="sm"
+                className="w-20"
               />
-            </div>
-            <div>
-              <label className="text-xs font-medium text-gray-500 block mb-1.5">
-                <TipLabel 
-                  label="Signal Value" 
-                  labelUk="Значення"
-                  tip="Threshold value for comparison. Usually 0 for trend direction (positive = bullish, negative = bearish)."
-                  tipUk="Порогове значення для порівняння. Зазвичай 0 для напрямку тренду (позитивне = бичий, негативне = ведмежий)."
-                />
-              </label>
+            </Field>
+            <Field label="Value" labelUk="Знач." tip="Threshold (0)" tipUk="Поріг (0)">
               <Input
                 type="number"
                 value={condition.subfields?.["Signal Value"] || 0}
                 onChange={(e) => handleChange("Signal Value", parseFloat(e.target.value))}
                 inputSize="sm"
+                className="w-14"
               />
-            </div>
+            </Field>
           </>
         )}
+
+        {/* Remove button - always at end */}
+        <button 
+          onClick={onRemove} 
+          className="px-2 py-1 text-red-500 hover:text-white hover:bg-red-500 text-xs font-bold border border-red-200 hover:border-red-500 transition-all rounded ml-auto flex-shrink-0"
+        >
+          ✕
+        </button>
       </div>
     </div>
   );
