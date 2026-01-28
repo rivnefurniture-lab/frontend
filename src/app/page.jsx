@@ -417,176 +417,87 @@ export default function Page() {
         </div>
       </section>
 
-      {/* Trusted Partners - Brokers in stocks mode, data providers in crypto mode */}
-      <section className="py-16 border-t-2 border-gray-100">
-        <div className="container">
-          <p className="text-center text-gray-500 mb-10 font-medium">
-            {isStocksMode() 
-              ? (language === "uk" 
-                  ? "Інтегровано з провідними брокерами та платформами" 
-                  : "Integrated with leading brokers and platforms")
-              : (language === "uk" 
-                  ? "Інтегровано з провідними платформами та постачальниками даних" 
-                  : "Integrated with leading platforms and data providers")}
-          </p>
+      {/* Trusted Partners - Infinite scrolling marquee */}
+      <section className="py-12 border-t border-gray-100 bg-gradient-to-b from-gray-50 to-white overflow-hidden">
+        <p className="text-center text-gray-400 mb-8 text-sm uppercase tracking-widest font-medium">
+          {language === "uk" 
+            ? "Інтегровано з провідними платформами" 
+            : "Integrated with leading platforms"}
+        </p>
+        
+        {/* Marquee container with fade edges */}
+        <div className="relative">
+          {/* Left fade */}
+          <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
+          {/* Right fade */}
+          <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
           
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 max-w-4xl mx-auto">
-            {isStocksMode() ? (
-              <>
-                {/* Interactive Brokers */}
-                <a 
-                  href="https://www.interactivebrokers.com" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex flex-col items-center justify-center p-4 bg-white border-2 border-gray-100 hover:border-red-600 hover:shadow-lg transition-all group"
-                  style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}
-                >
-                  <div className="w-8 h-8 mb-2 flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <span className="text-xl font-black text-red-700">IB</span>
-                  </div>
-                  <span className="text-xs font-bold text-gray-700 text-center leading-tight">Interactive<br/>Brokers</span>
-                </a>
-                
-                {/* TD Ameritrade / thinkorswim */}
-                <a 
-                  href="https://www.tdameritrade.com" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex flex-col items-center justify-center p-4 bg-white border-2 border-gray-100 hover:border-green-600 hover:shadow-lg transition-all group"
-                  style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}
-                >
-                  <div className="w-8 h-8 mb-2 flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <span className="text-xl font-black text-green-700">TD</span>
-                  </div>
-                  <span className="text-xs font-bold text-gray-700 text-center leading-tight">TD<br/>Ameritrade</span>
-                </a>
-                
-                {/* Alpaca */}
-                <a 
-                  href="https://alpaca.markets" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex flex-col items-center justify-center p-4 bg-white border-2 border-gray-100 hover:border-yellow-500 hover:shadow-lg transition-all group"
-                  style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}
-                >
-                  <div className="w-8 h-8 mb-2 flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <span className="text-xl">🦙</span>
-                  </div>
-                  <span className="text-xs font-bold text-gray-700">Alpaca</span>
-                </a>
-                
-                {/* TradeStation */}
-                <a 
-                  href="https://www.tradestation.com" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex flex-col items-center justify-center p-4 bg-white border-2 border-gray-100 hover:border-blue-700 hover:shadow-lg transition-all group"
-                  style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}
-                >
-                  <div className="w-8 h-8 mb-2 flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <span className="text-xl font-black text-blue-700">TS</span>
-                  </div>
-                  <span className="text-xs font-bold text-gray-700 text-center leading-tight">Trade<br/>Station</span>
-                </a>
-                
-                {/* TradingView */}
-                <a 
-                  href="https://www.tradingview.com" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex flex-col items-center justify-center p-4 bg-white border-2 border-gray-100 hover:border-black hover:shadow-lg transition-all group"
-                  style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}
-                >
-                  <svg className="w-8 h-8 mb-2 group-hover:scale-110 transition-transform" viewBox="0 0 36 28" fill="none">
-                    <path d="M14 22V6h8v16h-8zM0 22V10h8v12H0z" fill="currentColor" className="text-black"/>
-                    <path d="M28 22l8-16v16h-8z" fill="currentColor" className="text-black"/>
-                  </svg>
-                  <span className="text-xs font-bold text-gray-700 text-center leading-tight">TradingView</span>
-                </a>
-              </>
-            ) : (
-              <>
-                {/* TradingView */}
-                <a 
-                  href="https://www.tradingview.com" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex flex-col items-center justify-center p-4 bg-white border-2 border-gray-100 hover:border-blue-500 hover:shadow-lg transition-all group"
-                  style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}
-                >
+          {/* Scrolling track */}
+          <div className="flex animate-marquee hover:[animation-play-state:paused]">
+            {/* First set of logos */}
+            {[
+              { name: "tradingview", ext: "png" },
+              { name: "coingecko", ext: "png" },
+              { name: "coinmarketcap", ext: "svg" },
+              { name: "glassnode", ext: "png" },
+              { name: "messari", ext: "webp" },
+              { name: "dune", ext: "png" },
+              { name: "defillama", ext: "webp" },
+              { name: "nansen", ext: "png" },
+              { name: "santiment", ext: "png" },
+              { name: "cryptoquant", ext: "jpg" },
+              { name: "blockchain", ext: "webp" },
+              { name: "polygon", ext: "png" },
+              { name: "alpha-vantage", ext: "png" },
+              { name: "yahoo-finance", ext: "png" },
+              { name: "quandl", ext: "png" },
+            ].map((partner) => (
+              <div
+                key={partner.name}
+                className="flex-shrink-0 mx-8 group"
+              >
+                <div className="relative p-4 transition-all duration-300 ease-out group-hover:scale-110">
+                  <div className="absolute inset-0 bg-emerald-400/20 rounded-2xl opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-300" />
                   <img 
-                    src="/logos/partners/tradingview.png" 
-                    alt="TradingView" 
-                    className="h-8 mb-2 group-hover:scale-110 transition-transform object-contain"
+                    src={`/logos/partners/${partner.name}.${partner.ext}`}
+                    alt={partner.name}
+                    className="h-8 md:h-10 w-auto object-contain relative z-10 grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300"
                   />
-                  <span className="text-xs font-bold text-gray-700 text-center leading-tight">TradingView</span>
-                </a>
-                
-                {/* Polygon.io */}
-                <a 
-                  href="https://polygon.io" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex flex-col items-center justify-center p-4 bg-white border-2 border-gray-100 hover:border-purple-500 hover:shadow-lg transition-all group"
-                  style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}
-                >
+                </div>
+              </div>
+            ))}
+            {/* Duplicate set for seamless loop */}
+            {[
+              { name: "tradingview", ext: "png" },
+              { name: "coingecko", ext: "png" },
+              { name: "coinmarketcap", ext: "svg" },
+              { name: "glassnode", ext: "png" },
+              { name: "messari", ext: "webp" },
+              { name: "dune", ext: "png" },
+              { name: "defillama", ext: "webp" },
+              { name: "nansen", ext: "png" },
+              { name: "santiment", ext: "png" },
+              { name: "cryptoquant", ext: "jpg" },
+              { name: "blockchain", ext: "webp" },
+              { name: "polygon", ext: "png" },
+              { name: "alpha-vantage", ext: "png" },
+              { name: "yahoo-finance", ext: "png" },
+              { name: "quandl", ext: "png" },
+            ].map((partner) => (
+              <div
+                key={`${partner.name}-2`}
+                className="flex-shrink-0 mx-8 group"
+              >
+                <div className="relative p-4 transition-all duration-300 ease-out group-hover:scale-110">
+                  <div className="absolute inset-0 bg-emerald-400/20 rounded-2xl opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-300" />
                   <img 
-                    src="/logos/partners/polygon.png" 
-                    alt="Polygon.io" 
-                    className="h-8 mb-2 group-hover:scale-110 transition-transform object-contain"
+                    src={`/logos/partners/${partner.name}.${partner.ext}`}
+                    alt={partner.name}
+                    className="h-8 md:h-10 w-auto object-contain relative z-10 grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300"
                   />
-                  <span className="text-xs font-bold text-gray-700">Polygon.io</span>
-                </a>
-                
-                {/* Alpha Vantage */}
-                <a 
-                  href="https://www.alphavantage.co" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex flex-col items-center justify-center p-4 bg-white border-2 border-gray-100 hover:border-emerald-500 hover:shadow-lg transition-all group"
-                  style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}
-                >
-                  <img 
-                    src="/logos/partners/alpha-vantage.png" 
-                    alt="Alpha Vantage" 
-                    className="h-8 mb-2 group-hover:scale-110 transition-transform object-contain"
-                  />
-                  <span className="text-xs font-bold text-gray-700 text-center leading-tight">Alpha Vantage</span>
-                </a>
-                
-                {/* Yahoo Finance */}
-                <a 
-                  href="https://finance.yahoo.com" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex flex-col items-center justify-center p-4 bg-white border-2 border-gray-100 hover:border-purple-500 hover:shadow-lg transition-all group"
-                  style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}
-                >
-                  <img 
-                    src="/logos/partners/yahoo-finance.png" 
-                    alt="Yahoo Finance" 
-                    className="h-8 mb-2 group-hover:scale-110 transition-transform object-contain"
-                  />
-                  <span className="text-xs font-bold text-gray-700 text-center leading-tight">Yahoo Finance</span>
-                </a>
-                
-                {/* Quandl */}
-                <a 
-                  href="https://www.quandl.com" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex flex-col items-center justify-center p-4 bg-white border-2 border-gray-100 hover:border-orange-500 hover:shadow-lg transition-all group"
-                  style={{clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'}}
-                >
-                  <img 
-                    src="/logos/partners/quandl.png" 
-                    alt="Quandl" 
-                    className="h-8 mb-2 group-hover:scale-110 transition-transform object-contain"
-                  />
-                  <span className="text-xs font-bold text-gray-700">Quandl</span>
-                </a>
-              </>
-            )}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
