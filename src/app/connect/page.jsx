@@ -36,31 +36,19 @@ const ExchangeLogo = ({ id, size = "md" }) => {
   };
   
   const logoPath = `/logos/exchanges/${id}.svg`;
-  
-  // Fallback colors for exchanges
-  const fallbackColors = {
-    binance: "from-yellow-400 to-yellow-600",
-    bybit: "from-orange-400 to-orange-600",
-    okx: "from-gray-700 to-gray-900",
-    kraken: "from-purple-500 to-purple-700",
-    kucoin: "from-green-400 to-green-600",
-    coinbase: "from-blue-500 to-blue-700",
-  };
-  
-  const fallbackLabels = {
-    binance: "BN",
-    bybit: "BY",
-    okx: "OKX",
-    kraken: "KR",
-    kucoin: "KC",
-    coinbase: "CB",
-  };
 
   return (
-    <div className={`${sizes[size]} rounded-2xl bg-gradient-to-br ${fallbackColors[id] || 'from-gray-400 to-gray-600'} flex items-center justify-center text-white font-bold shadow-lg`}>
-      <span className={size === 'xl' ? 'text-2xl' : size === 'lg' ? 'text-xl' : 'text-sm'}>
-        {fallbackLabels[id] || id?.slice(0, 2).toUpperCase()}
-      </span>
+    <div className={`${sizes[size]} rounded-2xl overflow-hidden flex items-center justify-center shadow-lg bg-white`}>
+      <img 
+        src={logoPath} 
+        alt={`${id} logo`}
+        className="w-full h-full object-contain"
+        onError={(e) => {
+          // Fallback to text if image fails
+          e.target.style.display = 'none';
+          e.target.parentElement.innerHTML = `<span class="text-sm font-bold text-gray-600">${id?.slice(0, 2).toUpperCase()}</span>`;
+        }}
+      />
     </div>
   );
 };

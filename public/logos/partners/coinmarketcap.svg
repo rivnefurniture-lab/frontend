@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 50" fill="none">
+  <circle cx="25" cy="25" r="18" fill="#17181B"/>
+  <path d="M18 30V20l7 10 7-10v10" stroke="#3861FB" stroke-width="2" fill="none"/>
+  <text x="55" y="32" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#17181B">CoinMarketCap</text>
+</svg>

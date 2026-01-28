@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 50" fill="none">
+  <path d="M15 35L25 15h8l-10 20h-8z" fill="#2962FF"/>
+  <path d="M33 15h8l10 20h-8l-10-20z" fill="#2962FF"/>
+  <text x="60" y="32" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#131722">TradingView</text>
+</svg>
