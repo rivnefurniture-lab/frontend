@@ -18,9 +18,10 @@ import {
   Line,
 } from "recharts";
 import Link from "next/link";
-import { Zap, BarChart3, Link2, BookOpen, Sparkles, Folder, Crown } from "lucide-react";
+import { Zap, BarChart3, Link2, BookOpen, Sparkles, Folder, Crown, Play } from "lucide-react";
 import { isCryptoMode } from "@/config/tradingMode";
 import { useSubscription } from "@/context/SubscriptionContext";
+import VideoPlaceholder from "@/components/VideoPlaceholder";
 
 export default function Dashboard() {
   const { user, loading: authLoading } = useAuth();
@@ -390,9 +391,22 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               {strategies.length === 0 ? (
-                <div className="text-center py-6 text-gray-500">
-                  <p>{t.noStrategies}</p>
-                  <p className="text-sm">{language === "uk" ? "Запустіть бектест і збережіть його як стратегію" : "Run a backtest and save it as a strategy"}</p>
+                <div className="text-center py-6">
+                  <div className="text-gray-500 mb-4">
+                    <p>{t.noStrategies}</p>
+                    <p className="text-sm">{language === "uk" ? "Запустіть бектест і збережіть його як стратегію" : "Run a backtest and save it as a strategy"}</p>
+                  </div>
+                  <VideoPlaceholder
+                    title="Getting Started: Your First Strategy"
+                    titleUk="Початок роботи: Ваша перша стратегія"
+                    description="Create and test your first trading model in 5 minutes"
+                    descriptionUk="Створіть та протестуйте вашу першу торгову модель за 5 хвилин"
+                    duration="5:00"
+                    topic="tutorial"
+                    language={language}
+                    variant="inline"
+                    className="max-w-md mx-auto"
+                  />
                 </div>
               ) : (
                 <div className="space-y-3">

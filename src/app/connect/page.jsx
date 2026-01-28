@@ -11,6 +11,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import Link from "next/link";
 import { TRADING_MODE, getExchanges, isCryptoMode } from "@/config/tradingMode";
 import { showToast } from "@/components/Toast";
+import VideoPlaceholder from "@/components/VideoPlaceholder";
 
 // Broker/Exchange Icons
 const BrokerIcon = ({ id, className = "w-6 h-6" }) => {
@@ -626,6 +627,19 @@ export default function ConnectPage() {
           <h1 className="text-3xl font-bold mb-2">{t.title}</h1>
           <p className="text-gray-600 max-w-xl mx-auto">{t.subtitle}</p>
         </div>
+
+        {/* Video Tutorial */}
+        <VideoPlaceholder
+          title="How to Safely Connect Your Exchange"
+          titleUk="Як безпечно підключити біржу"
+          description="Step-by-step guide to creating and configuring API keys"
+          descriptionUk="Покрокова інструкція зі створення та налаштування API ключів"
+          duration="4:00"
+          topic="setup"
+          language={language}
+          variant="banner"
+          className="mb-8"
+        />
 
         <div className="bg-gray-900 text-white p-5 mb-8" style={{clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))'}}>
           <h3 className="font-bold text-lg flex items-center gap-2 mb-3">

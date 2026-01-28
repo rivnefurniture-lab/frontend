@@ -19,6 +19,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { getCurrentTradingMode, getTradingPairs, isCryptoMode } from "@/config/tradingMode";
 import ConfirmModal from "@/components/ConfirmModal";
 import { showToast } from "@/components/Toast";
+import VideoPlaceholder from "@/components/VideoPlaceholder";
 
 // Build version: 2026-01-19-v1 - added backtest duration display
 console.log("[Algotcha] Strategies list page loaded - build v2026-01-19-v1");

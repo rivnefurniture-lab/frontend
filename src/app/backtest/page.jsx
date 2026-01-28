@@ -36,10 +36,16 @@ import {
   Calendar,
   Layers,
   BarChart3,
-  ArrowRight
+  ArrowRight,
+  Sparkles,
+  Zap,
+  TrendingUp,
+  Target,
+  HelpCircle
 } from "lucide-react";
 import { getTradingPairs, getDefaultPair, isCryptoMode, STOCKS_CONFIG } from "@/config/tradingMode";
 import SuccessModal from "@/components/SuccessModal";
+import VideoPlaceholder from "@/components/VideoPlaceholder";
 
 // INDICATORS matching backtest2.py exactly
 const INDICATORS = [
@@ -969,10 +975,61 @@ export default function BacktestPage() {
         }
       />
 
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-3xl font-bold">{t("backtest.title")}</h1>
-          <p className="text-gray-600 mt-1">{t("backtest.subtitle")}</p>
+      {/* Hero Header with Gradient */}
+      <div className="relative mb-8 overflow-hidden rounded-2xl bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-8">
+        {/* Animated background elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -top-24 -right-24 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+          {/* Grid pattern */}
+          <div className="absolute inset-0 opacity-5" style={{
+            backgroundImage: 'linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px)',
+            backgroundSize: '32px 32px'
+          }} />
+        </div>
+        
+        <div className="relative flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+          <div>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/25">
+                <Sparkles className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl lg:text-3xl font-bold text-white">{t("backtest.title")}</h1>
+                <p className="text-gray-400">{t("backtest.subtitle")}</p>
+              </div>
+            </div>
+            
+            {/* Quick stats */}
+            <div className="flex flex-wrap gap-4 mt-4">
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-lg border border-white/10">
+                <Zap className="w-4 h-4 text-yellow-400" />
+                <span className="text-sm text-gray-300">{language === "uk" ? "Швидкий аналіз" : "Fast Analysis"}</span>
+              </div>
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-lg border border-white/10">
+                <TrendingUp className="w-4 h-4 text-emerald-400" />
+                <span className="text-sm text-gray-300">{language === "uk" ? "Реальні дані" : "Real Data"}</span>
+              </div>
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-lg border border-white/10">
+                <Target className="w-4 h-4 text-blue-400" />
+                <span className="text-sm text-gray-300">{language === "uk" ? "Точні метрики" : "Precise Metrics"}</span>
+              </div>
+            </div>
+          </div>
+          
+          {/* Video tutorial card */}
+          <div className="lg:w-80">
+            <VideoPlaceholder
+              title="How to Create Your First Backtest"
+              titleUk="Як створити перший бектест"
+              description="Learn the basics in 3 minutes"
+              descriptionUk="Вивчіть основи за 3 хвилини"
+              duration="3:00"
+              topic="tutorial"
+              language={language}
+              variant="banner"
+            />
+          </div>
         </div>
       </div>
 
@@ -1372,10 +1429,26 @@ export default function BacktestPage() {
           {/* Conditions Tab */}
           {activeConfigTab === "conditions" && (
             <>
+              {/* Video Tutorial for Conditions */}
+              <VideoPlaceholder
+                title="Understanding Entry & Exit Conditions"
+                titleUk="Розуміння умов входу та виходу"
+                description="Learn how to combine indicators for powerful strategies"
+                descriptionUk="Навчіться комбінувати індикатори для потужних стратегій"
+                duration="4:30"
+                topic="advanced"
+                language={language}
+                variant="inline"
+                className="mb-6"
+              />
+
               {/* Entry Conditions */}
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
-                  <CardTitle className="text-green-600 flex items-center gap-1">
+                  <CardTitle className="text-green-600 flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center">
+                      <TrendingUp className="w-4 h-4 text-green-600" />
+                    </div>
                     {t("backtest.entryConditions")} <span className="text-red-500">*</span>
                   </CardTitle>
                   <Button size="sm" variant="outline" onClick={() => addCondition("entry")}>
@@ -1579,10 +1652,26 @@ export default function BacktestPage() {
           {/* Advanced Tab */}
           {activeConfigTab === "advanced" && (
             <>
+              {/* Video Tutorial for Advanced Settings */}
+              <VideoPlaceholder
+                title="Mastering Safety Orders & DCA"
+                titleUk="Майстерність Safety Orders та DCA"
+                description="Dollar Cost Averaging strategies explained"
+                descriptionUk="Стратегії усереднення вартості пояснено"
+                duration="5:00"
+                topic="advanced"
+                language={language}
+                variant="inline"
+                className="mb-6"
+              />
+
               {/* Advanced Settings */}
               <Card>
                 <CardHeader>
-                  <CardTitle>
+                  <CardTitle className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center">
+                      <ShieldCheck className="w-4 h-4 text-purple-600" />
+                    </div>
                     <TooltipLabel
                       label={language === "uk" ? "Розширені налаштування" : "Advanced Settings"}
                       tooltip="Fine-tune your strategy with additional controls for cooldowns, volume filters, and profit management."
