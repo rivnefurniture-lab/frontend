@@ -418,7 +418,7 @@ export default function Page() {
       </section>
 
       {/* Trusted Partners - Two-row sliding logos */}
-      <section className="py-16 border-t border-gray-100 bg-gradient-to-b from-gray-50 to-white overflow-hidden">
+      <section className="py-16 border-t border-gray-100 bg-gradient-to-b from-gray-50 to-white overflow-hidden group/partners">
         <p className="text-center text-gray-400 mb-10 text-sm uppercase tracking-widest font-medium">
           {language === "uk" 
             ? "Інтегровано з провідними платформами" 
@@ -431,32 +431,32 @@ export default function Page() {
           <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
           
           {/* Row 1 - slides left */}
-          <div className="overflow-hidden mb-6">
+          <div className="overflow-hidden mb-8">
             <div 
-              className="flex items-center"
+              className="flex items-center group-hover/partners:[animation-play-state:paused]"
               style={{
-                animation: 'slideLeft 25s linear infinite',
+                animation: 'slideLeft 35s linear infinite',
                 width: 'max-content'
               }}
             >
               {[...Array(2)].map((_, setIdx) => (
                 <div key={setIdx} className="flex items-center">
                   {[
-                    { name: "tradingview", ext: "png", url: "https://www.tradingview.com", h: 28 },
-                    { name: "coingecko", ext: "png", url: "https://www.coingecko.com", h: 28 },
-                    { name: "coinmarketcap", ext: "svg", url: "https://coinmarketcap.com", h: 24 },
-                    { name: "glassnode", ext: "png", url: "https://glassnode.com", h: 22 },
-                    { name: "messari", ext: "webp", url: "https://messari.io", h: 24 },
-                    { name: "dune", ext: "png", url: "https://dune.com", h: 24 },
-                    { name: "defillama", ext: "webp", url: "https://defillama.com", h: 24 },
-                    { name: "nansen", ext: "png", url: "https://nansen.ai", h: 24 },
+                    { name: "tradingview", ext: "png", url: "https://www.tradingview.com", h: 48 },
+                    { name: "coingecko", ext: "png", url: "https://www.coingecko.com", h: 48 },
+                    { name: "coinmarketcap", ext: "svg", url: "https://coinmarketcap.com", h: 40 },
+                    { name: "glassnode", ext: "png", url: "https://glassnode.com", h: 36 },
+                    { name: "messari", ext: "webp", url: "https://messari.io", h: 40 },
+                    { name: "dune", ext: "png", url: "https://dune.com", h: 40 },
+                    { name: "defillama", ext: "webp", url: "https://defillama.com", h: 40 },
+                    { name: "nansen", ext: "png", url: "https://nansen.ai", h: 40 },
                   ].map((p) => (
                     <a 
                       key={`${p.name}-${setIdx}`} 
                       href={p.url} 
                       target="_blank" 
                       rel="noopener noreferrer" 
-                      className="mx-8 flex-shrink-0 opacity-50 hover:opacity-100 grayscale hover:grayscale-0 transition-all duration-300"
+                      className="mx-10 flex-shrink-0 opacity-50 hover:opacity-100 grayscale hover:grayscale-0 transition-all duration-300"
                     >
                       <img 
                         src={`/logos/partners/${p.name}.${p.ext}`} 
@@ -474,29 +474,29 @@ export default function Page() {
           {/* Row 2 - slides right */}
           <div className="overflow-hidden">
             <div 
-              className="flex items-center"
+              className="flex items-center group-hover/partners:[animation-play-state:paused]"
               style={{
-                animation: 'slideRight 30s linear infinite',
+                animation: 'slideRight 40s linear infinite',
                 width: 'max-content'
               }}
             >
               {[...Array(2)].map((_, setIdx) => (
                 <div key={setIdx} className="flex items-center">
                   {[
-                    { name: "santiment", ext: "png", url: "https://santiment.net", h: 22 },
-                    { name: "cryptoquant", ext: "jpg", url: "https://cryptoquant.com", h: 24 },
-                    { name: "blockchain", ext: "webp", url: "https://www.blockchain.com", h: 20 },
-                    { name: "polygon", ext: "png", url: "https://polygon.io", h: 24 },
-                    { name: "alpha-vantage", ext: "png", url: "https://www.alphavantage.co", h: 24 },
-                    { name: "yahoo-finance", ext: "png", url: "https://finance.yahoo.com", h: 24 },
-                    { name: "quandl", ext: "png", url: "https://www.quandl.com", h: 24 },
+                    { name: "santiment", ext: "png", url: "https://santiment.net", h: 36 },
+                    { name: "cryptoquant", ext: "jpg", url: "https://cryptoquant.com", h: 40 },
+                    { name: "blockchain", ext: "webp", url: "https://www.blockchain.com", h: 32 },
+                    { name: "polygon", ext: "png", url: "https://polygon.io", h: 40 },
+                    { name: "alpha-vantage", ext: "png", url: "https://www.alphavantage.co", h: 40 },
+                    { name: "yahoo-finance", ext: "png", url: "https://finance.yahoo.com", h: 40 },
+                    { name: "quandl", ext: "png", url: "https://www.quandl.com", h: 40 },
                   ].map((p) => (
                     <a 
                       key={`${p.name}-${setIdx}`} 
                       href={p.url} 
                       target="_blank" 
                       rel="noopener noreferrer" 
-                      className="mx-8 flex-shrink-0 opacity-50 hover:opacity-100 grayscale hover:grayscale-0 transition-all duration-300"
+                      className="mx-10 flex-shrink-0 opacity-50 hover:opacity-100 grayscale hover:grayscale-0 transition-all duration-300"
                     >
                       <img 
                         src={`/logos/partners/${p.name}.${p.ext}`} 

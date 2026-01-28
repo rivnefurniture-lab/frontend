@@ -306,10 +306,10 @@ export default function ConnectPage() {
         {/* Connected Exchange Card */}
         {hasConnectedExchange && connectedExchangeData && step === 1 && (
           <div className="mb-8 bg-gradient-to-br from-emerald-50 to-green-50 rounded-3xl p-6 border-2 border-emerald-200">
-            <div className="flex items-center gap-4 mb-4">
+            <div className="flex flex-col items-center text-center gap-4 mb-4">
               <ExchangeLogo id={connectedExchangeData.id} size="lg" />
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
+              <div>
+                <div className="flex items-center justify-center gap-2 mb-1">
                   <h3 className="text-xl font-bold">{connectedExchangeData.name}</h3>
                   <span className="px-2 py-0.5 bg-emerald-500 text-white text-xs font-bold rounded-full flex items-center gap-1">
                     <CheckCircle2 className="w-3 h-3" />
@@ -320,14 +320,13 @@ export default function ConnectPage() {
               </div>
             </div>
             
-            <div className="flex gap-3">
+            <div className="flex justify-center">
               <Button 
                 variant="outline" 
                 onClick={() => {
                   setSelectedExchange(connectedExchangeData);
                   setStep(3);
                 }}
-                className="flex-1"
               >
                 {t.manageConnection}
               </Button>
@@ -369,9 +368,8 @@ export default function ConnectPage() {
         {/* Step 1: Select Exchange */}
         {step === 1 && (
           <div className="space-y-6">
-            {/* Popular Exchanges */}
+            {/* Exchanges */}
             <div>
-              <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">{t.popular}</h3>
               <div className="grid grid-cols-3 sm:grid-cols-3 gap-4">
                 {exchanges.filter(e => !e.comingSoon).slice(0, 6).map((exchange) => {
                   const isConnected = connectedExchanges.includes(exchange.id);
