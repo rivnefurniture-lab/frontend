@@ -432,64 +432,125 @@ export default function Page() {
           <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
           
           {/* Row 1 - Moving RIGHT */}
-          <div className="flex animate-marquee-right">
-            {[
-              { name: "tradingview", ext: "png", url: "https://www.tradingview.com" },
-              { name: "coingecko", ext: "png", url: "https://www.coingecko.com" },
-              { name: "coinmarketcap", ext: "svg", url: "https://coinmarketcap.com" },
-              { name: "glassnode", ext: "png", url: "https://glassnode.com" },
-              { name: "messari", ext: "webp", url: "https://messari.io" },
-              { name: "dune", ext: "png", url: "https://dune.com" },
-              { name: "defillama", ext: "webp", url: "https://defillama.com" },
-              { name: "nansen", ext: "png", url: "https://nansen.ai" },
-            ].flatMap((partner) => [partner, { ...partner, key: `${partner.name}-dup` }]).map((partner, idx) => (
-              <a
-                key={partner.key || partner.name}
-                href={partner.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex-shrink-0 mx-6 group"
-              >
-                <div className="relative p-4 transition-all duration-300 ease-out group-hover:scale-110 group-hover:-translate-y-1">
-                  <div className="absolute inset-0 bg-emerald-400/30 rounded-2xl opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-300" />
-                  <img 
-                    src={`/logos/partners/${partner.name}.${partner.ext}`}
-                    alt={partner.name}
-                    className="h-12 md:h-16 w-auto object-contain relative z-10 grayscale opacity-40 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300"
-                  />
-                </div>
-              </a>
-            ))}
+          <div className="marquee-row-right">
+            <div className="marquee-content-right">
+              {[
+                { name: "tradingview", ext: "png", url: "https://www.tradingview.com" },
+                { name: "coingecko", ext: "png", url: "https://www.coingecko.com" },
+                { name: "coinmarketcap", ext: "svg", url: "https://coinmarketcap.com" },
+                { name: "glassnode", ext: "png", url: "https://glassnode.com" },
+                { name: "messari", ext: "webp", url: "https://messari.io" },
+                { name: "dune", ext: "png", url: "https://dune.com" },
+                { name: "defillama", ext: "webp", url: "https://defillama.com" },
+                { name: "nansen", ext: "png", url: "https://nansen.ai" },
+              ].map((partner) => (
+                <a
+                  key={partner.name}
+                  href={partner.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-shrink-0 mx-8 group inline-block"
+                >
+                  <div className="relative p-4 transition-all duration-300 ease-out group-hover:scale-110 group-hover:-translate-y-1">
+                    <div className="absolute inset-0 bg-emerald-400/30 rounded-2xl opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-300" />
+                    <img 
+                      src={`/logos/partners/${partner.name}.${partner.ext}`}
+                      alt={partner.name}
+                      className="h-10 md:h-14 w-auto object-contain relative z-10 grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300"
+                    />
+                  </div>
+                </a>
+              ))}
+            </div>
+            <div className="marquee-content-right" aria-hidden="true">
+              {[
+                { name: "tradingview", ext: "png", url: "https://www.tradingview.com" },
+                { name: "coingecko", ext: "png", url: "https://www.coingecko.com" },
+                { name: "coinmarketcap", ext: "svg", url: "https://coinmarketcap.com" },
+                { name: "glassnode", ext: "png", url: "https://glassnode.com" },
+                { name: "messari", ext: "webp", url: "https://messari.io" },
+                { name: "dune", ext: "png", url: "https://dune.com" },
+                { name: "defillama", ext: "webp", url: "https://defillama.com" },
+                { name: "nansen", ext: "png", url: "https://nansen.ai" },
+              ].map((partner) => (
+                <a
+                  key={`${partner.name}-2`}
+                  href={partner.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-shrink-0 mx-8 group inline-block"
+                >
+                  <div className="relative p-4 transition-all duration-300 ease-out group-hover:scale-110 group-hover:-translate-y-1">
+                    <div className="absolute inset-0 bg-emerald-400/30 rounded-2xl opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-300" />
+                    <img 
+                      src={`/logos/partners/${partner.name}.${partner.ext}`}
+                      alt={partner.name}
+                      className="h-10 md:h-14 w-auto object-contain relative z-10 grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300"
+                    />
+                  </div>
+                </a>
+              ))}
+            </div>
           </div>
           
           {/* Row 2 - Moving LEFT */}
-          <div className="flex animate-marquee-left">
-            {[
-              { name: "santiment", ext: "png", url: "https://santiment.net" },
-              { name: "cryptoquant", ext: "jpg", url: "https://cryptoquant.com" },
-              { name: "blockchain", ext: "webp", url: "https://www.blockchain.com" },
-              { name: "polygon", ext: "png", url: "https://polygon.io" },
-              { name: "alpha-vantage", ext: "png", url: "https://www.alphavantage.co" },
-              { name: "yahoo-finance", ext: "png", url: "https://finance.yahoo.com" },
-              { name: "quandl", ext: "png", url: "https://www.quandl.com" },
-            ].flatMap((partner) => [partner, { ...partner, key: `${partner.name}-dup` }]).map((partner, idx) => (
-              <a
-                key={partner.key || partner.name}
-                href={partner.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex-shrink-0 mx-6 group"
-              >
-                <div className="relative p-4 transition-all duration-300 ease-out group-hover:scale-110 group-hover:-translate-y-1">
-                  <div className="absolute inset-0 bg-emerald-400/30 rounded-2xl opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-300" />
-                  <img 
-                    src={`/logos/partners/${partner.name}.${partner.ext}`}
-                    alt={partner.name}
-                    className="h-12 md:h-16 w-auto object-contain relative z-10 grayscale opacity-40 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300"
-                  />
-                </div>
-              </a>
-            ))}
+          <div className="marquee-row-left">
+            <div className="marquee-content-left">
+              {[
+                { name: "santiment", ext: "png", url: "https://santiment.net" },
+                { name: "cryptoquant", ext: "jpg", url: "https://cryptoquant.com" },
+                { name: "blockchain", ext: "webp", url: "https://www.blockchain.com" },
+                { name: "polygon", ext: "png", url: "https://polygon.io" },
+                { name: "alpha-vantage", ext: "png", url: "https://www.alphavantage.co" },
+                { name: "yahoo-finance", ext: "png", url: "https://finance.yahoo.com" },
+                { name: "quandl", ext: "png", url: "https://www.quandl.com" },
+              ].map((partner) => (
+                <a
+                  key={partner.name}
+                  href={partner.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-shrink-0 mx-8 group inline-block"
+                >
+                  <div className="relative p-4 transition-all duration-300 ease-out group-hover:scale-110 group-hover:-translate-y-1">
+                    <div className="absolute inset-0 bg-emerald-400/30 rounded-2xl opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-300" />
+                    <img 
+                      src={`/logos/partners/${partner.name}.${partner.ext}`}
+                      alt={partner.name}
+                      className="h-10 md:h-14 w-auto object-contain relative z-10 grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300"
+                    />
+                  </div>
+                </a>
+              ))}
+            </div>
+            <div className="marquee-content-left" aria-hidden="true">
+              {[
+                { name: "santiment", ext: "png", url: "https://santiment.net" },
+                { name: "cryptoquant", ext: "jpg", url: "https://cryptoquant.com" },
+                { name: "blockchain", ext: "webp", url: "https://www.blockchain.com" },
+                { name: "polygon", ext: "png", url: "https://polygon.io" },
+                { name: "alpha-vantage", ext: "png", url: "https://www.alphavantage.co" },
+                { name: "yahoo-finance", ext: "png", url: "https://finance.yahoo.com" },
+                { name: "quandl", ext: "png", url: "https://www.quandl.com" },
+              ].map((partner) => (
+                <a
+                  key={`${partner.name}-2`}
+                  href={partner.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-shrink-0 mx-8 group inline-block"
+                >
+                  <div className="relative p-4 transition-all duration-300 ease-out group-hover:scale-110 group-hover:-translate-y-1">
+                    <div className="absolute inset-0 bg-emerald-400/30 rounded-2xl opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-300" />
+                    <img 
+                      src={`/logos/partners/${partner.name}.${partner.ext}`}
+                      alt={partner.name}
+                      className="h-10 md:h-14 w-auto object-contain relative z-10 grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300"
+                    />
+                  </div>
+                </a>
+              ))}
+            </div>
           </div>
         </div>
       </section>

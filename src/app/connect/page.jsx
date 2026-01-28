@@ -28,11 +28,24 @@ import {
 
 // Exchange logo component - uses images from public/logos/exchanges/
 const ExchangeLogo = ({ id, size = "md" }) => {
-  const sizes = {
-    sm: "w-8 h-8",
-    md: "w-12 h-12",
-    lg: "w-16 h-16",
-    xl: "w-20 h-20"
+  // Container sizes
+  const containerSizes = {
+    sm: "w-12 h-12",
+    md: "w-16 h-16",
+    lg: "w-20 h-20",
+    xl: "w-24 h-24"
+  };
+  
+  // Custom image sizes per exchange (40% bigger default, coinbase 65%, kucoin 20%)
+  const getImageSize = (exchangeId) => {
+    switch(exchangeId) {
+      case "coinbase":
+        return "w-20 h-20"; // 65% bigger
+      case "kucoin":
+        return "w-14 h-14"; // 20% bigger
+      default:
+        return "w-16 h-16"; // 40% bigger (default)
+    }
   };
   
   // Use PNG files (coinbase is webp)
@@ -40,11 +53,11 @@ const ExchangeLogo = ({ id, size = "md" }) => {
   const logoPath = `/logos/exchanges/${id}.${extension}`;
 
   return (
-    <div className={`${sizes[size]} rounded-2xl overflow-hidden flex items-center justify-center bg-white p-2`}>
+    <div className={`${containerSizes[size]} rounded-2xl overflow-hidden flex items-center justify-center bg-white`}>
       <img 
         src={logoPath} 
         alt={`${id} logo`}
-        className="w-full h-full object-contain"
+        className={`${getImageSize(id)} object-contain`}
         onError={(e) => {
           // Fallback to text if image fails
           e.target.style.display = 'none';

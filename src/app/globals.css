@@ -139,30 +139,46 @@
   }
 
   /* Infinite marquee animations - two directions */
-  @keyframes marquee-right {
+  @keyframes scroll-left {
     0% {
-      transform: translateX(-50%);
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-100%);
+    }
+  }
+
+  @keyframes scroll-right {
+    0% {
+      transform: translateX(-100%);
     }
     100% {
       transform: translateX(0);
     }
   }
 
-  @keyframes marquee-left {
-    0% {
-      transform: translateX(0);
-    }
-    100% {
-      transform: translateX(-50%);
-    }
+  .marquee-row-left,
+  .marquee-row-right {
+    display: flex;
+    overflow: hidden;
+    width: 100%;
   }
 
-  .animate-marquee-right {
-    animation: marquee-right 30s linear infinite;
+  .marquee-content-left {
+    display: flex;
+    flex-shrink: 0;
+    animation: scroll-left 25s linear infinite;
   }
 
-  .animate-marquee-left {
-    animation: marquee-left 35s linear infinite;
+  .marquee-content-right {
+    display: flex;
+    flex-shrink: 0;
+    animation: scroll-right 30s linear infinite;
+  }
+
+  .marquee-row-left:hover .marquee-content-left,
+  .marquee-row-right:hover .marquee-content-right {
+    animation-play-state: paused;
   }
 
   /* Better input styling */
